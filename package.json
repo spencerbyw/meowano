@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "typecheck": "tsc -b",
-    "pwa-assets": "pwa-assets-generator"
+    "pwa-assets": "pwa-assets-generator",
+    "screenshots": "node scripts/screenshots.mjs"
   },
   "dependencies": {
     "@fontsource-variable/nunito": "^5.3.0",
@@ -32,6 +33,7 @@
     "@vite-pwa/assets-generator": "^2.0.0",
     "@vitejs/plugin-react": "^6.1.2",
     "oxlint": "^1.90.0",
+    "playwright": "^1.65.0",
     "prettier": "^3.9.10",
     "typescript": "~7.0.2",
     "vite": "^8.3.6",

@@ -349,6 +349,10 @@ function distractorPool(c: Candidate, key: Key, clef: Clef, s: PracticeSettings)
   return pool.filter((w): w is Weighted<Answer> => !!w.item)
 }
 
+/** The big text on a button; we avoid showing three identical headlines. */
+const headline = (a: Answer) =>
+  a.type === 'dyad' ? a.interval : a.type === 'triad' ? a.quality : answerId(a)
+
 function chooseDistractors(
   correct: Answer,
   pool: Weighted<Answer>[],
@@ -364,7 +368,13 @@ function chooseDistractors(
   })
   const chosen: Answer[] = []
   while (chosen.length < count && remaining.length > 0) {
-    const pick = pickWeighted(remaining, random)!
+    // Strongly prefer headlines not already on screen (e.g. not three "Major 2nd"s).
+    const shown = new Set([correct, ...chosen].map(headline))
+    const weighted = remaining.map((w) => ({
+      item: w.item,
+      weight: shown.has(headline(w.item)) ? w.weight * 0.05 : w.weight,
+    }))
+    const pick = pickWeighted(weighted, random)!
     chosen.push(pick)
     remaining.splice(
       remaining.findIndex((w) => w.item === pick),
