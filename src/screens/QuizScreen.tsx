@@ -31,7 +31,6 @@ export function QuizScreen() {
   } | null>(null)
   const [shake, setShake] = useState<number | null>(null)
 
-
   const staffLabel = useMemo(
     () => (question ? formatStaffLabel(t, question) : ''),
     [question, t],

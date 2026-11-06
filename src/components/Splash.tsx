@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useSettings } from '../settings/store'
 import styles from './Splash.module.css'
 
-const INTERVAL_MS = 3200
+const INTERVAL_MS = 5000
 
 /** Minecraft-style pulsing splash text that cycles through cute lines. */
 export function Splash({ className }: { className?: string }) {

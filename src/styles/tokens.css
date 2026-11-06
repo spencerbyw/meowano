@@ -52,6 +52,14 @@
   --color-sunny-edge: #c98f10;
   --color-sky: #59c3ff;
 
+  /* Logo cat: a dark kitty on light backgrounds… */
+  --cat-fur: #3b2f4a;
+  --cat-ear: #ff7aae;
+  --cat-eye: #ffd36b;
+  --cat-shine: #fff8f1;
+  --cat-nose: #ff7aae;
+  --cat-mouth: #b6a9c9;
+
   color-scheme: light;
 }
 
@@ -83,6 +91,14 @@
   --color-error-soft: #422630;
   --color-sunny: #ffd36b;
   --color-sunny-edge: #b9850f;
+
+  /* …and a white kitty on dark ones. */
+  --cat-fur: #fff8f1;
+  --cat-ear: #ff7aae;
+  --cat-eye: #3b2f4a;
+  --cat-shine: #ffffff;
+  --cat-nose: #ff7aae;
+  --cat-mouth: #3b2f4a;
 
   color-scheme: dark;
 }
