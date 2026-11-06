@@ -8,6 +8,7 @@ import {
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Logo } from '../components/Logo'
+import { SettingsButton } from '../components/settings/SettingsButton'
 import { Staff } from '../components/Staff'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatStaffLabel } from '../music/format'
@@ -106,6 +107,7 @@ export function QuizScreen() {
           <IconFlame size={20} aria-hidden="true" />
           <span aria-hidden="true">{streak}</span>
         </div>
+        <SettingsButton />
       </header>
 
       <main className={styles.main}>

@@ -1,22 +1,26 @@
-import { IconInfinity, IconPlayerPlayFilled } from '@tabler/icons-react'
+import { IconChevronRight, IconInfinity, IconPlayerPlayFilled } from '@tabler/icons-react'
 import { ToggleGroup } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
 import { Footer } from '../components/Footer'
 import { Logo } from '../components/Logo'
+import { SettingsButton } from '../components/settings/SettingsButton'
 import { Splash } from '../components/Splash'
 import { Button3D } from '../components/ui/Button3D'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import { QUIZ_LENGTHS, type QuizLength } from '../settings/types'
+import { useUi } from '../ui/store'
 import styles from './StartScreen.module.css'
 
 export function StartScreen() {
   const { t } = useTranslation()
   const { quizLength, setQuizLength, preset } = useSettings()
   const start = useQuiz((s) => s.start)
+  const setSettingsOpen = useUi((s) => s.setSettingsOpen)
 
   return (
     <div className={styles.screen}>
+      <SettingsButton className={styles.settings} />
       <main className={styles.main}>
         <h1 className={styles.hero}>
           <Logo />
@@ -47,9 +51,14 @@ export function StartScreen() {
             ))}
           </ToggleGroup.Root>
 
-          <p className={styles.level}>
+          <button
+            type="button"
+            className={styles.level}
+            onClick={() => setSettingsOpen(true)}
+          >
             {t('start.level')}: <strong>{t(`presets.${preset}`)}</strong>
-          </p>
+            <IconChevronRight size={18} aria-hidden="true" />
+          </button>
 
           <Button3D size="lg" className={styles.play} onClick={start}>
             <IconPlayerPlayFilled size={24} aria-hidden="true" />
