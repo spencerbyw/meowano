@@ -43,6 +43,22 @@ for (const theme of ['light', 'dark']) {
     await page.waitForLoadState('networkidle')
     await shot('1-start')
 
+    // Settings drawer: top, then scrolled to the middle and bottom (it scrolls internally).
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    await page.waitForTimeout(500)
+    const drawerShot = (label) =>
+      page.screenshot({ path: `${OUT}/${name}-${theme}-${label}.png` })
+    await drawerShot('1a-settings')
+    const body = page.locator('[role="dialog"] > div').last()
+    await body.evaluate((el) => (el.scrollTop = el.scrollHeight * 0.4))
+    await page.waitForTimeout(300)
+    await drawerShot('1b-settings-middle')
+    await body.evaluate((el) => (el.scrollTop = el.scrollHeight))
+    await page.waitForTimeout(300)
+    await drawerShot('1c-settings-bottom')
+    await page.keyboard.press('Escape')
+    await page.waitForTimeout(400)
+
     await page.getByRole('button', { name: /play/i }).click()
     await page.locator('svg').first().waitFor()
     await page.waitForTimeout(600)

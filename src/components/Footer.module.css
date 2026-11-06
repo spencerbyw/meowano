@@ -30,3 +30,15 @@
 .icon {
   margin-inline-end: 4px;
 }
+
+/* On narrow screens, stack the two links instead of leaving a dangling dot. */
+@media (max-width: 480px) {
+  .footer {
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .footer > [aria-hidden='true'] {
+    display: none;
+  }
+}

@@ -9,7 +9,14 @@ import {
   Formatter,
 } from 'vexflow/bravura'
 import type { Clef } from '../music/ranges'
-import { displayedAccidental, type Key, type Pitch } from '../music/theory'
+import {
+  displayedAccidental,
+  majorKey,
+  parsePitch,
+  pitchName,
+  type Key,
+  type Pitch,
+} from '../music/theory'
 import styles from './Staff.module.css'
 
 // Logical drawing size; the SVG scales to fit its container via viewBox.
@@ -27,13 +34,33 @@ const vexKey = (p: Pitch) => `${p.letter.toLowerCase()}${p.acc}/${p.octave}`
 
 interface StaffProps {
   clef: Clef
-  keySignature: Key
-  notes: Pitch[]
+  keySignature?: Key
+  /** One note or chord, centred on the staff. */
+  notes?: Pitch[]
+  /** Several notes/chords in a row (used by settings previews). Overrides `notes`. */
+  chords?: Pitch[][]
   label: string
   className?: string
 }
 
-export function Staff({ clef, keySignature, notes, label, className }: StaffProps) {
+const C_MAJOR = majorKey(0)
+
+export function Staff({
+  clef,
+  keySignature = C_MAJOR,
+  notes = [],
+  chords,
+  label,
+  className,
+}: StaffProps) {
+  const groups = chords ?? (notes.length ? [notes] : [])
+  // Everything the drawing depends on, as a string, so callers can pass fresh arrays
+  // without forcing redraws. The effect rebuilds its inputs from it.
+  const signature = [
+    clef,
+    keySignature.fifths,
+    groups.map((g) => g.map(pitchName).join(',')).join(';'),
+  ].join('|')
   const ref = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
 
@@ -48,6 +75,12 @@ export function Staff({ clef, keySignature, notes, label, className }: StaffProp
   useEffect(() => {
     const el = ref.current
     if (!el || !ready) return
+    const [clefPart, fifthsPart, notesPart] = signature.split('|')
+    const clef = clefPart as Clef
+    const keySignature = majorKey(Number(fifthsPart))
+    const groups = notesPart
+      ? notesPart.split(';').map((g) => g.split(',').map(parsePitch))
+      : []
     el.replaceChildren()
 
     const renderer = new Renderer(el, Renderer.Backends.SVG)
@@ -63,23 +96,28 @@ export function Staff({ clef, keySignature, notes, label, className }: StaffProp
     stave.setStyle(ink)
     stave.setContext(ctx).draw()
 
-    if (notes.length) {
-      const note = new StaveNote({
-        clef,
-        keys: notes.map(vexKey),
-        duration: 'w',
-        alignCenter: true,
+    if (groups.length) {
+      const staveNotes = groups.map((group) => {
+        const note = new StaveNote({
+          clef,
+          keys: group.map(vexKey),
+          duration: 'w',
+          alignCenter: groups.length === 1,
+        })
+        group.forEach((p, i) => {
+          const acc = displayedAccidental(p, keySignature)
+          if (acc) note.addModifier(new Accidental(acc), i)
+        })
+        note.setStyle(ink)
+        note.setLedgerLineStyle({ strokeStyle: 'currentColor', lineWidth: 1.6 })
+        return note
       })
-      notes.forEach((p, i) => {
-        const acc = displayedAccidental(p, keySignature)
-        if (acc) note.addModifier(new Accidental(acc), i)
-      })
-      note.setStyle(ink)
-      note.setLedgerLineStyle({ strokeStyle: 'currentColor', lineWidth: 1.6 })
-      const voice = new Voice({ numBeats: 4, beatValue: 4 }).addTickables([note])
+      const voice = new Voice({ numBeats: 4 * groups.length, beatValue: 4 }).addTickables(
+        staveNotes,
+      )
       new Formatter()
         .joinVoices([voice])
-        .format([voice], stave.getNoteEndX() - stave.getNoteStartX())
+        .format([voice], stave.getNoteEndX() - stave.getNoteStartX() - 16)
       voice.draw(ctx, stave)
     }
 
@@ -92,7 +130,7 @@ export function Staff({ clef, keySignature, notes, label, className }: StaffProp
       el.removeAttribute('style') // VexFlow sets a fixed width on the container too
       svg.setAttribute('aria-hidden', 'true')
     }
-  }, [ready, clef, keySignature, notes])
+  }, [ready, signature])
 
   return (
     <div

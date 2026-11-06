@@ -1,3 +1,4 @@
+import { SettingsDrawer } from './components/settings/SettingsDrawer'
 import { useQuiz } from './quiz/store'
 import { QuizScreen } from './screens/QuizScreen'
 import { StartScreen } from './screens/StartScreen'
@@ -8,7 +9,16 @@ export default function App() {
   useApplyTheme()
   const screen = useQuiz((s) => s.screen)
 
-  if (screen === 'quiz') return <QuizScreen />
-  if (screen === 'summary') return <SummaryScreen />
-  return <StartScreen />
+  return (
+    <>
+      {screen === 'quiz' ? (
+        <QuizScreen />
+      ) : screen === 'summary' ? (
+        <SummaryScreen />
+      ) : (
+        <StartScreen />
+      )}
+      <SettingsDrawer />
+    </>
+  )
 }
