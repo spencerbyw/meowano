@@ -1,0 +1,145 @@
+.pushable {
+  --face: var(--color-primary);
+  --edge: var(--color-primary-edge);
+  --ink: var(--color-primary-text);
+  --lift: 5px;
+  --radius: var(--radius-md);
+
+  position: relative;
+  display: block;
+  border: none;
+  background: transparent;
+  padding: 0;
+  padding-top: var(--lift);
+  cursor: pointer;
+  outline-offset: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition: filter 250ms;
+}
+
+.shadow,
+.edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: var(--lift);
+  border-radius: var(--radius);
+}
+
+.shadow {
+  background: hsl(var(--color-shadow) / 0.28);
+  transform: translateY(2px);
+  filter: blur(2px);
+  transition: transform 600ms var(--ease-out);
+}
+
+.edge {
+  background: var(--edge);
+}
+
+.front {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  border-radius: var(--radius);
+  background: var(--face);
+  color: var(--ink);
+  font-family: var(--font-display);
+  transform: translateY(calc(var(--lift) * -1));
+  transition:
+    transform 600ms var(--ease-out),
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+.sm .front {
+  padding: var(--space-2) var(--space-4);
+  font-size: 1rem;
+}
+
+.md .front {
+  padding: var(--space-3) var(--space-5);
+  font-size: 1.25rem;
+}
+
+.lg .front {
+  min-height: 64px;
+  padding: var(--space-3) var(--space-6);
+  font-size: 1.5rem;
+}
+
+@media (hover: hover) {
+  .pushable:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+
+  .pushable:hover:not(:disabled) .front {
+    transform: translateY(calc(var(--lift) * -1.3));
+    transition: transform 250ms var(--ease-spring);
+  }
+
+  .pushable:hover:not(:disabled) .shadow {
+    transform: translateY(4px);
+    transition: transform 250ms var(--ease-spring);
+  }
+}
+
+.pushable:active:not(:disabled) .front,
+.pressed .front {
+  transform: translateY(-1px);
+  transition: transform 34ms;
+}
+
+.pushable:active:not(:disabled) .shadow,
+.pressed .shadow {
+  transform: translateY(1px);
+  transition: transform 34ms;
+}
+
+.pushable:disabled {
+  cursor: default;
+}
+
+/* Variants */
+.secondary {
+  --face: var(--color-secondary);
+  --edge: var(--color-secondary-edge);
+  --ink: #fff;
+}
+
+.choice {
+  --face: var(--color-choice);
+  --edge: var(--color-choice-edge);
+  --ink: var(--color-choice-text);
+}
+
+.pending {
+  --face: var(--color-sunny);
+  --edge: var(--color-sunny-edge);
+  --ink: #3b2f4a;
+}
+
+.success {
+  --face: var(--color-success);
+  --edge: var(--color-success-edge);
+  --ink: #fff;
+}
+
+.error {
+  --face: var(--color-error);
+  --edge: var(--color-error-edge);
+  --ink: #fff;
+}
+
+.ghost {
+  --face: var(--color-surface);
+  --edge: var(--color-border);
+  --ink: var(--color-text);
+  --lift: 3px;
+}

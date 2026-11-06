@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next'
-import type { Answer, PitchClass } from './generator'
-import type { Pitch } from './theory'
+import type { Answer, PitchClass, Question } from './generator'
+import type { Accidental, Key, Pitch } from './theory'
 
 export const formatPitchClass = (t: TFunction, p: PitchClass | Pitch) =>
   `${t(`notes.${p.letter}`)}${t(`accidentals.${p.acc}`)}`
@@ -28,3 +28,15 @@ export function formatAnswer(
       }
   }
 }
+
+/** "F♯" for the key of F# major. */
+export const formatKeyName = (t: TFunction, key: Key) =>
+  formatPitchClass(t, { letter: key.tonic, acc: key.name.slice(1) as Accidental })
+
+/** Screen-reader description of what's on the staff. */
+export const formatStaffLabel = (t: TFunction, q: Question) =>
+  t('staff.label', {
+    clef: t(`clefs.${q.clef}`),
+    key: formatKeyName(t, q.key),
+    notes: q.notes.map((n) => formatPitchClass(t, n)).join(', '),
+  })

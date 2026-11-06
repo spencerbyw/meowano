@@ -1,0 +1,33 @@
+.wrap {
+  display: inline-block;
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+
+.splash {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--color-sunny);
+  text-shadow:
+    2px 2px 0 var(--color-sunny-edge),
+    0 0 1px var(--color-sunny-edge);
+  white-space: nowrap;
+  animation:
+    pop-in 400ms var(--ease-spring) both,
+    pulse 900ms ease-in-out 400ms infinite alternate;
+}
+
+@keyframes pop-in {
+  from {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  to {
+    transform: scale(1.1);
+  }
+}

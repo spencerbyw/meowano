@@ -1,7 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { DEFAULT_PRESET, PRESETS } from './presets'
-import type { ConfirmMode, PracticeSettings, PresetId, ThemeSetting } from './types'
+import type {
+  ConfirmMode,
+  PracticeSettings,
+  PresetId,
+  QuizLength,
+  ThemeSetting,
+} from './types'
 
 interface SettingsState {
   theme: ThemeSetting
@@ -10,7 +16,10 @@ interface SettingsState {
   sound: boolean
   preset: PresetId | 'custom'
   practice: PracticeSettings
+  /** Questions per round; 0 means unlimited. */
+  quizLength: QuizLength
 
+  setQuizLength: (n: QuizLength) => void
   setTheme: (theme: ThemeSetting) => void
   setCatMode: (on: boolean) => void
   setConfirm: (mode: ConfirmMode) => void
@@ -29,6 +38,9 @@ export const useSettings = create<SettingsState>()(
       sound: true,
       preset: DEFAULT_PRESET,
       practice: PRESETS[DEFAULT_PRESET],
+      quizLength: 10,
+
+      setQuizLength: (quizLength) => set({ quizLength }),
 
       setTheme: (theme) => set({ theme }),
       setCatMode: (catMode) => set({ catMode }),
