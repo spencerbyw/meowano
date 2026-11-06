@@ -1,0 +1,88 @@
+/* Design tokens. Components read these via var(--…); themes swap the values. */
+:root {
+  --font-display: 'Sniglet', 'Nunito Variable', system-ui, sans-serif;
+  --font-body: 'Nunito Variable', system-ui, -apple-system, sans-serif;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --tap-min: 48px;
+  --content-max: 560px;
+
+  --ease-spring: cubic-bezier(0.3, 0.7, 0.4, 1.5);
+  --ease-out: cubic-bezier(0.3, 0.7, 0.4, 1);
+
+  /* Light palette */
+  --color-bg: #fff8f1;
+  --color-bg-accent: #ffeef5;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-text: #3b2f4a;
+  --color-text-muted: #7a6e86;
+  --color-border: #f0e2ea;
+  --color-staff: #3b2f4a;
+  --color-shadow: 330deg 40% 60%;
+
+  --color-primary: #ff7aae;
+  --color-primary-edge: #e0508a;
+  --color-primary-text: #ffffff;
+  --color-secondary: #a99bff;
+  --color-secondary-edge: #7f6fe6;
+  --color-choice: #ffffff;
+  --color-choice-edge: #e9d9f2;
+  --color-choice-text: #3b2f4a;
+
+  --color-success: #2fbf8f;
+  --color-success-edge: #1f9a72;
+  --color-success-soft: #dcf7ec;
+  --color-error: #ff6b6b;
+  --color-error-edge: #dc4a4a;
+  --color-error-soft: #ffe4e4;
+  --color-sunny: #ffc94d;
+  --color-sunny-edge: #c98f10;
+  --color-sky: #59c3ff;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #1e1a2b;
+  --color-bg-accent: #272138;
+  --color-surface: #2a2440;
+  --color-surface-raised: #342d4f;
+  --color-text: #f6eeff;
+  --color-text-muted: #b6a9c9;
+  --color-border: #3d3558;
+  --color-staff: #f6eeff;
+  --color-shadow: 260deg 40% 5%;
+
+  --color-primary: #ff7aae;
+  --color-primary-edge: #c2427a;
+  --color-primary-text: #2a1424;
+  --color-secondary: #a99bff;
+  --color-secondary-edge: #6c5bd6;
+  --color-choice: #342d4f;
+  --color-choice-edge: #1f1a30;
+  --color-choice-text: #f6eeff;
+
+  --color-success: #4fdcaa;
+  --color-success-edge: #23a57a;
+  --color-success-soft: #1d3a33;
+  --color-error: #ff8484;
+  --color-error-edge: #c94a4a;
+  --color-error-soft: #422630;
+  --color-sunny: #ffd36b;
+  --color-sunny-edge: #b9850f;
+
+  color-scheme: dark;
+}

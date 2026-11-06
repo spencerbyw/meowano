@@ -1,0 +1,11 @@
+.staff {
+  color: var(--color-staff);
+  width: 100%;
+  aspect-ratio: 260 / 150;
+}
+
+.canvas,
+.canvas svg {
+  width: 100%;
+  height: 100%;
+}
