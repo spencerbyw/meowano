@@ -75,7 +75,7 @@ export async function playNotes(pitches: Pitch[], { roll = 0.025 } = {}) {
       note: midiOf(p),
       velocity: VELOCITY,
       time: now + i * roll,
-      duration: 1.6,
+      duration: 1.3, // seconds; long enough to ring, short enough to tap again
     })
   })
 }
