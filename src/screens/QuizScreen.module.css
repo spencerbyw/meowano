@@ -1,0 +1,256 @@
+.screen {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+  gap: var(--space-4);
+}
+
+/* Top bar */
+.top {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.progressText {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+.bar {
+  width: 100%;
+  height: 10px;
+  background: var(--color-border);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.barFill {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: inherit;
+  transition: width 400ms var(--ease-spring);
+}
+
+.streak {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: var(--tap-min);
+  justify-content: center;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-primary-edge);
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  box-shadow: 0 2px 0 var(--color-border);
+}
+
+/* Layout */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.staffCard {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  box-shadow: 0 10px 30px hsl(var(--color-shadow) / 0.15);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-inline: var(--space-2);
+}
+
+.prompt {
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-align: right;
+}
+
+.staffIn {
+  animation: staff-in 450ms var(--ease-spring) both;
+}
+
+@keyframes staff-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.97);
+  }
+}
+
+.answers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.choices {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.choice {
+  width: 100%;
+}
+
+.choiceFront {
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  min-height: 76px;
+  padding-inline: var(--space-2);
+}
+
+.choiceIcon {
+  display: grid;
+  place-items: center;
+}
+
+.choiceText {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+}
+
+.choiceLabel {
+  font-size: 1.625rem;
+}
+
+.choiceDetail {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 1rem;
+  opacity: 0.75;
+  margin-top: 2px;
+}
+
+.sure {
+  font-size: 0.9375rem;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--color-sunny-edge);
+  animation: pop 300ms var(--ease-spring);
+}
+
+.dimmed {
+  opacity: 0.45;
+}
+
+.shake {
+  animation: shake 400ms ease;
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-8px);
+  }
+  40%,
+  80% {
+    transform: translateX(8px);
+  }
+}
+
+/* Feedback + next */
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 132px;
+}
+
+.feedback {
+  min-height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.feedback.correct {
+  color: var(--color-success-edge);
+}
+
+.feedback.wrong {
+  color: var(--color-error-edge);
+}
+
+:root[data-theme='dark'] .feedback.correct {
+  color: var(--color-success);
+}
+
+:root[data-theme='dark'] .feedback.wrong {
+  color: var(--color-error);
+}
+
+.pop {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  animation: pop 350ms var(--ease-spring);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+.next {
+  width: 100%;
+}
+
+/* Landscape: staff on the left, answers on the right. */
+@media (orientation: landscape) and (min-width: 700px) {
+  .screen {
+    max-width: 1100px;
+  }
+
+  .main {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    align-items: center;
+    gap: var(--space-6);
+  }
+}
+
+/* Tablet portrait: give the staff more room. */
+@media (orientation: portrait) and (min-width: 700px) {
+  .screen {
+    max-width: 680px;
+    padding-top: var(--space-5);
+  }
+
+  .choiceLabel {
+    font-size: 1.875rem;
+  }
+}

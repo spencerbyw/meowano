@@ -1,0 +1,31 @@
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useSettings } from '../settings/store'
+import styles from './Splash.module.css'
+
+const INTERVAL_MS = 3200
+
+/** Minecraft-style pulsing splash text that cycles through cute lines. */
+export function Splash({ className }: { className?: string }) {
+  const { t } = useTranslation()
+  const catMode = useSettings((s) => s.catMode)
+  const lines = t(catMode ? 'splash' : 'splashPlain', { returnObjects: true }) as string[]
+  const [index, setIndex] = useState(0)
+
+  useEffect(() => {
+    const id = setInterval(() => setIndex((i) => i + 1), INTERVAL_MS)
+    return () => clearInterval(id)
+  }, [])
+
+  const line = lines[index % lines.length]
+  return (
+    <span
+      className={[styles.wrap, className].filter(Boolean).join(' ')}
+      aria-hidden="true"
+    >
+      <span key={line} className={styles.splash}>
+        {line}
+      </span>
+    </span>
+  )
+}
