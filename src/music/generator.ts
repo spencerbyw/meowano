@@ -346,7 +346,14 @@ function distractorPool(c: Candidate, key: Key, clef: Clef, s: PracticeSettings)
     }
   }
 
-  return pool.filter((w): w is Weighted<Answer> => !!w.item)
+  return pool
+    .filter((w): w is Weighted<Answer> => !!w.item)
+    .map((w) =>
+      // Prefer interval sizes she's practicing (no surprise "Major 6th" for a beginner).
+      w.item.type === 'dyad' && !s.intervals.includes(Number(w.item.interval.slice(1)))
+        ? { ...w, weight: w.weight * 0.1 }
+        : w,
+    )
 }
 
 /** The big text on a button; we avoid showing three identical headlines. */

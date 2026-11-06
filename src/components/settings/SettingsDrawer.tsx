@@ -16,6 +16,7 @@ import {
 import { Dialog } from 'radix-ui'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { unlockAudio } from '../../audio/engine'
 import { PRESET_ORDER } from '../../settings/presets'
 import { useSettings } from '../../settings/store'
 import type {
@@ -295,7 +296,10 @@ export function SettingsDrawer() {
                 hint={t('settings.soundHint')}
                 icon={<IconVolume size={22} aria-hidden="true" />}
                 checked={settings.sound}
-                onChange={settings.setSound}
+                onChange={(on) => {
+                  if (on) unlockAudio()
+                  settings.setSound(on)
+                }}
               />
             </Section>
           </div>

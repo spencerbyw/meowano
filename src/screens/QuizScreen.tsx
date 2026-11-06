@@ -3,10 +3,13 @@ import {
   IconCheck,
   IconFlag,
   IconFlame,
+  IconLoader2,
+  IconVolume,
   IconX,
 } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { playChime, playNotes, useAudioStatus } from '../audio/engine'
 import { Logo } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { Staff } from '../components/Staff'
@@ -22,7 +25,16 @@ export function QuizScreen() {
   const { t } = useTranslation()
   const { question, wrongPicks, solved, results, length, streak, bestStreak } = useQuiz()
   const { answer, next, finish, goHome } = useQuiz()
-  const { confirm, catMode } = useSettings()
+  const { confirm, catMode, sound } = useSettings()
+  const pianoStatus = useAudioStatus((s) => s.piano)
+  // Bumped on each tap of the staff to restart the little "ring" animation.
+  const [rings, setRings] = useState(0)
+
+  const hear = () => {
+    if (!question) return
+    setRings((n) => n + 1)
+    void playNotes(question.notes)
+  }
 
   // Index awaiting a second tap when "double tap to confirm" is on.
   const [pending, setPending] = useState<number | null>(null)
@@ -55,6 +67,7 @@ export function QuizScreen() {
     }
     setPending(null)
     const outcome = answer(i)
+    if (sound && outcome !== 'ignored') playChime(outcome)
     if (outcome === 'correct') {
       const praise = t(catMode ? 'quiz.praiseCat' : 'quiz.praise', {
         returnObjects: true,
@@ -116,14 +129,50 @@ export function QuizScreen() {
             <Logo size="sm" />
             <p className={styles.prompt}>{t(`quiz.prompt.${question.kind}`)}</p>
           </div>
-          <div key={question.id} className={styles.staffIn}>
-            <Staff
-              clef={question.clef}
-              keySignature={question.key}
-              notes={question.notes}
-              label={staffLabel}
-            />
-          </div>
+          {sound ? (
+            <button
+              type="button"
+              className={styles.staffButton}
+              onClick={hear}
+              aria-label={`${staffLabel}. ${t('quiz.hear')}`}
+            >
+              <div key={question.id} className={styles.staffIn}>
+                <Staff
+                  clef={question.clef}
+                  keySignature={question.key}
+                  notes={question.notes}
+                  label={staffLabel}
+                />
+              </div>
+              <span
+                key={`ring-${rings}`}
+                className={[styles.hearHint, rings > 0 && styles.ringing]
+                  .filter(Boolean)
+                  .join(' ')}
+                aria-hidden="true"
+              >
+                {pianoStatus === 'loading' && rings > 0 ? (
+                  <IconLoader2 size={18} className={styles.spin} />
+                ) : (
+                  <IconVolume size={18} />
+                )}
+                {pianoStatus === 'loading' && rings > 0
+                  ? t('quiz.loadingPiano')
+                  : pianoStatus === 'error'
+                    ? t('quiz.pianoError')
+                    : t('quiz.hear')}
+              </span>
+            </button>
+          ) : (
+            <div key={question.id} className={styles.staffIn}>
+              <Staff
+                clef={question.clef}
+                keySignature={question.key}
+                notes={question.notes}
+                label={staffLabel}
+              />
+            </div>
+          )}
         </section>
 
         <section className={styles.answers}>

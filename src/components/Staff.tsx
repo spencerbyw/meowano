@@ -101,7 +101,7 @@ export function Staff({
         const note = new StaveNote({
           clef,
           keys: group.map(vexKey),
-          duration: 'w',
+          duration: 'q',
           alignCenter: groups.length === 1,
         })
         group.forEach((p, i) => {
@@ -112,7 +112,7 @@ export function Staff({
         note.setLedgerLineStyle({ strokeStyle: 'currentColor', lineWidth: 1.6 })
         return note
       })
-      const voice = new Voice({ numBeats: 4 * groups.length, beatValue: 4 }).addTickables(
+      const voice = new Voice({ numBeats: groups.length, beatValue: 4 }).addTickables(
         staveNotes,
       )
       new Formatter()

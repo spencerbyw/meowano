@@ -2,6 +2,7 @@ import { IconChevronRight, IconInfinity, IconPlayerPlayFilled } from '@tabler/ic
 import { ToggleGroup } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
 import { Footer } from '../components/Footer'
+import { unlockAudio } from '../audio/engine'
 import { Logo } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { Splash } from '../components/Splash'
@@ -60,7 +61,14 @@ export function StartScreen() {
             <IconChevronRight size={18} aria-hidden="true" />
           </button>
 
-          <Button3D size="lg" className={styles.play} onClick={start}>
+          <Button3D
+            size="lg"
+            className={styles.play}
+            onClick={() => {
+              if (useSettings.getState().sound) unlockAudio()
+              start()
+            }}
+          >
             <IconPlayerPlayFilled size={24} aria-hidden="true" />
             {t('start.play')}
           </Button3D>

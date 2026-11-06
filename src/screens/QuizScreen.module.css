@@ -89,7 +89,61 @@
   text-align: right;
 }
 
+.staffButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.staffButton:active .staffIn {
+  transform: scale(0.985);
+}
+
+.hearHint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: calc(var(--space-2) * -1);
+  padding-bottom: var(--space-1);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.ringing {
+  color: var(--color-secondary-edge);
+  animation: ring 500ms var(--ease-spring);
+}
+
+:root[data-theme='dark'] .ringing {
+  color: var(--color-secondary);
+}
+
+@keyframes ring {
+  30% {
+    transform: scale(1.12);
+  }
+}
+
+.spin {
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .staffIn {
+  transition: transform 120ms ease;
   animation: staff-in 450ms var(--ease-spring) both;
 }
 
