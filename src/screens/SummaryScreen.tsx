@@ -1,5 +1,6 @@
 import { IconHome, IconRefresh, IconStarFilled } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
+import { unlockAudio } from '../audio/engine'
 import { CatMark } from '../components/Logo'
 import { Staff } from '../components/Staff'
 import { Button3D } from '../components/ui/Button3D'
@@ -79,7 +80,14 @@ export function SummaryScreen() {
         )}
 
         <div className={styles.actions}>
-          <Button3D size="lg" onClick={start} autoFocus>
+          <Button3D
+            size="lg"
+            onClick={() => {
+              if (useSettings.getState().sound) unlockAudio()
+              start()
+            }}
+            autoFocus
+          >
             <IconRefresh size={24} aria-hidden="true" />
             {t('summary.again')}
           </Button3D>
