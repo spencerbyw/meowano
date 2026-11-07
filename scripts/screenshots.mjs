@@ -90,6 +90,11 @@ for (const theme of ['light', 'dark']) {
     }
     await page.waitForTimeout(800)
     await shot('6-summary')
+
+    await page.getByRole('button', { name: /home/i }).click()
+    await page.getByRole('button', { name: /my stats/i }).click()
+    await page.waitForTimeout(800)
+    await shot('7-stats')
     await page.close()
   }
 }

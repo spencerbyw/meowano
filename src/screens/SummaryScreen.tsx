@@ -1,4 +1,9 @@
-import { IconHome, IconRefresh, IconStarFilled } from '@tabler/icons-react'
+import {
+  IconHome,
+  IconRefresh,
+  IconStarFilled,
+  IconTrophyFilled,
+} from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { unlockAudio } from '../audio/engine'
 import { CatMark } from '../components/Logo'
@@ -11,7 +16,8 @@ import styles from './SummaryScreen.module.css'
 
 export function SummaryScreen() {
   const { t } = useTranslation()
-  const { results, bestStreak, start, goHome } = useQuiz()
+  const { results, bestStreak, recordAtStart, start, goHome } = useQuiz()
+  const newRecord = bestStreak > recordAtStart && bestStreak > 1
   const catMode = useSettings((s) => s.catMode)
 
   const correct = results.filter((r) => r.firstTry).length
@@ -45,6 +51,12 @@ export function SummaryScreen() {
           <div className={styles.stat}>
             <span className={styles.big}>{bestStreak}</span>
             <span className={styles.statLabel}>{t('summary.bestStreak')}</span>
+            {newRecord && (
+              <span className={styles.record}>
+                <IconTrophyFilled size={16} aria-hidden="true" />
+                {t('summary.newRecord')}
+              </span>
+            )}
           </div>
         </section>
 

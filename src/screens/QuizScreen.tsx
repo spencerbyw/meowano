@@ -17,13 +17,16 @@ import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatStaffLabel } from '../music/format'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
+import { useStats } from '../stats/store'
 import styles from './QuizScreen.module.css'
 
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 export function QuizScreen() {
   const { t } = useTranslation()
-  const { question, wrongPicks, solved, results, length, streak, bestStreak } = useQuiz()
+  const { question, wrongPicks, solved, results, length } = useQuiz()
+  const currentStreak = useStats((s) => s.currentStreak)
+  const allTimeBest = useStats((s) => s.bestStreak)
   const { answer, next, finish, goHome } = useQuiz()
   const { confirm, catMode, sound } = useSettings()
   const pianoStatus = useAudioStatus((s) => s.piano)
@@ -115,10 +118,15 @@ export function QuizScreen() {
         <div
           className={styles.streak}
           role="status"
-          aria-label={t('quiz.streakLabel', { count: streak, best: bestStreak })}
+          aria-label={t('quiz.streakLabel', { count: currentStreak, best: allTimeBest })}
         >
-          <IconFlame size={20} aria-hidden="true" />
-          <span aria-hidden="true">{streak}</span>
+          <span className={styles.streakNow} aria-hidden="true">
+            <IconFlame size={20} />
+            {currentStreak}
+          </span>
+          <span className={styles.streakBest} aria-hidden="true">
+            {t('quiz.best', { count: allTimeBest })}
+          </span>
         </div>
         <SettingsButton />
       </header>
