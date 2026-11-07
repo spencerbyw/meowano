@@ -9,6 +9,8 @@
 }
 
 html {
+  /* No double-tap-to-zoom anywhere: quick repeated taps are part of the game. */
+  touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 }

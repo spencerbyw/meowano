@@ -140,7 +140,7 @@
 
 .preset[aria-checked='true'] .presetIcon {
   background: var(--color-secondary);
-  color: #fff;
+  color: var(--color-on-candy);
 }
 
 .presetText {

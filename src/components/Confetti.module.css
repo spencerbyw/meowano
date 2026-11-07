@@ -1,0 +1,30 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.piece {
+  position: absolute;
+  top: -40px;
+  opacity: 0.9;
+  animation-name: fall;
+  animation-timing-function: cubic-bezier(0.3, 0.4, 0.6, 1);
+  animation-fill-mode: both;
+}
+
+@keyframes fall {
+  from {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--drift), 105vh) rotate(var(--spin));
+    opacity: 0;
+  }
+}

@@ -110,7 +110,7 @@
 .secondary {
   --face: var(--color-secondary);
   --edge: var(--color-secondary-edge);
-  --ink: #fff;
+  --ink: var(--color-on-candy);
 }
 
 .choice {
@@ -128,13 +128,13 @@
 .success {
   --face: var(--color-success);
   --edge: var(--color-success-edge);
-  --ink: #fff;
+  --ink: var(--color-on-candy);
 }
 
 .error {
   --face: var(--color-error);
   --edge: var(--color-error-edge);
-  --ink: #fff;
+  --ink: var(--color-on-candy);
 }
 
 .ghost {

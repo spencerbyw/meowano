@@ -4,13 +4,14 @@ import {
   IconFlag,
   IconFlame,
   IconLoader2,
+  IconMusic,
   IconVolume,
   IconX,
 } from '@tabler/icons-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { playChime, playNotes, useAudioStatus } from '../audio/engine'
-import { Logo } from '../components/Logo'
+import { CatMark, type CatMood } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { Staff } from '../components/Staff'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
@@ -18,6 +19,7 @@ import { formatAnswer, formatStaffLabel } from '../music/format'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import { useStats } from '../stats/store'
+import { useWakeLock } from '../ui/useWakeLock'
 import styles from './QuizScreen.module.css'
 
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
@@ -29,6 +31,7 @@ export function QuizScreen() {
   const allTimeBest = useStats((s) => s.bestStreak)
   const { answer, next, finish, goHome } = useQuiz()
   const { confirm, catMode, sound } = useSettings()
+  useWakeLock(true)
   const pianoStatus = useAudioStatus((s) => s.piano)
   // Bumped on each tap of the staff to restart the little "ring" animation.
   const [rings, setRings] = useState(0)
@@ -46,6 +49,12 @@ export function QuizScreen() {
     text: string
   } | null>(null)
   const [shake, setShake] = useState<number | null>(null)
+  const promptRef = useRef<HTMLParagraphElement>(null)
+  const mood: CatMood = !feedback
+    ? 'idle'
+    : feedback.kind === 'correct'
+      ? 'happy'
+      : 'surprised'
 
   const staffLabel = useMemo(
     () => (question ? formatStaffLabel(t, question) : ''),
@@ -60,6 +69,8 @@ export function QuizScreen() {
     setPending(null)
     setFeedback(null)
     next()
+    // The Next button disappears, so move focus to the new question's prompt.
+    requestAnimationFrame(() => promptRef.current?.focus())
   }
 
   const onChoice = (i: number) => {
@@ -132,10 +143,30 @@ export function QuizScreen() {
       </header>
 
       <main className={styles.main}>
+        <p className="visually-hidden" aria-live="polite">
+          {length > 0
+            ? t('quiz.progress', { current, total: length })
+            : t('quiz.progressUnlimited', { current })}
+          . {t(`quiz.prompt.${question.kind}`)}
+        </p>
         <section className={styles.staffCard}>
           <div className={styles.cardHead}>
-            <Logo size="sm" />
-            <p className={styles.prompt}>{t(`quiz.prompt.${question.kind}`)}</p>
+            <span
+              key={`${mood}-${results.length}-${wrongPicks.length}`}
+              className={[styles.mascot, mood !== 'idle' && styles.react]
+                .filter(Boolean)
+                .join(' ')}
+              aria-hidden="true"
+            >
+              {catMode ? (
+                <CatMark size={44} mood={mood} />
+              ) : (
+                <IconMusic size={28} stroke={2.2} />
+              )}
+            </span>
+            <p ref={promptRef} tabIndex={-1} className={styles.prompt}>
+              {t(`quiz.prompt.${question.kind}`)}
+            </p>
           </div>
           {sound ? (
             <button

@@ -6,6 +6,7 @@ import {
 } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { unlockAudio } from '../audio/engine'
+import { Confetti } from '../components/Confetti'
 import { CatMark } from '../components/Logo'
 import { Staff } from '../components/Staff'
 import { Button3D } from '../components/ui/Button3D'
@@ -26,10 +27,11 @@ export function SummaryScreen() {
 
   return (
     <div className={styles.screen}>
+      {(perfect || newRecord) && <Confetti />}
       <main className={styles.main}>
         <div className={styles.hero}>
           {catMode ? (
-            <CatMark size={88} />
+            <CatMark size={88} mood={correct > 0 ? 'happy' : 'idle'} />
           ) : (
             <IconStarFilled size={80} className={styles.star} aria-hidden="true" />
           )}
