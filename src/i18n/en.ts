@@ -3,6 +3,7 @@ const en = {
   app: {
     name: 'Kiano',
     tagline: 'Purrfect pitch!',
+    petCat: 'Pet the cat',
   },
   splash: [
     'Purrfect pitch!',

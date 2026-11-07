@@ -5,7 +5,9 @@ import {
   IconPlayerPlayFilled,
 } from '@tabler/icons-react'
 import { ToggleGroup } from 'radix-ui'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Confetti } from '../components/Confetti'
 import { Footer } from '../components/Footer'
 import { unlockAudio } from '../audio/engine'
 import { Logo } from '../components/Logo'
@@ -24,13 +26,21 @@ export function StartScreen() {
   const start = useQuiz((s) => s.start)
   const setSettingsOpen = useUi((s) => s.setSettingsOpen)
   const showStats = useQuiz((s) => s.showStats)
+  const pet = usePetting()
 
   return (
     <div className={[styles.screen, catMode && styles.paws].filter(Boolean).join(' ')}>
       <SettingsButton className={styles.settings} />
       <main className={styles.main}>
         <h1 className={styles.hero}>
-          <Logo />
+          <Logo
+            mood={pet.happy ? 'happy' : 'idle'}
+            onCatClick={pet.onPet}
+            catLabel={t('app.petCat')}
+            catClassName={
+              pet.pets === 0 ? undefined : pet.pets % 2 ? styles.purrA : styles.purrB
+            }
+          />
           <span className="visually-hidden"> — {t('app.tagline')}</span>
           <Splash className={styles.splash} />
         </h1>
@@ -91,6 +101,43 @@ export function StartScreen() {
         </Button3D>
       </main>
       <Footer />
+      {pet.parties > 0 && <Confetti key={pet.parties} />}
     </div>
   )
+}
+
+const HAPPY_MS = 1400
+/** Taps further apart than this start the count over. */
+const STREAK_GAP_MS = 1200
+const PETS_FOR_CONFETTI = 5
+
+/**
+ * Easter egg: tapping the cat makes it happy and wiggle; five quick taps in a row
+ * set off the confetti (handy for checking it without playing a whole round).
+ */
+function usePetting() {
+  const [pets, setPets] = useState(0)
+  const [happy, setHappy] = useState(false)
+  const [parties, setParties] = useState(0)
+  const streak = useRef({ count: 0, last: 0 })
+  const timer = useRef<number | undefined>(undefined)
+
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  const onPet = () => {
+    const now = Date.now()
+    const s = streak.current
+    s.count = now - s.last <= STREAK_GAP_MS ? s.count + 1 : 1
+    s.last = now
+    if (s.count >= PETS_FOR_CONFETTI) {
+      s.count = 0
+      setParties((n) => n + 1)
+    }
+    setPets((n) => n + 1)
+    setHappy(true)
+    window.clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => setHappy(false), HAPPY_MS)
+  }
+
+  return { pets, happy, parties, onPet }
 }

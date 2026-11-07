@@ -92,10 +92,37 @@ export function CatMark({ size = 56, mood = 'idle' }: { size?: number; mood?: Ca
   )
 }
 
-export function Logo({ size = 'lg' }: { size?: 'sm' | 'lg' }) {
+interface LogoProps {
+  size?: 'sm' | 'lg'
+  mood?: CatMood
+  /** When set, the cat becomes a button (the start-screen petting easter egg). */
+  onCatClick?: () => void
+  catLabel?: string
+  catClassName?: string
+}
+
+export function Logo({
+  size = 'lg',
+  mood = 'idle',
+  onCatClick,
+  catLabel,
+  catClassName,
+}: LogoProps) {
+  const cat = <CatMark size={size === 'lg' ? 72 : 36} mood={mood} />
   return (
     <span className={`${styles.logo} ${styles[size]}`}>
-      <CatMark size={size === 'lg' ? 72 : 36} />
+      {onCatClick ? (
+        <button
+          type="button"
+          className={[styles.catButton, catClassName].filter(Boolean).join(' ')}
+          onClick={onCatClick}
+          aria-label={catLabel}
+        >
+          {cat}
+        </button>
+      ) : (
+        cat
+      )}
       <span className={styles.word}>Kiano</span>
     </span>
   )

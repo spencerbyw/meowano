@@ -132,3 +132,43 @@
     max-width: 420px;
   }
 }
+
+/* Easter egg: the cat wiggles happily when petted. */
+.purrA {
+  animation: purr-a 600ms var(--ease-spring);
+}
+
+/* Same wiggle under another name, so each tap restarts it. */
+.purrB {
+  animation: purr-b 600ms var(--ease-spring);
+}
+
+@keyframes purr-a {
+  15% {
+    transform: rotate(-12deg) scale(1.08);
+  }
+  35% {
+    transform: rotate(10deg) scale(1.1);
+  }
+  55% {
+    transform: rotate(-7deg) scale(1.06);
+  }
+  75% {
+    transform: rotate(4deg) scale(1.03);
+  }
+}
+
+@keyframes purr-b {
+  15% {
+    transform: rotate(-12deg) scale(1.08);
+  }
+  35% {
+    transform: rotate(10deg) scale(1.1);
+  }
+  55% {
+    transform: rotate(-7deg) scale(1.06);
+  }
+  75% {
+    transform: rotate(4deg) scale(1.03);
+  }
+}
