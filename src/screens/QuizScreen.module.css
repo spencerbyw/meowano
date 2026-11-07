@@ -47,17 +47,34 @@
 
 .streak {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 64px;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: 0 2px 0 var(--color-border);
+  line-height: 1.1;
+}
+
+.streakNow {
+  display: flex;
   align-items: center;
   gap: 2px;
-  min-width: var(--tap-min);
-  justify-content: center;
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface);
   color: var(--color-primary-edge);
   font-family: var(--font-display);
   font-size: 1.25rem;
-  box-shadow: 0 2px 0 var(--color-border);
+}
+
+:root[data-theme='dark'] .streakNow {
+  color: var(--color-primary);
+}
+
+.streakBest {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--color-text-muted);
+  white-space: nowrap;
 }
 
 /* Layout */

@@ -104,6 +104,10 @@
   color: var(--color-text);
 }
 
+.statsButton {
+  margin-top: calc(var(--space-6) * -1);
+}
+
 .play {
   margin-top: var(--space-2);
 }

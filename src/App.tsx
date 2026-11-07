@@ -2,6 +2,7 @@ import { SettingsDrawer } from './components/settings/SettingsDrawer'
 import { useQuiz } from './quiz/store'
 import { QuizScreen } from './screens/QuizScreen'
 import { StartScreen } from './screens/StartScreen'
+import { StatsScreen } from './screens/StatsScreen'
 import { SummaryScreen } from './screens/SummaryScreen'
 import { useApplyTheme } from './settings/useTheme'
 
@@ -15,6 +16,8 @@ export default function App() {
         <QuizScreen />
       ) : screen === 'summary' ? (
         <SummaryScreen />
+      ) : screen === 'stats' ? (
+        <StatsScreen />
       ) : (
         <StartScreen />
       )}

@@ -1,4 +1,9 @@
-import { IconChevronRight, IconInfinity, IconPlayerPlayFilled } from '@tabler/icons-react'
+import {
+  IconChartBar,
+  IconChevronRight,
+  IconInfinity,
+  IconPlayerPlayFilled,
+} from '@tabler/icons-react'
 import { ToggleGroup } from 'radix-ui'
 import { useTranslation } from 'react-i18next'
 import { Footer } from '../components/Footer'
@@ -18,6 +23,7 @@ export function StartScreen() {
   const { quizLength, setQuizLength, preset } = useSettings()
   const start = useQuiz((s) => s.start)
   const setSettingsOpen = useUi((s) => s.setSettingsOpen)
+  const showStats = useQuiz((s) => s.showStats)
 
   return (
     <div className={styles.screen}>
@@ -73,6 +79,16 @@ export function StartScreen() {
             {t('start.play')}
           </Button3D>
         </section>
+
+        <Button3D
+          variant="ghost"
+          size="sm"
+          className={styles.statsButton}
+          onClick={showStats}
+        >
+          <IconChartBar size={20} aria-hidden="true" />
+          {t('stats.open')}
+        </Button3D>
       </main>
       <Footer />
     </div>

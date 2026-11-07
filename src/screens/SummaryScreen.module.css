@@ -133,3 +133,17 @@
   flex-direction: column;
   gap: var(--space-3);
 }
+
+.record {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-sunny);
+  color: #3b2f4a;
+  font-size: 0.8125rem;
+  font-weight: 800;
+  animation: bounce-in 600ms var(--ease-spring) 300ms both;
+}
