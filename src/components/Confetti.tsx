@@ -3,7 +3,7 @@ import { useSettings } from '../settings/store'
 import styles from './Confetti.module.css'
 
 const COLORS = ['#ff7aae', '#a99bff', '#ffc94d', '#4fdcaa', '#59c3ff']
-const COUNT = 28
+const COUNT = 56
 
 function Paw() {
   return (
