@@ -35,9 +35,11 @@
 
   --color-primary: #ff7aae;
   --color-primary-edge: #e0508a;
-  --color-primary-text: #ffffff;
+  --color-primary-text: #3b2f4a;
+  /* Text on bright candy fills (buttons, selected chips): dark plum for contrast. */
+  --color-on-candy: #3b2f4a;
   --color-secondary: #a99bff;
-  --color-secondary-edge: #7f6fe6;
+  --color-secondary-edge: #6c5bd6;
   --color-choice: #ffffff;
   --color-choice-edge: #e9d9f2;
   --color-choice-text: #3b2f4a;
@@ -77,6 +79,7 @@
   --color-primary: #ff7aae;
   --color-primary-edge: #c2427a;
   --color-primary-text: #2a1424;
+  --color-on-candy: #2a1d38;
   --color-secondary: #a99bff;
   --color-secondary-edge: #6c5bd6;
   --color-choice: #342d4f;

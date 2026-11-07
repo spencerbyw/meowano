@@ -20,13 +20,13 @@ import styles from './StartScreen.module.css'
 
 export function StartScreen() {
   const { t } = useTranslation()
-  const { quizLength, setQuizLength, preset } = useSettings()
+  const { quizLength, setQuizLength, preset, catMode } = useSettings()
   const start = useQuiz((s) => s.start)
   const setSettingsOpen = useUi((s) => s.setSettingsOpen)
   const showStats = useQuiz((s) => s.showStats)
 
   return (
-    <div className={styles.screen}>
+    <div className={[styles.screen, catMode && styles.paws].filter(Boolean).join(' ')}>
       <SettingsButton className={styles.settings} />
       <main className={styles.main}>
         <h1 className={styles.hero}>

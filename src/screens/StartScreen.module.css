@@ -8,6 +8,14 @@
     radial-gradient(circle at 90% 85%, var(--color-bg-accent) 0 14%, transparent 35%);
 }
 
+/* Cat mode: a faint scatter of paw prints behind everything. */
+.paws {
+  background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><g fill='%23ff7aae' fill-opacity='0.09'><g transform='translate(18 22) rotate(-20 12 12)'><ellipse cx='12' cy='16' rx='5.2' ry='4.4'/><ellipse cx='5.5' cy='10.5' rx='2.1' ry='2.6'/><ellipse cx='9.5' cy='6.5' rx='2.1' ry='2.7'/><ellipse cx='14.5' cy='6.5' rx='2.1' ry='2.7'/><ellipse cx='18.5' cy='10.5' rx='2.1' ry='2.6'/></g><g transform='translate(88 86) rotate(18 12 12)'><ellipse cx='12' cy='16' rx='5.2' ry='4.4'/><ellipse cx='5.5' cy='10.5' rx='2.1' ry='2.6'/><ellipse cx='9.5' cy='6.5' rx='2.1' ry='2.7'/><ellipse cx='14.5' cy='6.5' rx='2.1' ry='2.7'/><ellipse cx='18.5' cy='10.5' rx='2.1' ry='2.6'/></g></g></svg>"),
+    radial-gradient(circle at 15% 10%, var(--color-bg-accent) 0 18%, transparent 40%),
+    radial-gradient(circle at 90% 85%, var(--color-bg-accent) 0 14%, transparent 35%);
+}
+
 .main {
   flex: 1;
   width: 100%;
@@ -75,7 +83,7 @@
 .length[data-state='on'] {
   background: var(--color-secondary);
   border-color: var(--color-secondary-edge);
-  color: #fff;
+  color: var(--color-on-candy);
   transform: scale(1.04);
 }
 

@@ -95,15 +95,44 @@
 .cardHead {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
-  padding-inline: var(--space-2);
+  padding-inline: var(--space-1);
+}
+
+.mascot {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--color-bg-accent);
+  color: var(--color-primary-edge);
+}
+
+:root[data-theme='dark'] .mascot {
+  color: var(--color-primary);
+}
+
+.react {
+  animation: mascot-bounce 500ms var(--ease-spring);
+}
+
+@keyframes mascot-bounce {
+  30% {
+    transform: translateY(-6px) scale(1.12) rotate(-6deg);
+  }
+}
+
+.prompt:focus {
+  outline: none;
 }
 
 .prompt {
-  font-weight: 700;
-  color: var(--color-text-muted);
-  text-align: right;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  color: var(--color-text);
 }
 
 .staffButton {
@@ -224,7 +253,7 @@
   padding: 2px var(--space-2);
   border-radius: var(--radius-pill);
   background: #fff;
-  color: var(--color-sunny-edge);
+  color: #3b2f4a;
   animation: pop 300ms var(--ease-spring);
 }
 
@@ -303,14 +332,20 @@
 /* Landscape: staff on the left, answers on the right. */
 @media (orientation: landscape) and (min-width: 700px) {
   .screen {
-    max-width: 1100px;
+    max-width: 1240px;
   }
 
+  /* Staff gets the bigger share; both columns sit centred in the space below the top bar. */
   .main {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
+    align-content: center;
     align-items: center;
     gap: var(--space-6);
+  }
+
+  .staffCard {
+    padding: var(--space-4);
   }
 }
 
