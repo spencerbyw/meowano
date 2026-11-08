@@ -17,6 +17,8 @@ export const useAudioStatus = create<{ piano: PianoStatus }>()(() => ({ piano: '
 const LOW_MIDI = 33
 const HIGH_MIDI = 88
 const VELOCITY = 76
+// Long enough to ring, short enough to tap again.
+const NOTE_SECONDS = 1.3
 
 let ctx: AudioContext | null = null
 let piano: ReturnType<typeof SplendidGrandPiano> | null = null
@@ -27,11 +29,43 @@ function context(): AudioContext {
   return ctx
 }
 
+type AudioSessionNavigator = Navigator & { audioSession?: { type: string } }
+
 /** Ask iOS to play through the speaker even when the ring/silent switch is on. */
 function preferPlayback() {
-  const session = (navigator as Navigator & { audioSession?: { type: string } })
-    .audioSession
+  window.clearTimeout(releaseTimer)
+  const session = (navigator as AudioSessionNavigator).audioSession
   if (session && session.type !== 'playback') session.type = 'playback'
+}
+
+// A 'playback' audio session makes iOS treat the app like a music player, which
+// keeps it in the Dynamic Island / Now Playing after a note ends. Once things go
+// quiet, suspend the audio and hand the session back so it disappears.
+let releaseTimer: number | undefined
+const RELEASE_AFTER_MS = 2500
+
+function releaseSoon(soundSeconds: number) {
+  window.clearTimeout(releaseTimer)
+  releaseTimer = window.setTimeout(
+    () => {
+      if (!ctx || ctx.state !== 'running') return
+      void ctx.suspend().then(() => {
+        const session = (navigator as AudioSessionNavigator).audioSession
+        if (session) session.type = 'auto'
+        if ('mediaSession' in navigator) {
+          navigator.mediaSession.metadata = null
+          navigator.mediaSession.playbackState = 'none'
+        }
+      })
+    },
+    soundSeconds * 1000 + RELEASE_AFTER_MS,
+  )
+}
+
+/** Wake the context (it's suspended between sounds) before scheduling anything. */
+async function ready(c: AudioContext) {
+  preferPlayback()
+  if (c.state === 'suspended') await c.resume()
 }
 
 function loadPiano(): Promise<void> {
@@ -66,16 +100,17 @@ export function unlockAudio() {
 /** Play pitches together, with a tiny roll from the bottom so chords sound natural. */
 export async function playNotes(pitches: Pitch[], { roll = 0.025 } = {}) {
   unlockAudio()
-  preferPlayback()
+  await ready(context())
   await loadPiano()
   if (!piano || !ctx) return
+  releaseSoon(NOTE_SECONDS + pitches.length * roll)
   const now = ctx.currentTime + 0.01
   pitches.forEach((p, i) => {
     piano!.start({
       note: midiOf(p),
       velocity: VELOCITY,
       time: now + i * roll,
-      duration: 1.3, // seconds; long enough to ring, short enough to tap again
+      duration: NOTE_SECONDS,
     })
   })
 }
@@ -103,17 +138,19 @@ function tone(
   osc.stop(start + length + 0.05)
 }
 
-export function playChime(kind: 'correct' | 'wrong') {
+export async function playChime(kind: 'correct' | 'wrong') {
   const c = context()
-  if (c.state === 'suspended') void c.resume()
-  preferPlayback()
+  await ready(c)
+  releaseSoon(0.6)
   const t = c.currentTime + 0.01
   if (kind === 'correct') {
     // A bright little "bling": E6 then A6.
     tone(c, 1318.5, t, 0.25)
     tone(c, 1760, t + 0.09, 0.4)
   } else {
-    // A soft, low "bonk".
-    tone(c, 220, t, 0.22, { type: 'sine', gain: 0.25, glideTo: 140 })
+    // A gentle "uh-oh": B♭4 down to F4. High enough for phone speakers, which
+    // barely reproduce anything under ~300 Hz (the old 220 Hz bonk got lost).
+    tone(c, 466.2, t, 0.17, { gain: 0.3 })
+    tone(c, 349.2, t + 0.13, 0.32, { gain: 0.3, glideTo: 330 })
   }
 }
