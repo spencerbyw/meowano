@@ -1,11 +1,17 @@
 .staff {
   color: var(--color-staff);
   width: 100%;
-  aspect-ratio: 260 / 140;
 }
 
 .canvas,
 .canvas svg {
   width: 100%;
   height: 100%;
+}
+
+/* Staff and bar lines are a touch lighter than the notes so the notes stand out. */
+.canvas :global(.vf-stave),
+.canvas :global(.vf-stavebarline) {
+  fill: var(--color-staff-line);
+  stroke: var(--color-staff-line);
 }

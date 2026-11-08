@@ -20,9 +20,15 @@ import {
 import styles from './Staff.module.css'
 
 // Logical drawing size; the SVG scales to fit its container via viewBox.
-const WIDTH = 260
+// A single note/chord gets a narrow staff so it can be drawn bigger; rows of
+// chords (settings previews) get the wide one.
+const WIDE = 260
+const NARROW = 180
 const HEIGHT = 140
-const STAVE_Y = 10 // top line at y=50, bottom at y=90: centred, with room for 2 ledger lines
+const STAVE_Y = 10 // top line at y=50, bottom at y=90
+// Visible band: two ledger lines above and below (D6 / G3 in treble) plus a little air.
+const VIEW_TOP = 14
+const VIEW_HEIGHT = 112
 
 // VexFlow measures glyphs with the Bravura web font, so wait for it before drawing.
 const fontReady =
@@ -54,12 +60,14 @@ export function Staff({
   className,
 }: StaffProps) {
   const groups = chords ?? (notes.length ? [notes] : [])
+  const width = groups.length > 1 ? WIDE : NARROW
   // Everything the drawing depends on, as a string, so callers can pass fresh arrays
   // without forcing redraws. The effect rebuilds its inputs from it.
   const signature = [
     clef,
     keySignature.fifths,
     groups.map((g) => g.map(pitchName).join(',')).join(';'),
+    width,
   ].join('|')
   const ref = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
@@ -75,7 +83,8 @@ export function Staff({
   useEffect(() => {
     const el = ref.current
     if (!el || !ready) return
-    const [clefPart, fifthsPart, notesPart] = signature.split('|')
+    const [clefPart, fifthsPart, notesPart, widthPart] = signature.split('|')
+    const width = Number(widthPart)
     const clef = clefPart as Clef
     const keySignature = majorKey(Number(fifthsPart))
     const groups = notesPart
@@ -84,15 +93,18 @@ export function Staff({
     el.replaceChildren()
 
     const renderer = new Renderer(el, Renderer.Backends.SVG)
-    renderer.resize(WIDTH, HEIGHT)
+    renderer.resize(width, HEIGHT)
     const ctx = renderer.getContext()
     const ink = { fillStyle: 'currentColor', strokeStyle: 'currentColor' }
+    // Ledger lines match the staff lines (coloured in Staff.module.css), a touch
+    // lighter than the notes.
+    const ledger = { strokeStyle: 'var(--color-staff-line)', lineWidth: 1.6 }
     ctx.setFillStyle(ink.fillStyle)
     ctx.setStrokeStyle(ink.strokeStyle)
 
-    const stave = new Stave(4, STAVE_Y, WIDTH - 8)
+    const stave = new Stave(4, STAVE_Y, width - 8)
     stave.addClef(clef).addKeySignature(keySignature.name)
-    stave.setEndBarType(BarlineType.NONE)
+    stave.setEndBarType(BarlineType.END)
     stave.setStyle(ink)
     stave.setContext(ctx).draw()
 
@@ -101,7 +113,7 @@ export function Staff({
         const note = new StaveNote({
           clef,
           keys: group.map(vexKey),
-          duration: 'q',
+          duration: 'w',
           alignCenter: groups.length === 1,
         })
         group.forEach((p, i) => {
@@ -109,10 +121,10 @@ export function Staff({
           if (acc) note.addModifier(new Accidental(acc), i)
         })
         note.setStyle(ink)
-        note.setLedgerLineStyle({ strokeStyle: 'currentColor', lineWidth: 1.6 })
+        note.setLedgerLineStyle(ledger)
         return note
       })
-      const voice = new Voice({ numBeats: groups.length, beatValue: 4 }).addTickables(
+      const voice = new Voice({ numBeats: groups.length, beatValue: 1 }).addTickables(
         staveNotes,
       )
       new Formatter()
@@ -121,9 +133,17 @@ export function Staff({
       voice.draw(ctx, stave)
     }
 
+    // VexFlow draws 1px staff lines on half-pixel rows (y + 0.5) so they look crisp
+    // at 1:1, but places noteheads, clefs and key signatures on whole rows. Scaled
+    // up, that leaves every glyph visibly a hair above its line, so move the staff
+    // and bar lines up half a unit to meet them (ledger lines are already on whole rows).
+    el.querySelectorAll('.vf-stave, .vf-stavebarline').forEach((g) =>
+      g.setAttribute('transform', 'translate(0 -0.5)'),
+    )
+
     const svg = el.querySelector('svg')
     if (svg) {
-      svg.setAttribute('viewBox', `0 0 ${WIDTH} ${HEIGHT}`)
+      svg.setAttribute('viewBox', `0 ${VIEW_TOP} ${width} ${VIEW_HEIGHT}`)
       svg.removeAttribute('width')
       svg.removeAttribute('height')
       svg.removeAttribute('style')
@@ -135,6 +155,7 @@ export function Staff({
   return (
     <div
       className={[styles.staff, className].filter(Boolean).join(' ')}
+      style={{ aspectRatio: `${width} / ${VIEW_HEIGHT}` }}
       role="img"
       aria-label={label}
     >

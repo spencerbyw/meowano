@@ -31,6 +31,7 @@
   --color-text-muted: #7a6e86;
   --color-border: #f0e2ea;
   --color-staff: #3b2f4a;
+  --color-staff-line: #8a7f96;
   --color-shadow: 330deg 40% 60%;
 
   --color-primary: #ff7aae;
@@ -74,6 +75,7 @@
   --color-text-muted: #b6a9c9;
   --color-border: #3d3558;
   --color-staff: #f6eeff;
+  --color-staff-line: #a69bb8;
   --color-shadow: 260deg 40% 5%;
 
   --color-primary: #ff7aae;
