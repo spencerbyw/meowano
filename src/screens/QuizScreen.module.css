@@ -1,7 +1,5 @@
 .screen {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
   max-width: var(--content-max);
   margin-inline: auto;
   padding: var(--space-3) var(--space-4) var(--space-5);
@@ -77,12 +75,39 @@
   white-space: nowrap;
 }
 
-/* Layout */
+/* Layout: top bar and answers stay put; only the staff area scrolls, if ever. */
 .main {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
+}
+
+.staffArea {
+  /* Bleed to the screen edges so the card's shadow isn't clipped by the scroller. */
+  margin: calc(var(--space-3) * -1) calc(var(--space-4) * -1);
+  padding: var(--space-3) var(--space-4);
+}
+
+.staffArea > .staffCard {
+  margin-block: auto;
+}
+
+/* Size the staff by whichever runs out first, width or height, so the whole card
+   always fits above the answers (small phones, landscape). The 180/112 is the
+   staff's aspect ratio; 120px is roughly the card's header, hint and padding. */
+.staffArea {
+  container-type: size;
+}
+
+.staffIn {
+  max-width: max(120px, calc((100cqh - 130px) * 180 / 112));
+  margin-inline: auto;
+}
+
+.answers {
+  flex-shrink: 0;
 }
 
 .staffCard {
@@ -281,7 +306,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  min-height: 132px;
 }
 
 .feedback {
@@ -329,6 +353,15 @@
   width: 100%;
 }
 
+.footerButtons {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.dontKnow {
+  flex: 1;
+}
+
 /* Landscape: staff on the left, answers on the right. */
 @media (orientation: landscape) and (min-width: 700px) {
   .screen {
@@ -339,9 +372,19 @@
   .main {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
-    align-content: center;
-    align-items: center;
+    grid-template-rows: minmax(0, 1fr);
     gap: var(--space-6);
+  }
+
+  .staffArea {
+    margin-inline: 0;
+    padding-inline: var(--space-2);
+  }
+
+  .answers {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    justify-content: center;
   }
 
   .staffCard {
@@ -358,5 +401,26 @@
 
   .choiceLabel {
     font-size: 1.875rem;
+  }
+}
+
+/* Short phones (iPhone SE/mini): tighter answers so the staff keeps its room. */
+@media (orientation: portrait) and (max-height: 740px) {
+  .main,
+  .answers,
+  .choices {
+    gap: var(--space-2);
+  }
+
+  .choiceFront {
+    min-height: 60px;
+  }
+
+  .choiceLabel {
+    font-size: 1.375rem;
+  }
+
+  .feedback {
+    font-size: 1.125rem;
   }
 }

@@ -29,77 +29,87 @@ export function StartScreen() {
   const pet = usePetting()
 
   return (
-    <div className={[styles.screen, catMode && styles.paws].filter(Boolean).join(' ')}>
+    <div
+      className={['screen-frame', styles.screen, catMode && styles.paws]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <SettingsButton className={styles.settings} />
-      <main className={styles.main}>
-        <h1 className={styles.hero}>
-          <Logo
-            mood={pet.happy ? 'happy' : 'idle'}
-            onCatClick={pet.onPet}
-            catLabel={t('app.petCat')}
-            catClassName={
-              pet.pets === 0 ? undefined : pet.pets % 2 ? styles.purrA : styles.purrB
-            }
-          />
-          <span className="visually-hidden"> — {t('app.tagline')}</span>
-          <Splash className={styles.splash} />
-        </h1>
+      <div className="scroll-area">
+        <main className={styles.main}>
+          <h1 className={styles.hero}>
+            <Logo
+              mood={pet.happy ? 'happy' : 'idle'}
+              onCatClick={pet.onPet}
+              catLabel={t('app.petCat')}
+              catClassName={
+                pet.pets === 0 ? undefined : pet.pets % 2 ? styles.purrA : styles.purrB
+              }
+            />
+            <span className="visually-hidden"> — {t('app.tagline')}</span>
+            <Splash className={styles.splash} />
+          </h1>
 
-        <section className={styles.panel}>
-          <h2 id="length-label" className={styles.label}>
-            {t('start.howMany')}
-          </h2>
-          <ToggleGroup.Root
-            type="single"
-            aria-labelledby="length-label"
-            className={styles.lengths}
-            value={String(quizLength)}
-            onValueChange={(v) => v && setQuizLength(Number(v) as QuizLength)}
-          >
-            {QUIZ_LENGTHS.map((n) => (
-              <ToggleGroup.Item
-                key={n}
-                value={String(n)}
-                className={styles.length}
-                aria-label={n === 0 ? t('start.unlimited') : String(n)}
-              >
-                {n === 0 ? <IconInfinity size={28} stroke={2.5} aria-hidden="true" /> : n}
-              </ToggleGroup.Item>
-            ))}
-          </ToggleGroup.Root>
+          <section className={styles.panel}>
+            <h2 id="length-label" className={styles.label}>
+              {t('start.howMany')}
+            </h2>
+            <ToggleGroup.Root
+              type="single"
+              aria-labelledby="length-label"
+              className={styles.lengths}
+              value={String(quizLength)}
+              onValueChange={(v) => v && setQuizLength(Number(v) as QuizLength)}
+            >
+              {QUIZ_LENGTHS.map((n) => (
+                <ToggleGroup.Item
+                  key={n}
+                  value={String(n)}
+                  className={styles.length}
+                  aria-label={n === 0 ? t('start.unlimited') : String(n)}
+                >
+                  {n === 0 ? (
+                    <IconInfinity size={28} stroke={2.5} aria-hidden="true" />
+                  ) : (
+                    n
+                  )}
+                </ToggleGroup.Item>
+              ))}
+            </ToggleGroup.Root>
 
-          <button
-            type="button"
-            className={styles.level}
-            onClick={() => setSettingsOpen(true)}
-          >
-            {t('start.level')}: <strong>{t(`presets.${preset}`)}</strong>
-            <IconChevronRight size={18} aria-hidden="true" />
-          </button>
+            <button
+              type="button"
+              className={styles.level}
+              onClick={() => setSettingsOpen(true)}
+            >
+              {t('start.level')}: <strong>{t(`presets.${preset}`)}</strong>
+              <IconChevronRight size={18} aria-hidden="true" />
+            </button>
+
+            <Button3D
+              size="lg"
+              className={styles.play}
+              onClick={() => {
+                if (useSettings.getState().sound) unlockAudio()
+                start()
+              }}
+            >
+              <IconPlayerPlayFilled size={24} aria-hidden="true" />
+              {t('start.play')}
+            </Button3D>
+          </section>
 
           <Button3D
-            size="lg"
-            className={styles.play}
-            onClick={() => {
-              if (useSettings.getState().sound) unlockAudio()
-              start()
-            }}
+            variant="ghost"
+            size="sm"
+            className={styles.statsButton}
+            onClick={showStats}
           >
-            <IconPlayerPlayFilled size={24} aria-hidden="true" />
-            {t('start.play')}
+            <IconChartBar size={20} aria-hidden="true" />
+            {t('stats.open')}
           </Button3D>
-        </section>
-
-        <Button3D
-          variant="ghost"
-          size="sm"
-          className={styles.statsButton}
-          onClick={showStats}
-        >
-          <IconChartBar size={20} aria-hidden="true" />
-          {t('stats.open')}
-        </Button3D>
-      </main>
+        </main>
+      </div>
       <Footer />
       {pet.parties > 0 && <Confetti key={pet.parties} />}
     </div>

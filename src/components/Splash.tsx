@@ -18,12 +18,22 @@ export function Splash({ className }: { className?: string }) {
   }, [])
 
   const line = lines[index % lines.length]
+  // It hangs off the logo's right edge, so longer lines are set smaller to keep
+  // them from reaching too far left.
   return (
     <span
       className={[styles.wrap, className].filter(Boolean).join(' ')}
       aria-hidden="true"
     >
-      <span key={line} className={styles.splash}>
+      <span
+        key={line}
+        className={[
+          styles.splash,
+          line.length > 18 ? styles.long : line.length > 12 && styles.medium,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         {line}
       </span>
     </span>
