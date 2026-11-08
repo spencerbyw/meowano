@@ -17,6 +17,7 @@ import { SettingsButton } from '../components/settings/SettingsButton'
 import { Staff } from '../components/Staff'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatStaffLabel } from '../music/format'
+import { practiceBand, viewOf } from '../music/staffBand'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import { useStats } from '../stats/store'
@@ -32,6 +33,17 @@ export function QuizScreen() {
   const allTimeBest = useStats((s) => s.bestStreak)
   const { answer, next, skip, finish, goHome } = useQuiz()
   const { confirm, catMode, sound } = useSettings()
+  const practice = useSettings((s) => s.practice)
+  // One staff size for the whole session: tall enough for every note these
+  // settings can produce, and wide enough for the biggest key signature.
+  const staffFit = useMemo(() => {
+    const band = practiceBand(practice)
+    const width =
+      146 +
+      9 * practice.maxKeyAccidentals +
+      (practice.accidentals || practice.kinds.triad ? 12 : 0)
+    return { band, width, aspect: width / viewOf(band).height }
+  }, [practice])
   useWakeLock(true)
   const pianoStatus = useAudioStatus((s) => s.piano)
   // Bumped on each tap of the staff to restart the little "ring" animation.
@@ -196,11 +208,17 @@ export function QuizScreen() {
                 onClick={hear}
                 aria-label={`${staffLabel}. ${t('quiz.hear')}`}
               >
-                <div key={question.id} className={styles.staffIn}>
+                <div
+                  key={question.id}
+                  className={styles.staffIn}
+                  style={{ '--staff-aspect': staffFit.aspect } as React.CSSProperties}
+                >
                   <Staff
                     clef={question.clef}
                     keySignature={question.key}
                     notes={question.notes}
+                    band={staffFit.band}
+                    width={staffFit.width}
                     label={staffLabel}
                   />
                 </div>
@@ -224,11 +242,17 @@ export function QuizScreen() {
                 </span>
               </button>
             ) : (
-              <div key={question.id} className={styles.staffIn}>
+              <div
+                key={question.id}
+                className={styles.staffIn}
+                style={{ '--staff-aspect': staffFit.aspect } as React.CSSProperties}
+              >
                 <Staff
                   clef={question.clef}
                   keySignature={question.key}
                   notes={question.notes}
+                  band={staffFit.band}
+                  width={staffFit.width}
                   label={staffLabel}
                 />
               </div>

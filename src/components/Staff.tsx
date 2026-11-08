@@ -17,6 +17,7 @@ import {
   type Key,
   type Pitch,
 } from '../music/theory'
+import { bandWithNotes, baseBand, viewOf, type StaffBand } from '../music/staffBand'
 import styles from './Staff.module.css'
 
 // Logical drawing size; the SVG scales to fit its container via viewBox.
@@ -25,10 +26,7 @@ import styles from './Staff.module.css'
 const WIDE = 260
 const NARROW = 180
 const HEIGHT = 140
-const STAVE_Y = 10 // top line at y=50, bottom at y=90
-// Visible band: two ledger lines above and below (D6 / G3 in treble) plus a little air.
-const VIEW_TOP = 14
-const VIEW_HEIGHT = 112
+const STAVE_Y = 10 // top line at y=50, bottom at y=90 (see music/staffBand.ts)
 
 // VexFlow measures glyphs with the Bravura web font, so wait for it before drawing.
 const fontReady =
@@ -45,6 +43,14 @@ interface StaffProps {
   notes?: Pitch[]
   /** Several notes/chords in a row (used by settings previews). Overrides `notes`. */
   chords?: Pitch[][]
+  /**
+   * Vertical room to show. The quiz passes one band for the whole session so the
+   * staff keeps its size; by default it fits the clef, key signature and notes.
+   * Notes are always kept in view either way.
+   */
+  band?: StaffBand
+  /** Drawing width for a single note/chord (wider keys need more room). */
+  width?: number
   label: string
   className?: string
 }
@@ -56,11 +62,20 @@ export function Staff({
   keySignature = C_MAJOR,
   notes = [],
   chords,
+  band,
+  width: narrowWidth = NARROW,
   label,
   className,
 }: StaffProps) {
   const groups = chords ?? (notes.length ? [notes] : [])
-  const width = groups.length > 1 ? WIDE : NARROW
+  const width = groups.length > 1 ? WIDE : narrowWidth
+  const view = viewOf(
+    bandWithNotes(
+      clef,
+      band ?? baseBand(clef, Math.abs(keySignature.fifths)),
+      groups.flat(),
+    ),
+  )
   // Everything the drawing depends on, as a string, so callers can pass fresh arrays
   // without forcing redraws. The effect rebuilds its inputs from it.
   const signature = [
@@ -68,6 +83,8 @@ export function Staff({
     keySignature.fifths,
     groups.map((g) => g.map(pitchName).join(',')).join(';'),
     width,
+    view.top,
+    view.height,
   ].join('|')
   const ref = useRef<HTMLDivElement>(null)
   const [ready, setReady] = useState(false)
@@ -83,7 +100,8 @@ export function Staff({
   useEffect(() => {
     const el = ref.current
     if (!el || !ready) return
-    const [clefPart, fifthsPart, notesPart, widthPart] = signature.split('|')
+    const [clefPart, fifthsPart, notesPart, widthPart, viewTop, viewHeight] =
+      signature.split('|')
     const width = Number(widthPart)
     const clef = clefPart as Clef
     const keySignature = majorKey(Number(fifthsPart))
@@ -143,7 +161,7 @@ export function Staff({
 
     const svg = el.querySelector('svg')
     if (svg) {
-      svg.setAttribute('viewBox', `0 ${VIEW_TOP} ${width} ${VIEW_HEIGHT}`)
+      svg.setAttribute('viewBox', `0 ${viewTop} ${width} ${viewHeight}`)
       svg.removeAttribute('width')
       svg.removeAttribute('height')
       svg.removeAttribute('style')
@@ -155,7 +173,7 @@ export function Staff({
   return (
     <div
       className={[styles.staff, className].filter(Boolean).join(' ')}
-      style={{ aspectRatio: `${width} / ${VIEW_HEIGHT}` }}
+      style={{ aspectRatio: `${width} / ${view.height}` }}
       role="img"
       aria-label={label}
     >
