@@ -86,8 +86,9 @@
 
 .settings {
   position: absolute;
-  top: var(--space-3);
-  right: var(--space-4);
+  /* The screen bleeds under the status bar, so stay below it. */
+  top: calc(var(--safe-top) + var(--space-3));
+  right: calc(var(--safe-right) + var(--space-4));
   z-index: 1;
 }
 

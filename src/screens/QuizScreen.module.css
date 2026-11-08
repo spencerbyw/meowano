@@ -102,7 +102,7 @@
 }
 
 .staffIn {
-  max-width: max(120px, calc((100cqh - 130px) * 180 / 112));
+  max-width: max(120px, calc((100cqh - 115px) * 180 / 112));
   margin-inline: auto;
 }
 
@@ -404,8 +404,9 @@
   }
 }
 
-/* Short phones (iPhone SE/mini): tighter answers so the staff keeps its room. */
-@media (orientation: portrait) and (max-height: 740px) {
+/* Phones in portrait: the status bar and home indicator eat ~90px, so keep the
+   answers compact and give the staff as much of the height as possible. */
+@media (orientation: portrait) and (max-width: 600px) {
   .main,
   .answers,
   .choices {
@@ -413,14 +414,31 @@
   }
 
   .choiceFront {
-    min-height: 60px;
+    min-height: 64px;
+  }
+
+  .choiceLabel {
+    font-size: 1.5rem;
+  }
+
+  .feedback {
+    min-height: 1.75rem;
+    font-size: 1.125rem;
+  }
+
+  .mascot {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Very short phones (iPhone SE/mini). */
+@media (orientation: portrait) and (max-height: 700px) {
+  .choiceFront {
+    min-height: 58px;
   }
 
   .choiceLabel {
     font-size: 1.375rem;
-  }
-
-  .feedback {
-    font-size: 1.125rem;
   }
 }

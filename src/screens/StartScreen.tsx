@@ -30,7 +30,7 @@ export function StartScreen() {
 
   return (
     <div
-      className={['screen-frame', styles.screen, catMode && styles.paws]
+      className={['screen-frame', 'bleed', styles.screen, catMode && styles.paws]
         .filter(Boolean)
         .join(' ')}
     >

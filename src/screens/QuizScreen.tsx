@@ -180,7 +180,7 @@ export function QuizScreen() {
                 aria-hidden="true"
               >
                 {catMode ? (
-                  <CatMark size={44} mood={mood} />
+                  <CatMark size={40} mood={mood} />
                 ) : (
                   <IconMusic size={28} stroke={2.2} />
                 )}
