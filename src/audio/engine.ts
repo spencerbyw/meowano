@@ -1,6 +1,7 @@
 import { CacheStorage, SplendidGrandPiano } from 'smplr'
 import { create } from 'zustand'
 import { midiOf, type Pitch } from '../music/theory'
+import { useSettings } from '../settings/store'
 
 /**
  * All sound lives here. Browsers (iOS especially) only allow audio after a user
@@ -31,16 +32,24 @@ function context(): AudioContext {
 
 type AudioSessionNavigator = Navigator & { audioSession?: { type: string } }
 
-/** Ask iOS to play through the speaker even when the ring/silent switch is on. */
-function preferPlayback() {
+/**
+ * iOS audio session for the next sound:
+ * - 'ambient' (default): obeys the silent switch, mixes with other audio and
+ *   never shows in the Dynamic Island.
+ * - 'playback' ("Play in silent mode"): ignores the silent switch, but iOS treats
+ *   Kiano like a music player: Dynamic Island / Now Playing, other audio paused.
+ */
+function chooseSession(): boolean {
   window.clearTimeout(releaseTimer)
+  const playback = useSettings.getState().silentMode
+  const type = playback ? 'playback' : 'ambient'
   const session = (navigator as AudioSessionNavigator).audioSession
-  if (session && session.type !== 'playback') session.type = 'playback'
+  if (session && session.type !== type) session.type = type
+  return playback
 }
 
-// A 'playback' audio session makes iOS treat the app like a music player, which
-// keeps it in the Dynamic Island / Now Playing after a note ends. Once things go
-// quiet, suspend the audio and hand the session back so it disappears.
+// In 'playback', iOS keeps Kiano in the Dynamic Island after a note ends. Once
+// things go quiet, suspend the audio and hand the session back so it disappears.
 let releaseTimer: number | undefined
 const RELEASE_AFTER_MS = 2500
 
@@ -62,10 +71,14 @@ function releaseSoon(soundSeconds: number) {
   )
 }
 
-/** Wake the context (it's suspended between sounds) before scheduling anything. */
+/**
+ * Pick the session and wake the context (it may be suspended between sounds)
+ * before scheduling anything. Returns whether we're in 'playback'.
+ */
 async function ready(c: AudioContext) {
-  preferPlayback()
+  const playback = chooseSession()
   if (c.state === 'suspended') await c.resume()
+  return playback
 }
 
 function loadPiano(): Promise<void> {
@@ -100,10 +113,10 @@ export function unlockAudio() {
 /** Play pitches together, with a tiny roll from the bottom so chords sound natural. */
 export async function playNotes(pitches: Pitch[], { roll = 0.025 } = {}) {
   unlockAudio()
-  await ready(context())
+  const playback = await ready(context())
   await loadPiano()
   if (!piano || !ctx) return
-  releaseSoon(NOTE_SECONDS + pitches.length * roll)
+  if (playback) releaseSoon(NOTE_SECONDS + pitches.length * roll)
   const now = ctx.currentTime + 0.01
   pitches.forEach((p, i) => {
     piano!.start({
@@ -140,8 +153,7 @@ function tone(
 
 export async function playChime(kind: 'correct' | 'wrong') {
   const c = context()
-  await ready(c)
-  releaseSoon(0.6)
+  if (await ready(c)) releaseSoon(0.6)
   const t = c.currentTime + 0.01
   if (kind === 'correct') {
     // A bright little "bling": E6 then A6.

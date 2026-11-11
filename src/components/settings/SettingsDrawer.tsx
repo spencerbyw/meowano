@@ -1,5 +1,6 @@
 import {
   IconAdjustmentsHorizontal,
+  IconBellOff,
   IconCat,
   IconDeviceDesktop,
   IconEgg,
@@ -306,6 +307,15 @@ export function SettingsDrawer() {
                   settings.setSound(on)
                 }}
               />
+              {settings.sound && (
+                <SwitchField
+                  label={t('settings.silentMode')}
+                  hint={t('settings.silentModeHint')}
+                  icon={<IconBellOff size={22} aria-hidden="true" />}
+                  checked={settings.silentMode}
+                  onChange={settings.setSilentMode}
+                />
+              )}
             </Section>
           </div>
         </Dialog.Content>

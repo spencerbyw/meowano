@@ -152,6 +152,8 @@ const en = {
     catModeHint: 'Extra cat puns and kitty cheers',
     sound: 'Sound',
     soundHint: 'Tap the staff to hear the notes',
+    silentMode: 'Play in silent mode',
+    silentModeHint: 'Ignore the silent switch (shows in the Dynamic Island)',
   },
   start: {
     howMany: 'How many questions?',
