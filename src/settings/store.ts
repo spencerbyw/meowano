@@ -42,7 +42,7 @@ export const useSettings = create<SettingsState>()(
       catMode: true,
       confirm: 'double',
       sound: true,
-      silentMode: false,
+      silentMode: true,
       preset: DEFAULT_PRESET,
       practice: PRESETS[DEFAULT_PRESET],
       quizLength: 10,
