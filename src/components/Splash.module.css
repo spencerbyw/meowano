@@ -19,6 +19,14 @@
     pulse 900ms ease-in-out 400ms infinite alternate;
 }
 
+.medium {
+  font-size: 1.0625rem;
+}
+
+.long {
+  font-size: 0.9375rem;
+}
+
 @keyframes pop-in {
   from {
     transform: scale(0.3);

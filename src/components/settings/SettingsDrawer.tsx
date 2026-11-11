@@ -1,5 +1,6 @@
 import {
   IconAdjustmentsHorizontal,
+  IconBellOff,
   IconCat,
   IconDeviceDesktop,
   IconEgg,
@@ -11,6 +12,7 @@ import {
   IconSun,
   IconTree,
   IconVolume,
+  IconStairsUp,
   IconX,
 } from '@tabler/icons-react'
 import { Dialog } from 'radix-ui'
@@ -31,6 +33,7 @@ import type {
 import { useUi } from '../../ui/store'
 import { Chips, Section, Segmented, StepSlider, SwitchField } from './controls'
 import { ChordPreview, KeyPreview, RangePreview } from './previews'
+import { Button3D } from '../ui/Button3D'
 import styles from './SettingsDrawer.module.css'
 
 const PRESET_ICONS: Record<PresetId, ReactNode> = {
@@ -63,8 +66,10 @@ export function SettingsDrawer() {
               <IconAdjustmentsHorizontal size={26} aria-hidden="true" />
               {t('settings.title')}
             </Dialog.Title>
-            <Dialog.Close className={styles.close} aria-label={t('settings.close')}>
-              <IconX size={24} aria-hidden="true" />
+            <Dialog.Close asChild>
+              <Button3D variant="ghost" size="sm" aria-label={t('settings.close')}>
+                <IconX size={22} aria-hidden="true" />
+              </Button3D>
             </Dialog.Close>
           </header>
 
@@ -72,6 +77,7 @@ export function SettingsDrawer() {
             {/* Level presets */}
             <section className={styles.presetSection} aria-labelledby="preset-title">
               <h3 id="preset-title" className={styles.presetTitle}>
+                <IconStairsUp size={22} aria-hidden="true" />
                 {t('settings.level')}
               </h3>
               <div
@@ -301,6 +307,15 @@ export function SettingsDrawer() {
                   settings.setSound(on)
                 }}
               />
+              {settings.sound && (
+                <SwitchField
+                  label={t('settings.silentMode')}
+                  hint={t('settings.silentModeHint')}
+                  icon={<IconBellOff size={22} aria-hidden="true" />}
+                  checked={settings.silentMode}
+                  onChange={settings.setSilentMode}
+                />
+              )}
             </Section>
           </div>
         </Dialog.Content>

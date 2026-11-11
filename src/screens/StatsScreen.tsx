@@ -76,7 +76,7 @@ export function StatsScreen() {
   }
 
   return (
-    <div className={styles.screen}>
+    <div className="screen-frame">
       <header className={styles.top}>
         <Button3D variant="ghost" size="sm" onClick={goHome} aria-label={t('stats.back')}>
           <IconArrowLeft size={22} aria-hidden="true" />
@@ -85,128 +85,130 @@ export function StatsScreen() {
         <span />
       </header>
 
-      <main className={styles.main}>
-        {stats.answered === 0 ? (
-          <div className={styles.empty}>
-            <CatMark size={88} />
-            <p>{t('stats.empty')}</p>
-          </div>
-        ) : (
-          <>
-            <section className={styles.overview}>
-              <Tile value={stats.answered} label={t('stats.answered')} />
-              <Tile
-                value={`${pct(stats.firstTry, stats.answered)}%`}
-                label={t('stats.accuracy')}
-              />
-              <Tile
-                value={
-                  <>
-                    <IconFlame size={28} aria-hidden="true" className={styles.flame} />
-                    {stats.bestStreak}
-                  </>
-                }
-                label={t('stats.bestStreak')}
-              />
-              <Tile
-                value={stats.daysPracticed}
-                label={t('stats.days')}
-                sub={
-                  stats.dayStreak > 1
-                    ? t('stats.dayStreak', { count: stats.dayStreak })
-                    : undefined
-                }
-              />
-            </section>
+      <div className="scroll-area">
+        <main className={styles.main}>
+          {stats.answered === 0 ? (
+            <div className={styles.empty}>
+              <CatMark size={88} />
+              <p>{t('stats.empty')}</p>
+            </div>
+          ) : (
+            <>
+              <section className={styles.overview}>
+                <Tile value={stats.answered} label={t('stats.answered')} />
+                <Tile
+                  value={`${pct(stats.firstTry, stats.answered)}%`}
+                  label={t('stats.accuracy')}
+                />
+                <Tile
+                  value={
+                    <>
+                      <IconFlame size={28} aria-hidden="true" className={styles.flame} />
+                      {stats.bestStreak}
+                    </>
+                  }
+                  label={t('stats.bestStreak')}
+                />
+                <Tile
+                  value={stats.daysPracticed}
+                  label={t('stats.days')}
+                  sub={
+                    stats.dayStreak > 1
+                      ? t('stats.dayStreak', { count: stats.dayStreak })
+                      : undefined
+                  }
+                />
+              </section>
 
-            <section className={styles.section}>
-              <h2 className={styles.heading}>{t('stats.tricky')}</h2>
-              {tricky.length === 0 ? (
-                <p className={styles.muted}>{t('stats.trickyEmpty')}</p>
-              ) : (
-                <ul className={styles.tricky}>
-                  {tricky.map((i) => (
-                    <li key={i.key} className={styles.trickyItem}>
-                      <Staff
-                        className={styles.trickyStaff}
-                        clef={i.clef}
-                        notes={i.notes}
-                        label={describe(i)}
-                      />
-                      <span className={styles.trickyName}>{describe(i)}</span>
-                      <span className={styles.muted}>
-                        {t('stats.missed', { missed: i.missed, seen: i.seen })}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-
-            {(noteGrid.treble.length > 0 || noteGrid.bass.length > 0) && (
               <section className={styles.section}>
-                <h2 className={styles.heading}>{t('stats.notes')}</h2>
-                <p className={styles.muted}>{t('stats.notesHint')}</p>
-                {(['treble', 'bass'] as const).map(
-                  (clef) =>
-                    noteGrid[clef].length > 0 && (
-                      <div key={clef} className={styles.clefGroup}>
-                        <h3 className={styles.clefName}>{t(`clefs.${clef}`)}</h3>
-                        <ul className={styles.grid}>
-                          {noteGrid[clef].map((i) => {
-                            const accuracy = pct(i.seen - i.missed, i.seen)
-                            return (
-                              <li
-                                key={i.key}
-                                className={`${styles.cell} ${tier(accuracy)}`}
-                              >
-                                <span className={styles.cellNote}>
-                                  {formatPitchClass(t, i.notes[0])}
-                                  <sub>{i.notes[0].octave}</sub>
-                                </span>
-                                <span className={styles.cellPct}>{accuracy}%</span>
-                              </li>
-                            )
-                          })}
-                        </ul>
-                      </div>
-                    ),
+                <h2 className={styles.heading}>{t('stats.tricky')}</h2>
+                {tricky.length === 0 ? (
+                  <p className={styles.muted}>{t('stats.trickyEmpty')}</p>
+                ) : (
+                  <ul className={styles.tricky}>
+                    {tricky.map((i) => (
+                      <li key={i.key} className={styles.trickyItem}>
+                        <Staff
+                          className={styles.trickyStaff}
+                          clef={i.clef}
+                          notes={i.notes}
+                          label={describe(i)}
+                        />
+                        <span className={styles.trickyName}>{describe(i)}</span>
+                        <span className={styles.muted}>
+                          {t('stats.missed', { missed: i.missed, seen: i.seen })}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </section>
-            )}
 
-            <AlertDialog.Root>
-              <AlertDialog.Trigger asChild>
-                <Button3D variant="ghost" size="sm" className={styles.reset}>
-                  <IconTrash size={18} aria-hidden="true" />
-                  {t('stats.reset')}
-                </Button3D>
-              </AlertDialog.Trigger>
-              <AlertDialog.Portal>
-                <AlertDialog.Overlay className={styles.overlay} />
-                <AlertDialog.Content className={styles.dialog}>
-                  <AlertDialog.Title className={styles.dialogTitle}>
-                    {t('stats.resetTitle')}
-                  </AlertDialog.Title>
-                  <AlertDialog.Description className={styles.muted}>
-                    {t('stats.resetBody')}
-                  </AlertDialog.Description>
-                  <div className={styles.dialogActions}>
-                    <AlertDialog.Cancel asChild>
-                      <Button3D variant="ghost">{t('stats.cancel')}</Button3D>
-                    </AlertDialog.Cancel>
-                    <AlertDialog.Action asChild>
-                      <Button3D variant="error" onClick={stats.reset}>
-                        {t('stats.resetConfirm')}
-                      </Button3D>
-                    </AlertDialog.Action>
-                  </div>
-                </AlertDialog.Content>
-              </AlertDialog.Portal>
-            </AlertDialog.Root>
-          </>
-        )}
-      </main>
+              {(noteGrid.treble.length > 0 || noteGrid.bass.length > 0) && (
+                <section className={styles.section}>
+                  <h2 className={styles.heading}>{t('stats.notes')}</h2>
+                  <p className={styles.muted}>{t('stats.notesHint')}</p>
+                  {(['treble', 'bass'] as const).map(
+                    (clef) =>
+                      noteGrid[clef].length > 0 && (
+                        <div key={clef} className={styles.clefGroup}>
+                          <h3 className={styles.clefName}>{t(`clefs.${clef}`)}</h3>
+                          <ul className={styles.grid}>
+                            {noteGrid[clef].map((i) => {
+                              const accuracy = pct(i.seen - i.missed, i.seen)
+                              return (
+                                <li
+                                  key={i.key}
+                                  className={`${styles.cell} ${tier(accuracy)}`}
+                                >
+                                  <span className={styles.cellNote}>
+                                    {formatPitchClass(t, i.notes[0])}
+                                    <sub>{i.notes[0].octave}</sub>
+                                  </span>
+                                  <span className={styles.cellPct}>{accuracy}%</span>
+                                </li>
+                              )
+                            })}
+                          </ul>
+                        </div>
+                      ),
+                  )}
+                </section>
+              )}
+
+              <AlertDialog.Root>
+                <AlertDialog.Trigger asChild>
+                  <Button3D variant="ghost" size="sm" className={styles.reset}>
+                    <IconTrash size={18} aria-hidden="true" />
+                    {t('stats.reset')}
+                  </Button3D>
+                </AlertDialog.Trigger>
+                <AlertDialog.Portal>
+                  <AlertDialog.Overlay className={styles.overlay} />
+                  <AlertDialog.Content className={styles.dialog}>
+                    <AlertDialog.Title className={styles.dialogTitle}>
+                      {t('stats.resetTitle')}
+                    </AlertDialog.Title>
+                    <AlertDialog.Description className={styles.muted}>
+                      {t('stats.resetBody')}
+                    </AlertDialog.Description>
+                    <div className={styles.dialogActions}>
+                      <AlertDialog.Cancel asChild>
+                        <Button3D variant="ghost">{t('stats.cancel')}</Button3D>
+                      </AlertDialog.Cancel>
+                      <AlertDialog.Action asChild>
+                        <Button3D variant="error" onClick={stats.reset}>
+                          {t('stats.resetConfirm')}
+                        </Button3D>
+                      </AlertDialog.Action>
+                    </div>
+                  </AlertDialog.Content>
+                </AlertDialog.Portal>
+              </AlertDialog.Root>
+            </>
+          )}
+        </main>
+      </div>
     </div>
   )
 }

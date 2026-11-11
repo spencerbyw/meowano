@@ -14,6 +14,11 @@ interface SettingsState {
   catMode: boolean
   confirm: ConfirmMode
   sound: boolean
+  /**
+   * iPhone: play through the ring/silent switch. Needs iOS's "playback" audio
+   * session, which also shows Kiano in the Dynamic Island and pauses other audio.
+   */
+  silentMode: boolean
   preset: PresetId | 'custom'
   practice: PracticeSettings
   /** Questions per round; 0 means unlimited. */
@@ -24,6 +29,7 @@ interface SettingsState {
   setCatMode: (on: boolean) => void
   setConfirm: (mode: ConfirmMode) => void
   setSound: (on: boolean) => void
+  setSilentMode: (on: boolean) => void
   applyPreset: (preset: PresetId) => void
   updatePractice: (patch: Partial<PracticeSettings>) => void
 }
@@ -36,6 +42,7 @@ export const useSettings = create<SettingsState>()(
       catMode: true,
       confirm: 'double',
       sound: true,
+      silentMode: true,
       preset: DEFAULT_PRESET,
       practice: PRESETS[DEFAULT_PRESET],
       quizLength: 10,
@@ -46,6 +53,7 @@ export const useSettings = create<SettingsState>()(
       setCatMode: (catMode) => set({ catMode }),
       setConfirm: (confirm) => set({ confirm }),
       setSound: (sound) => set({ sound }),
+      setSilentMode: (silentMode) => set({ silentMode }),
       applyPreset: (preset) => set({ preset, practice: PRESETS[preset] }),
       updatePractice: (patch) =>
         set((s) => ({ preset: 'custom', practice: { ...s.practice, ...patch } })),

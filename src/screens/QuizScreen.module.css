@@ -1,7 +1,5 @@
 .screen {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
   max-width: var(--content-max);
   margin-inline: auto;
   padding: var(--space-3) var(--space-4) var(--space-5);
@@ -77,12 +75,41 @@
   white-space: nowrap;
 }
 
-/* Layout */
+/* Layout: top bar and answers stay put; only the staff area scrolls, if ever. */
 .main {
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
+}
+
+.staffArea {
+  /* Bleed to the screen edges so the card's shadow isn't clipped by the scroller. */
+  margin: calc(var(--space-3) * -1) calc(var(--space-4) * -1);
+  padding: var(--space-3) var(--space-4);
+}
+
+.staffArea > .staffCard {
+  margin-block: auto;
+}
+
+/* Size the staff by whichever runs out first, width or height, so the whole card
+   always fits above the answers (small phones, landscape). --staff-aspect is set
+   inline from the session's staff size; 115px is roughly the card's header, hint
+   and padding. */
+.staffArea {
+  container-type: size;
+}
+
+.staffIn {
+  margin-top: var(--space-3);
+  max-width: max(120px, calc((100cqh - 115px) * var(--staff-aspect, 1.6)));
+  margin-inline: auto;
+}
+
+.answers {
+  flex-shrink: 0;
 }
 
 .staffCard {
@@ -156,7 +183,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-top: calc(var(--space-2) * -1);
+  margin-top: var(--space-2);
   padding-bottom: var(--space-1);
   font-size: 0.875rem;
   font-weight: 700;
@@ -281,7 +308,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  min-height: 132px;
 }
 
 .feedback {
@@ -329,6 +355,15 @@
   width: 100%;
 }
 
+.footerButtons {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.dontKnow {
+  flex: 1;
+}
+
 /* Landscape: staff on the left, answers on the right. */
 @media (orientation: landscape) and (min-width: 700px) {
   .screen {
@@ -339,9 +374,19 @@
   .main {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
-    align-content: center;
-    align-items: center;
+    grid-template-rows: minmax(0, 1fr);
     gap: var(--space-6);
+  }
+
+  .staffArea {
+    margin-inline: 0;
+    padding-inline: var(--space-2);
+  }
+
+  .answers {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    justify-content: center;
   }
 
   .staffCard {
@@ -358,5 +403,44 @@
 
   .choiceLabel {
     font-size: 1.875rem;
+  }
+}
+
+/* Phones in portrait: the status bar and home indicator eat ~90px, so keep the
+   answers compact and give the staff as much of the height as possible. */
+@media (orientation: portrait) and (max-width: 600px) {
+  .main,
+  .answers,
+  .choices {
+    gap: var(--space-2);
+  }
+
+  .choiceFront {
+    min-height: 64px;
+  }
+
+  .choiceLabel {
+    font-size: 1.5rem;
+  }
+
+  .feedback {
+    min-height: 1.75rem;
+    font-size: 1.125rem;
+  }
+
+  .mascot {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Very short phones (iPhone SE/mini). */
+@media (orientation: portrait) and (max-height: 700px) {
+  .choiceFront {
+    min-height: 58px;
+  }
+
+  .choiceLabel {
+    font-size: 1.375rem;
   }
 }

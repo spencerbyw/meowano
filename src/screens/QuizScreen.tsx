@@ -3,6 +3,7 @@ import {
   IconCheck,
   IconFlag,
   IconFlame,
+  IconHelp,
   IconLoader2,
   IconMusic,
   IconVolume,
@@ -16,6 +17,7 @@ import { SettingsButton } from '../components/settings/SettingsButton'
 import { Staff } from '../components/Staff'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatStaffLabel } from '../music/format'
+import { practiceBand, viewOf } from '../music/staffBand'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import { useStats } from '../stats/store'
@@ -26,11 +28,22 @@ const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 export function QuizScreen() {
   const { t } = useTranslation()
-  const { question, wrongPicks, solved, results, length } = useQuiz()
+  const { question, wrongPicks, solved, results, length, isReturn } = useQuiz()
   const currentStreak = useStats((s) => s.currentStreak)
   const allTimeBest = useStats((s) => s.bestStreak)
-  const { answer, next, finish, goHome } = useQuiz()
+  const { answer, next, skip, finish, goHome } = useQuiz()
   const { confirm, catMode, sound } = useSettings()
+  const practice = useSettings((s) => s.practice)
+  // One staff size for the whole session: tall enough for every note these
+  // settings can produce, and wide enough for the biggest key signature.
+  const staffFit = useMemo(() => {
+    const band = practiceBand(practice)
+    const width =
+      146 +
+      9 * practice.maxKeyAccidentals +
+      (practice.accidentals || practice.kinds.triad ? 12 : 0)
+    return { band, width, aspect: width / viewOf(band).height }
+  }, [practice])
   useWakeLock(true)
   const pianoStatus = useAudioStatus((s) => s.piano)
   // Bumped on each tap of the staff to restart the little "ring" animation.
@@ -45,16 +58,17 @@ export function QuizScreen() {
   // Index awaiting a second tap when "double tap to confirm" is on.
   const [pending, setPending] = useState<number | null>(null)
   const [feedback, setFeedback] = useState<{
-    kind: 'correct' | 'wrong'
+    kind: 'correct' | 'wrong' | 'info'
     text: string
   } | null>(null)
   const [shake, setShake] = useState<number | null>(null)
   const promptRef = useRef<HTMLParagraphElement>(null)
-  const mood: CatMood = !feedback
-    ? 'idle'
-    : feedback.kind === 'correct'
+  const mood: CatMood =
+    feedback?.kind === 'correct'
       ? 'happy'
-      : 'surprised'
+      : feedback?.kind === 'wrong'
+        ? 'surprised'
+        : 'idle'
 
   const staffLabel = useMemo(
     () => (question ? formatStaffLabel(t, question) : ''),
@@ -73,6 +87,24 @@ export function QuizScreen() {
     requestAnimationFrame(() => promptRef.current?.focus())
   }
 
+  const onDontKnow = () => {
+    setPending(null)
+    const outcome = skip()
+    if (outcome === 'deferred') {
+      setFeedback({
+        kind: 'info',
+        text: t(length > 0 ? 'quiz.skipped' : 'quiz.skippedUnlimited'),
+      })
+      requestAnimationFrame(() => promptRef.current?.focus())
+    } else if (outcome === 'gaveUp') {
+      const { label, detail } = formatAnswer(t, question.choices[question.correctIndex])
+      setFeedback({
+        kind: 'info',
+        text: t('quiz.gaveUp', { answer: detail ? `${label} (${detail})` : label }),
+      })
+    }
+  }
+
   const onChoice = (i: number) => {
     if (solved || wrongPicks.includes(i)) return
     if (confirm === 'double' && pending !== i) {
@@ -81,7 +113,7 @@ export function QuizScreen() {
     }
     setPending(null)
     const outcome = answer(i)
-    if (sound && outcome !== 'ignored') playChime(outcome)
+    if (sound && outcome !== 'ignored') void playChime(outcome)
     if (outcome === 'correct') {
       const praise = t(catMode ? 'quiz.praiseCat' : 'quiz.praise', {
         returnObjects: true,
@@ -104,7 +136,7 @@ export function QuizScreen() {
   }
 
   return (
-    <div className={styles.screen}>
+    <div className={`screen-frame ${styles.screen}`}>
       <header className={styles.top}>
         <Button3D variant="ghost" size="sm" onClick={goHome} aria-label={t('quiz.quit')}>
           <IconX size={22} aria-hidden="true" />
@@ -149,70 +181,84 @@ export function QuizScreen() {
             : t('quiz.progressUnlimited', { current })}
           . {t(`quiz.prompt.${question.kind}`)}
         </p>
-        <section className={styles.staffCard}>
-          <div className={styles.cardHead}>
-            <span
-              key={`${mood}-${results.length}-${wrongPicks.length}`}
-              className={[styles.mascot, mood !== 'idle' && styles.react]
-                .filter(Boolean)
-                .join(' ')}
-              aria-hidden="true"
-            >
-              {catMode ? (
-                <CatMark size={44} mood={mood} />
-              ) : (
-                <IconMusic size={28} stroke={2.2} />
-              )}
-            </span>
-            <p ref={promptRef} tabIndex={-1} className={styles.prompt}>
-              {t(`quiz.prompt.${question.kind}`)}
-            </p>
-          </div>
-          {sound ? (
-            <button
-              type="button"
-              className={styles.staffButton}
-              onClick={hear}
-              aria-label={`${staffLabel}. ${t('quiz.hear')}`}
-            >
-              <div key={question.id} className={styles.staffIn}>
-                <Staff
-                  clef={question.clef}
-                  keySignature={question.key}
-                  notes={question.notes}
-                  label={staffLabel}
-                />
-              </div>
+        <div className={`scroll-area ${styles.staffArea}`}>
+          <section className={styles.staffCard}>
+            <div className={styles.cardHead}>
               <span
-                key={`ring-${rings}`}
-                className={[styles.hearHint, rings > 0 && styles.ringing]
+                key={`${mood}-${results.length}-${wrongPicks.length}`}
+                className={[styles.mascot, mood !== 'idle' && styles.react]
                   .filter(Boolean)
                   .join(' ')}
                 aria-hidden="true"
               >
-                {pianoStatus === 'loading' && rings > 0 ? (
-                  <IconLoader2 size={18} className={styles.spin} />
+                {catMode ? (
+                  <CatMark size={40} mood={mood} />
                 ) : (
-                  <IconVolume size={18} />
+                  <IconMusic size={28} stroke={2.2} />
                 )}
-                {pianoStatus === 'loading' && rings > 0
-                  ? t('quiz.loadingPiano')
-                  : pianoStatus === 'error'
-                    ? t('quiz.pianoError')
-                    : t('quiz.hear')}
               </span>
-            </button>
-          ) : (
-            <div key={question.id} className={styles.staffIn}>
-              <Staff
-                clef={question.clef}
-                keySignature={question.key}
-                notes={question.notes}
-                label={staffLabel}
-              />
+              <p ref={promptRef} tabIndex={-1} className={styles.prompt}>
+                {t(`quiz.prompt.${question.kind}`)}
+              </p>
             </div>
-          )}
-        </section>
+            {sound ? (
+              <button
+                type="button"
+                className={styles.staffButton}
+                onClick={hear}
+                aria-label={`${staffLabel}. ${t('quiz.hear')}`}
+              >
+                <div
+                  key={question.id}
+                  className={styles.staffIn}
+                  style={{ '--staff-aspect': staffFit.aspect } as React.CSSProperties}
+                >
+                  <Staff
+                    clef={question.clef}
+                    keySignature={question.key}
+                    notes={question.notes}
+                    band={staffFit.band}
+                    width={staffFit.width}
+                    label={staffLabel}
+                  />
+                </div>
+                <span
+                  key={`ring-${rings}`}
+                  className={[styles.hearHint, rings > 0 && styles.ringing]
+                    .filter(Boolean)
+                    .join(' ')}
+                  aria-hidden="true"
+                >
+                  {pianoStatus === 'loading' && rings > 0 ? (
+                    <IconLoader2 size={18} className={styles.spin} />
+                  ) : (
+                    <IconVolume size={18} />
+                  )}
+                  {pianoStatus === 'loading' && rings > 0
+                    ? t('quiz.loadingPiano')
+                    : pianoStatus === 'error'
+                      ? t('quiz.pianoError')
+                      : t('quiz.hear')}
+                </span>
+              </button>
+            ) : (
+              <div
+                key={question.id}
+                className={styles.staffIn}
+                style={{ '--staff-aspect': staffFit.aspect } as React.CSSProperties}
+              >
+                <Staff
+                  clef={question.clef}
+                  keySignature={question.key}
+                  notes={question.notes}
+                  band={staffFit.band}
+                  width={staffFit.width}
+                  label={staffLabel}
+                />
+              </div>
+            )}
+          </section>
+        </div>
 
         <section className={styles.answers}>
           <ol className={styles.choices}>
@@ -279,13 +325,15 @@ export function QuizScreen() {
                 >
                   {feedback.kind === 'correct' ? (
                     <IconCheck size={22} stroke={3} aria-hidden="true" />
-                  ) : (
+                  ) : feedback.kind === 'wrong' ? (
                     <IconX size={22} stroke={3} aria-hidden="true" />
-                  )}
+                  ) : null}
                   {feedback.text}
                 </span>
               ) : pending !== null ? (
                 t('quiz.confirmHint')
+              ) : isReturn ? (
+                t('quiz.returning')
               ) : null}
             </p>
 
@@ -295,18 +343,23 @@ export function QuizScreen() {
                 <IconArrowRight size={24} aria-hidden="true" />
               </Button3D>
             ) : (
-              length === 0 &&
-              results.length > 0 && (
+              <div className={styles.footerButtons}>
                 <Button3D
                   variant="ghost"
-                  size="sm"
-                  className={styles.next}
-                  onClick={finish}
+                  size="lg"
+                  className={styles.dontKnow}
+                  onClick={onDontKnow}
                 >
-                  <IconFlag size={18} aria-hidden="true" />
-                  {t('quiz.end')}
+                  <IconHelp size={24} aria-hidden="true" />
+                  {t('quiz.dontKnow')}
                 </Button3D>
-              )
+                {length === 0 && results.length > 0 && (
+                  <Button3D variant="ghost" size="lg" onClick={finish}>
+                    <IconFlag size={22} aria-hidden="true" />
+                    {t('quiz.end')}
+                  </Button3D>
+                )}
+              </div>
             )}
           </div>
         </section>
