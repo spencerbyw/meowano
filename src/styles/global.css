@@ -18,8 +18,6 @@ body {
 }
 
 html {
-  /* Safari tints its bars from the page background, so set it on the root too. */
-  background: var(--color-bg);
   /* No double-tap-to-zoom anywhere: quick repeated taps are part of the game. */
   touch-action: manipulation;
   -webkit-text-size-adjust: 100%;
@@ -33,8 +31,7 @@ body {
   font-size: 1.0625rem;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  /* No background transition: Safari samples the page colour for its status bar
-     and URL bar the moment the theme changes, and a fade would hand it the old one. */
+  transition: background-color 200ms ease;
   /* App, not page: no text selection or long-press callouts on taps. */
   -webkit-user-select: none;
   user-select: none;
@@ -42,7 +39,6 @@ body {
 }
 
 #root {
-  background: var(--color-bg);
   /* Safe areas (notch/status bar, home indicator), as variables so a screen can
      paint its background underneath them with .bleed. */
   --safe-top: env(safe-area-inset-top);
