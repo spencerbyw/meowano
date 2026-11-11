@@ -26,6 +26,8 @@ import {
 export interface PitchClass {
   letter: Letter
   acc: Accidental
+  /** Only set when answers name the octave (the "octaves" setting). */
+  octave?: number
 }
 
 export type Answer =
@@ -58,14 +60,19 @@ export interface GenerateOptions {
 // ---------------------------------------------------------------------------
 // Helpers
 
-const pc = (p: Pitch): PitchClass => ({ letter: p.letter, acc: p.acc })
+const pc = (p: Pitch, withOctave = false): PitchClass =>
+  withOctave
+    ? { letter: p.letter, acc: p.acc, octave: p.octave }
+    : { letter: p.letter, acc: p.acc }
+
+const pcId = (p: PitchClass) => `${p.letter}${p.acc}${p.octave ?? ''}`
 
 export const answerId = (a: Answer): string => {
   switch (a.type) {
     case 'note':
-      return `note:${a.note.letter}${a.note.acc}`
+      return `note:${pcId(a.note)}`
     case 'dyad':
-      return `dyad:${a.interval}:${a.notes.map((n) => n.letter + n.acc).join('-')}`
+      return `dyad:${a.interval}:${a.notes.map(pcId).join('-')}`
     case 'triad':
       return `triad:${a.root.letter}${a.root.acc}:${a.quality}`
   }
@@ -156,7 +163,7 @@ function noteCandidates(range: StepRange, key: Key, s: PracticeSettings, clef: C
         statKey: `${clef}:note:${pitchName(p)}`,
         kind: 'note',
         notes: [p],
-        answer: { type: 'note', note: pc(p) },
+        answer: { type: 'note', note: pc(p, s.octaves) },
         weight,
       })
     }
@@ -173,7 +180,11 @@ function dyadCandidates(range: StepRange, key: Key, s: PracticeSettings, clef: C
       statKey: `${clef}:dyad:${pitchName(low)}-${pitchName(high)}`,
       kind: 'dyad',
       notes: [low, high],
-      answer: { type: 'dyad', interval, notes: [pc(low), pc(high)] },
+      answer: {
+        type: 'dyad',
+        interval,
+        notes: [pc(low, s.octaves), pc(high, s.octaves)],
+      },
       weight,
     })
   }
@@ -236,7 +247,7 @@ function triadCandidates(range: StepRange, key: Key, s: PracticeSettings, clef: 
             type: 'triad',
             root: pc(root),
             quality: t.quality,
-            notes: chord.map(pc),
+            notes: chord.map((n) => pc(n)),
           },
           weight: inversion === 0 ? weight : weight * 0.7,
           triad: { root, quality: t.quality, inversion },
@@ -255,19 +266,19 @@ function diatonicTriadAnswer(step: number, key: Key): Answer | null {
   const quality = DIATONIC_QUALITIES[degreeOf(root.letter, key)]
   const chord = buildTriad(root, quality)
   if (!chord) return null
-  return { type: 'triad', root: pc(root), quality, notes: chord.map(pc) }
+  return { type: 'triad', root: pc(root), quality, notes: chord.map((n) => pc(n)) }
 }
 
 function triadAnswer(root: Pitch, quality: TriadQuality, key: Key): Answer | null {
   const chord = buildTriad(root, quality)
   if (!chord || chord.some((n) => isAwkward(n, key))) return null
-  return { type: 'triad', root: pc(root), quality, notes: chord.map(pc) }
+  return { type: 'triad', root: pc(root), quality, notes: chord.map((n) => pc(n)) }
 }
 
-function dyadAnswer(low: Pitch, high: Pitch): Answer | null {
+function dyadAnswer(low: Pitch, high: Pitch, withOctave: boolean): Answer | null {
   const interval = intervalName(low, high)
   if (!interval || !COMMON_INTERVALS.has(interval)) return null
-  return { type: 'dyad', interval, notes: [pc(low), pc(high)] }
+  return { type: 'dyad', interval, notes: [pc(low, withOctave), pc(high, withOctave)] }
 }
 
 const QUALITY_SWAPS: Partial<Record<TriadQuality, TriadQuality>> = {
@@ -282,24 +293,29 @@ const QUALITY_SWAPS: Partial<Record<TriadQuality, TriadQuality>> = {
 function distractorPool(c: Candidate, key: Key, clef: Clef, s: PracticeSettings) {
   // Reading a treble note as if it were bass clef shifts it up two letters (and vice versa).
   const clefMisread = clef === 'treble' ? 2 : -2
+  // With octaves, the same misreading lands an octave and a 6th away (treble E4 is
+  // bass G2), which spells the same letter.
+  const octaves = s.octaves
+  const misreadStep = octaves ? (clef === 'treble' ? -12 : 12) : clefMisread
   const pool: Weighted<Answer | null>[] = []
+  const noteAnswer = (p: Pitch): Answer => ({ type: 'note', note: pc(p, octaves) })
+  const dyad = (low: Pitch, high: Pitch) => dyadAnswer(low, high, octaves)
 
   if (c.kind === 'note') {
     const p = c.notes[0]
     const step = stepOf(p)
-    pool.push({ item: { type: 'note', note: pc(inKey(step + 1, key)) }, weight: 3 })
-    pool.push({ item: { type: 'note', note: pc(inKey(step - 1, key)) }, weight: 3 })
-    pool.push({
-      item: { type: 'note', note: pc(inKey(step + clefMisread, key)) },
-      weight: 2,
-    })
-    pool.push({
-      item: { type: 'note', note: pc(inKey(step - clefMisread, key)) },
-      weight: 1,
-    })
+    pool.push({ item: noteAnswer(inKey(step + 1, key)), weight: 3 })
+    pool.push({ item: noteAnswer(inKey(step - 1, key)), weight: 3 })
+    pool.push({ item: noteAnswer(inKey(step + misreadStep, key)), weight: 2 })
+    pool.push({ item: noteAnswer(inKey(step - clefMisread, key)), weight: 1 })
     // Missed the accidental: same letter as the key signature spells it.
     if (p.acc !== key.accidentals[p.letter]) {
-      pool.push({ item: { type: 'note', note: pc(inKey(step, key)) }, weight: 5 })
+      pool.push({ item: noteAnswer(inKey(step, key)), weight: 5 })
+    }
+    // Right note, wrong octave.
+    if (octaves) {
+      pool.push({ item: noteAnswer({ ...p, octave: p.octave + 1 }), weight: 4 })
+      pool.push({ item: noteAnswer({ ...p, octave: p.octave - 1 }), weight: 4 })
     }
   }
 
@@ -308,21 +324,25 @@ function distractorPool(c: Candidate, key: Key, clef: Clef, s: PracticeSettings)
     const lo = stepOf(low)
     const hi = stepOf(high)
     for (const d of [1, -1]) {
-      pool.push({ item: dyadAnswer(inKey(lo + d, key), inKey(hi + d, key)), weight: 3 })
-      pool.push({ item: dyadAnswer(low, inKey(hi + d, key)), weight: 3 })
+      pool.push({ item: dyad(inKey(lo + d, key), inKey(hi + d, key)), weight: 3 })
+      pool.push({ item: dyad(low, inKey(hi + d, key)), weight: 3 })
+      // Right notes, wrong octave.
+      if (octaves) {
+        const shift = (p: Pitch) => ({ ...p, octave: p.octave + d })
+        pool.push({ item: dyad(shift(low), shift(high)), weight: 3 })
+      }
     }
     pool.push({
-      item: dyadAnswer(inKey(lo + clefMisread, key), inKey(hi + clefMisread, key)),
+      item: dyad(inKey(lo + misreadStep, key), inKey(hi + misreadStep, key)),
       weight: 2,
     })
     if (s.accidentals) {
       // Same letters, different quality (e.g. Major 3rd vs Minor 3rd).
       const keyHigh = inKey(hi, key)
-      if (keyHigh.acc !== high.acc)
-        pool.push({ item: dyadAnswer(low, keyHigh), weight: 5 })
+      if (keyHigh.acc !== high.acc) pool.push({ item: dyad(low, keyHigh), weight: 5 })
       else
         chromaticVariants(high, key).forEach((v) =>
-          pool.push({ item: dyadAnswer(low, v), weight: 2 }),
+          pool.push({ item: dyad(low, v), weight: 2 }),
         )
     }
   }

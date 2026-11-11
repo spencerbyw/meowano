@@ -210,6 +210,13 @@ export function SettingsDrawer() {
                 onChange={(accidentals) => updatePractice({ accidentals })}
               />
 
+              <SwitchField
+                label={t('settings.octaves')}
+                hint={t('settings.octavesHint')}
+                checked={p.octaves}
+                onChange={(octaves) => updatePractice({ octaves })}
+              />
+
               {p.kinds.dyad && (
                 <Chips
                   label={t('settings.intervals')}

@@ -125,6 +125,8 @@ const en = {
     flats: '♭ Flats',
     accidentals: 'Extra accidentals',
     accidentalsHint: 'Notes outside the key, written with ♯, ♭ or ♮',
+    octaves: 'Name the octave',
+    octavesHint: 'Answer C4 instead of C (middle C is C4)',
     intervals: 'Intervals',
     intervalsHint: 'Which distances to use for two-note questions',
     intervalNames: {
@@ -159,7 +161,7 @@ const en = {
     howMany: 'How many questions?',
     unlimited: 'Unlimited',
     unlimitedShort: '∞',
-    level: 'Level',
+    level: 'Difficulty level',
     play: 'Let’s play!',
   },
   quiz: {

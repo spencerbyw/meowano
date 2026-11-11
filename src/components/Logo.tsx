@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import styles from './Logo.module.css'
 
 export type CatMood = 'idle' | 'happy' | 'surprised'
@@ -99,6 +100,12 @@ interface LogoProps {
   onCatClick?: () => void
   catLabel?: string
   catClassName?: string
+  /**
+   * Make the word an <h1> (with `children` inside it). Keeps the cat button out of
+   * the heading, so it doesn't read as "Pet the cat Kiano".
+   */
+  asHeading?: boolean
+  children?: ReactNode
 }
 
 export function Logo({
@@ -107,7 +114,10 @@ export function Logo({
   onCatClick,
   catLabel,
   catClassName,
+  asHeading,
+  children,
 }: LogoProps) {
+  const Word = asHeading ? 'h1' : 'span'
   const cat = <CatMark size={size === 'lg' ? 72 : 36} mood={mood} />
   return (
     <span className={`${styles.logo} ${styles[size]}`}>
@@ -123,7 +133,10 @@ export function Logo({
       ) : (
         cat
       )}
-      <span className={styles.word}>Kiano</span>
+      <Word className={styles.word}>
+        Kiano
+        {children}
+      </Word>
     </span>
   )
 }
