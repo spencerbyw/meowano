@@ -31,6 +31,10 @@
           theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         }
         document.documentElement.dataset.theme = theme
+        // Match the browser chrome to the theme from the first paint.
+        document
+          .querySelector('meta[name="theme-color"]')
+          .setAttribute('content', theme === 'dark' ? '#1e1a2b' : '#fff8f1')
       })()
     </script>
   </head>

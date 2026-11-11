@@ -12,9 +12,13 @@ export function useApplyTheme() {
     const apply = () => {
       const resolved = theme === 'system' ? (media.matches ? 'dark' : 'light') : theme
       document.documentElement.dataset.theme = resolved
-      document
-        .querySelector('meta[name="theme-color"]')
-        ?.setAttribute('content', THEME_COLORS[resolved])
+      // Replace the tag rather than editing it: iOS Safari doesn't always notice
+      // an edited theme-color, but does pick up a new one.
+      document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.remove())
+      const meta = document.createElement('meta')
+      meta.name = 'theme-color'
+      meta.content = THEME_COLORS[resolved]
+      document.head.append(meta)
     }
     apply()
     if (theme !== 'system') return
