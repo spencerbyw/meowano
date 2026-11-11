@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { playChime, playNotes, useAudioStatus } from '../audio/engine'
 import { CatMark, type CatMood } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
+import { PianoKeys } from '../components/PianoKeys'
 import { Staff } from '../components/Staff'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatStaffLabel } from '../music/format'
@@ -257,6 +258,7 @@ export function QuizScreen() {
                 />
               </div>
             )}
+            {solved && <PianoKeys notes={question.notes} t={t} />}
           </section>
         </div>
 
