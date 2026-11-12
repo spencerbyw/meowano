@@ -47,13 +47,32 @@ const EMPTY = {
   items: {},
 }
 
+let askedToKeep = false
+
+/**
+ * Ask the browser not to clear saved progress when the device runs low on space.
+ * Safari and Chrome decide quietly (an app added to the Home Screen gets it);
+ * Firefox may ask. Runs on the first answer, so there's something worth keeping.
+ */
+function keepStatsSafe() {
+  if (askedToKeep) return
+  askedToKeep = true
+  const storage = navigator.storage
+  if (!storage?.persist) return
+  void storage
+    .persisted()
+    .then((kept) => kept || storage.persist())
+    .catch(() => undefined)
+}
+
 /** Practice history, kept only on this device (localStorage, no accounts). */
 export const useStats = create<StatsState>()(
   persist(
     (set) => ({
       ...EMPTY,
 
-      record: (statKey, firstTry) =>
+      record: (statKey, firstTry) => {
+        keepStatsSafe()
         set((s) => {
           const today = localDay()
           const newDay = s.lastDay !== today
@@ -80,7 +99,8 @@ export const useStats = create<StatsState>()(
               },
             },
           }
-        }),
+        })
+      },
 
       reset: () => set(EMPTY),
     }),

@@ -5,8 +5,12 @@ import type { Accidental, Key, Pitch } from './theory'
 export const formatPitchClass = (t: TFunction, p: PitchClass | Pitch) =>
   `${t(`notes.${p.letter}`)}${t(`accidentals.${p.acc}`)}`
 
+/** An answer's note: "F♯", or "F♯4" when answers name the octave. */
+const formatAnswerNote = (t: TFunction, p: PitchClass) =>
+  `${formatPitchClass(t, p)}${p.octave ?? ''}`
+
 const joinNotes = (t: TFunction, notes: PitchClass[]) =>
-  notes.map((n) => formatPitchClass(t, n)).join('–')
+  notes.map((n) => formatAnswerNote(t, n)).join('–')
 
 /** Main label + optional detail line for an answer button. */
 export function formatAnswer(
@@ -15,7 +19,7 @@ export function formatAnswer(
 ): { label: string; detail?: string } {
   switch (a.type) {
     case 'note':
-      return { label: formatPitchClass(t, a.note) }
+      return { label: formatAnswerNote(t, a.note) }
     case 'dyad':
       return {
         label: t(`intervals.${a.interval}` as 'intervals.M3'),

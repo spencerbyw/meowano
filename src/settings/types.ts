@@ -32,6 +32,8 @@ export interface PracticeSettings {
   inversions: boolean
   /** Add sus2, sus4, augmented and diminished triads on any scale degree. */
   extraChords: boolean
+  /** Answers name the octave too ("C4" rather than "C"; middle C is C4). */
+  octaves: boolean
 }
 
 export type ThemeSetting = 'system' | 'light' | 'dark'

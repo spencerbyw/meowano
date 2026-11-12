@@ -58,6 +58,18 @@ export const useSettings = create<SettingsState>()(
       updatePractice: (patch) =>
         set((s) => ({ preset: 'custom', practice: { ...s.practice, ...patch } })),
     }),
-    { name: 'kiano-settings', version: 1 },
+    {
+      name: 'kiano-settings',
+      version: 2,
+      migrate: (saved, version) => {
+        const s = saved as Partial<SettingsState>
+        // v2 added `octaves`: take it from the saved level, or off for a custom mix.
+        if (version < 2 && s.practice) {
+          const preset = s.preset && s.preset !== 'custom' ? PRESETS[s.preset] : null
+          s.practice = { ...s.practice, octaves: preset?.octaves ?? false }
+        }
+        return s as SettingsState
+      },
+    },
   ),
 )

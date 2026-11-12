@@ -37,18 +37,20 @@ export function StartScreen() {
       <SettingsButton className={styles.settings} />
       <div className="scroll-area">
         <main className={styles.main}>
-          <h1 className={styles.hero}>
+          <div className={styles.hero}>
             <Logo
+              asHeading
               mood={pet.happy ? 'happy' : 'idle'}
               onCatClick={pet.onPet}
               catLabel={t('app.petCat')}
               catClassName={
                 pet.pets === 0 ? undefined : pet.pets % 2 ? styles.purrA : styles.purrB
               }
-            />
-            <span className="visually-hidden"> — {t('app.tagline')}</span>
+            >
+              <span className="visually-hidden"> — {t('app.tagline')}</span>
+            </Logo>
             <Splash className={styles.splash} />
-          </h1>
+          </div>
 
           <section className={styles.panel}>
             <h2 id="length-label" className={styles.label}>

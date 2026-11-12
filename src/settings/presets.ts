@@ -14,6 +14,7 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
     triadSet: 'primary',
     inversions: false,
     extraChords: false,
+    octaves: false,
   },
   beginner: {
     clef: 'both',
@@ -28,6 +29,7 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
     triadSet: 'primary',
     inversions: false,
     extraChords: false,
+    octaves: false,
   },
   intermediate: {
     clef: 'both',
@@ -42,6 +44,7 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
     triadSet: 'primary',
     inversions: false,
     extraChords: false,
+    octaves: false,
   },
   experienced: {
     clef: 'both',
@@ -56,6 +59,7 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
     triadSet: 'diatonic',
     inversions: true,
     extraChords: false,
+    octaves: true,
   },
   anything: {
     clef: 'both',
@@ -70,6 +74,7 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
     triadSet: 'diatonic',
     inversions: true,
     extraChords: true,
+    octaves: true,
   },
 }
 

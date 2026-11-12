@@ -36,6 +36,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // Each device only uses one or two iOS launch screens, so don't precache all 76.
+        globIgnores: ['splash/**'],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
     }),
