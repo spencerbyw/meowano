@@ -499,18 +499,25 @@
   animation: keys-open 360ms var(--ease-out) 250ms both;
 }
 
+/* The room opens first; the keys fade in as it finishes, with a little lift. */
 .keysReveal > * {
   min-height: 0;
   overflow: hidden;
+  animation: keys-fade 500ms ease-out 450ms both;
 }
 
 @keyframes keys-open {
   from {
     grid-template-rows: 0fr;
-    opacity: 0;
   }
   to {
     grid-template-rows: 1fr;
-    opacity: 1;
+  }
+}
+
+@keyframes keys-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
   }
 }
