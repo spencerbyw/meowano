@@ -15,6 +15,11 @@ const NATURAL = [0, 2, 4, 5, 7, 9, 11]
 const HAS_BLACK_ABOVE = [true, true, false, true, true, true, false]
 const MIDDLE_C = 60
 
+/** A key: square along the top (where it meets the keyboard), rounded at the bottom. */
+const keyPath = (x: number, top: number, w: number, bottom: number, r: number) =>
+  `M${x} ${top}H${x + w}V${bottom - r}Q${x + w} ${bottom} ${x + w - r} ${bottom}` +
+  `H${x + r}Q${x} ${bottom} ${x} ${bottom - r}Z`
+
 /** A small keyboard centred on the question's notes, with those keys lit up. */
 export function PianoKeys({ notes, t }: { notes: Pitch[]; t: TFunction }) {
   const lit = new Map(notes.map((p) => [midiOf(p), p]))
@@ -33,13 +38,9 @@ export function PianoKeys({ notes, t }: { notes: Pitch[]; t: TFunction }) {
     const x = i * WHITE_W
     const note = lit.get(midi)
     whites.push(
-      <rect
+      <path
         key={midi}
-        x={x + 0.5}
-        y={0.5}
-        width={WHITE_W - 1}
-        height={WHITE_H}
-        rx={3}
+        d={keyPath(x + 0.5, 0.5, WHITE_W - 1, WHITE_H, 3)}
         className={note ? styles.whiteLit : styles.white}
       />,
     )
@@ -68,13 +69,9 @@ export function PianoKeys({ notes, t }: { notes: Pitch[]; t: TFunction }) {
       const bnote = lit.get(midi + 1)
       const bx = x + WHITE_W - BLACK_W / 2
       blacks.push(
-        <rect
+        <path
           key={midi + 1}
-          x={bx}
-          y={0.5}
-          width={BLACK_W}
-          height={BLACK_H}
-          rx={2}
+          d={keyPath(bx, 0, BLACK_W, BLACK_H, 2)}
           className={bnote ? styles.blackLit : styles.black}
         />,
       )

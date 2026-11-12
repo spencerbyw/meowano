@@ -1,7 +1,8 @@
 .keys {
   display: block;
   width: 100%;
-  max-width: 360px;
+  /* The quiz sets --keys-w to share the card's height with the staff. */
+  max-width: var(--keys-w, 360px);
   margin: var(--space-2) auto 0;
   animation: rise 360ms var(--ease-out);
 }

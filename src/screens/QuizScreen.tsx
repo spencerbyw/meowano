@@ -183,7 +183,11 @@ export function QuizScreen() {
           . {t(`quiz.prompt.${question.kind}`)}
         </p>
         <div className={`scroll-area ${styles.staffArea}`}>
-          <section className={styles.staffCard}>
+          <section
+            className={[styles.staffCard, solved && styles.revealed]
+              .filter(Boolean)
+              .join(' ')}
+          >
             <div className={styles.cardHead}>
               <span
                 key={`${mood}-${results.length}-${wrongPicks.length}`}

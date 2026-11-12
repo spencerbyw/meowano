@@ -97,14 +97,27 @@
 /* Size the staff by whichever runs out first, width or height, so the whole card
    always fits above the answers (small phones, landscape). --staff-aspect is set
    inline from the session's staff size; 115px is roughly the card's header, hint
-   and padding. */
+   and padding. Once answered, the keyboard (PianoKeys, 341 × 93) takes up to 40%
+   of that height and the staff shrinks into the rest. */
 .staffArea {
   container-type: size;
 }
 
+.staffCard {
+  --keys-h: 0px;
+}
+
+.staffCard.revealed {
+  --keys-w: min(100cqw - 32px, 360px, (100cqh - 115px) * 0.4 * 341 / 93);
+  --keys-h: calc(var(--keys-w) * 93 / 341 + var(--space-2));
+}
+
 .staffIn {
   margin-top: var(--space-3);
-  max-width: max(120px, calc((100cqh - 115px) * var(--staff-aspect, 1.6)));
+  max-width: max(
+    100px,
+    calc((100cqh - 115px - var(--keys-h)) * var(--staff-aspect, 1.6))
+  );
   margin-inline: auto;
 }
 
@@ -216,7 +229,9 @@
 }
 
 .staffIn {
-  transition: transform 120ms ease;
+  transition:
+    transform 120ms ease,
+    max-width 320ms var(--ease-out);
   animation: staff-in 450ms var(--ease-spring) both;
 }
 
