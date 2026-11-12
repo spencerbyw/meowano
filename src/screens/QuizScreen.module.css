@@ -91,7 +91,10 @@
 }
 
 .staffArea > .staffCard {
-  margin-block: auto;
+  /* Centred while answering; once answered, --card-top keeps it where it was so it
+     doesn't slide down as the other answers fold away (see QuizScreen). */
+  margin-top: var(--card-top, auto);
+  margin-bottom: auto;
 }
 
 /* Size the staff by whichever runs out first, width or height, so the whole card
@@ -406,6 +409,11 @@
 @media (orientation: landscape) and (min-width: 700px) {
   .screen {
     max-width: 1240px;
+  }
+
+  /* Answers sit beside the staff here, so the card can stay centred as it grows. */
+  .staffArea > .staffCard {
+    margin-top: auto;
   }
 
   /* Staff gets the bigger share; both columns sit centred in the space below the top bar. */

@@ -47,15 +47,26 @@ export function QuizScreen() {
   }, [practice])
   useWakeLock(true)
   // Folding away the other answers frees up height, which would let the staff grow
-  // once answered. Hold it at the size it had while she was answering.
+  // and the centred card slide down once answered. Hold both where they were while
+  // she was answering.
   const staffRef = useRef<HTMLDivElement>(null)
-  const [staffCap, setStaffCap] = useState<number | null>(null)
+  const cardRef = useRef<HTMLElement>(null)
+  const [held, setHeld] = useState<{ staff: number; top: number } | null>(null)
   useLayoutEffect(() => {
-    setStaffCap(solved ? (staffRef.current?.offsetWidth ?? null) : null)
+    const staff = staffRef.current
+    const card = cardRef.current
+    const area = card?.parentElement
+    if (!solved || !staff || !card || !area) return setHeld(null)
+    const top =
+      card.getBoundingClientRect().top -
+      area.getBoundingClientRect().top -
+      parseFloat(getComputedStyle(area).paddingTop) +
+      area.scrollTop
+    setHeld({ staff: staff.offsetWidth, top })
   }, [solved])
   const staffStyle = {
     '--staff-aspect': staffFit.aspect,
-    ...(staffCap ? { '--staff-cap': `${staffCap}px` } : {}),
+    ...(held ? { '--staff-cap': `${held.staff}px` } : {}),
   } as React.CSSProperties
   const pianoStatus = useAudioStatus((s) => s.piano)
   // Bumped on each tap of the staff to restart the little "ring" animation.
@@ -194,7 +205,15 @@ export function QuizScreen() {
           . {t(`quiz.prompt.${question.kind}`)}
         </p>
         <div className={`scroll-area ${styles.staffArea}`}>
-          <section className={styles.staffCard}>
+          <section
+            ref={cardRef}
+            className={styles.staffCard}
+            style={
+              held
+                ? ({ '--card-top': `${held.top}px` } as React.CSSProperties)
+                : undefined
+            }
+          >
             <div className={styles.cardHead}>
               <span
                 key={`${mood}-${results.length}-${wrongPicks.length}`}
