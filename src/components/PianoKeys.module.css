@@ -1,0 +1,40 @@
+.keys {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  margin: var(--space-2) auto 0;
+}
+
+.white {
+  fill: #fffdfb;
+  stroke: var(--color-staff-line);
+  stroke-width: 1;
+}
+
+.whiteLit {
+  fill: var(--color-primary);
+  stroke: var(--color-primary-edge);
+  stroke-width: 1;
+}
+
+.black {
+  fill: #3b2f4a;
+}
+
+.blackLit {
+  fill: var(--color-primary-edge);
+}
+
+.label {
+  font: 800 11px var(--font-body);
+  text-anchor: middle;
+  fill: var(--color-primary-edge);
+}
+
+:root[data-theme='dark'] .label {
+  fill: var(--color-primary);
+}
+
+.dot {
+  fill: var(--color-staff-line);
+}

@@ -9,11 +9,12 @@ import {
   IconVolume,
   IconX,
 } from '@tabler/icons-react'
-import { useMemo, useRef, useState } from 'react'
+import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { playChime, playNotes, useAudioStatus } from '../audio/engine'
 import { CatMark, type CatMood } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
+import { PianoKeys } from '../components/PianoKeys'
 import { Staff } from '../components/Staff'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatStaffLabel } from '../music/format'
@@ -45,6 +46,28 @@ export function QuizScreen() {
     return { band, width, aspect: width / viewOf(band).height }
   }, [practice])
   useWakeLock(true)
+  // Folding away the other answers frees up height, which would let the staff grow
+  // and the centred card slide down once answered. Hold both where they were while
+  // she was answering.
+  const staffRef = useRef<HTMLDivElement>(null)
+  const cardRef = useRef<HTMLElement>(null)
+  const [held, setHeld] = useState<{ staff: number; top: number } | null>(null)
+  useLayoutEffect(() => {
+    const staff = staffRef.current
+    const card = cardRef.current
+    const area = card?.parentElement
+    if (!solved || !staff || !card || !area) return setHeld(null)
+    const top =
+      card.getBoundingClientRect().top -
+      area.getBoundingClientRect().top -
+      parseFloat(getComputedStyle(area).paddingTop) +
+      area.scrollTop
+    setHeld({ staff: staff.offsetWidth, top })
+  }, [solved])
+  const staffStyle = {
+    '--staff-aspect': staffFit.aspect,
+    ...(held ? { '--staff-cap': `${held.staff}px` } : {}),
+  } as React.CSSProperties
   const pianoStatus = useAudioStatus((s) => s.piano)
   // Bumped on each tap of the staff to restart the little "ring" animation.
   const [rings, setRings] = useState(0)
@@ -182,7 +205,15 @@ export function QuizScreen() {
           . {t(`quiz.prompt.${question.kind}`)}
         </p>
         <div className={`scroll-area ${styles.staffArea}`}>
-          <section className={styles.staffCard}>
+          <section
+            ref={cardRef}
+            className={styles.staffCard}
+            style={
+              held
+                ? ({ '--card-top': `${held.top}px` } as React.CSSProperties)
+                : undefined
+            }
+          >
             <div className={styles.cardHead}>
               <span
                 key={`${mood}-${results.length}-${wrongPicks.length}`}
@@ -210,8 +241,9 @@ export function QuizScreen() {
               >
                 <div
                   key={question.id}
+                  ref={staffRef}
                   className={styles.staffIn}
-                  style={{ '--staff-aspect': staffFit.aspect } as React.CSSProperties}
+                  style={staffStyle}
                 >
                   <Staff
                     clef={question.clef}
@@ -244,8 +276,9 @@ export function QuizScreen() {
             ) : (
               <div
                 key={question.id}
+                ref={staffRef}
                 className={styles.staffIn}
-                style={{ '--staff-aspect': staffFit.aspect } as React.CSSProperties}
+                style={staffStyle}
               >
                 <Staff
                   clef={question.clef}
@@ -255,6 +288,13 @@ export function QuizScreen() {
                   width={staffFit.width}
                   label={staffLabel}
                 />
+              </div>
+            )}
+            {solved && (
+              <div className={styles.keysReveal}>
+                <div>
+                  <PianoKeys notes={question.notes} t={t} />
+                </div>
               </div>
             )}
           </section>
@@ -267,44 +307,51 @@ export function QuizScreen() {
               const variant = variantFor(i)
               const dimmed = solved && i !== question.correctIndex
               return (
-                <li key={`${question.id}-${i}`}>
-                  <Button3D
-                    variant={variant}
-                    size="lg"
-                    className={[
-                      styles.choice,
-                      dimmed && styles.dimmed,
-                      shake === i && variant === 'error' && styles.shake,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    frontClassName={styles.choiceFront}
-                    pressed={variant === 'error' || variant === 'success'}
-                    disabled={solved || wrongPicks.includes(i)}
-                    aria-describedby={pending === i ? 'confirm-hint' : undefined}
-                    onClick={() => onChoice(i)}
-                    onAnimationEnd={() => setShake(null)}
-                  >
-                    <span className={styles.choiceIcon} aria-hidden="true">
-                      {variant === 'success' && <IconCheck size={28} stroke={3} />}
-                      {variant === 'error' && <IconX size={28} stroke={3} />}
-                    </span>
-                    <span className={styles.choiceText}>
-                      <span className={styles.choiceLabel}>{label}</span>
-                      {detail && <span className={styles.choiceDetail}>{detail}</span>}
-                    </span>
-                    <span className={styles.choiceIcon}>
-                      {variant === 'pending' && (
-                        <span className={styles.sure}>{t('quiz.confirm')}</span>
+                <li
+                  key={`${question.id}-${i}`}
+                  className={[styles.slot, dimmed && styles.gone]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <div className={styles.slotInner}>
+                    <Button3D
+                      variant={variant}
+                      size="lg"
+                      className={[
+                        styles.choice,
+                        dimmed && styles.dimmed,
+                        shake === i && variant === 'error' && styles.shake,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      frontClassName={styles.choiceFront}
+                      pressed={variant === 'error' || variant === 'success'}
+                      disabled={solved || wrongPicks.includes(i)}
+                      aria-describedby={pending === i ? 'confirm-hint' : undefined}
+                      onClick={() => onChoice(i)}
+                      onAnimationEnd={() => setShake(null)}
+                    >
+                      <span className={styles.choiceIcon} aria-hidden="true">
+                        {variant === 'success' && <IconCheck size={28} stroke={3} />}
+                        {variant === 'error' && <IconX size={28} stroke={3} />}
+                      </span>
+                      <span className={styles.choiceText}>
+                        <span className={styles.choiceLabel}>{label}</span>
+                        {detail && <span className={styles.choiceDetail}>{detail}</span>}
+                      </span>
+                      <span className={styles.choiceIcon}>
+                        {variant === 'pending' && (
+                          <span className={styles.sure}>{t('quiz.confirm')}</span>
+                        )}
+                      </span>
+                      {variant === 'error' && (
+                        <span className="visually-hidden">, {t('quiz.wrong')}</span>
                       )}
-                    </span>
-                    {variant === 'error' && (
-                      <span className="visually-hidden">, {t('quiz.wrong')}</span>
-                    )}
-                    {variant === 'success' && (
-                      <span className="visually-hidden">, {t('quiz.correct')}</span>
-                    )}
-                  </Button3D>
+                      {variant === 'success' && (
+                        <span className="visually-hidden">, {t('quiz.correct')}</span>
+                      )}
+                    </Button3D>
+                  </div>
                 </li>
               )
             })}
@@ -323,9 +370,7 @@ export function QuizScreen() {
                   key={feedback.text + results.length + wrongPicks.length}
                   className={styles.pop}
                 >
-                  {feedback.kind === 'correct' ? (
-                    <IconCheck size={22} stroke={3} aria-hidden="true" />
-                  ) : feedback.kind === 'wrong' ? (
+                  {feedback.kind === 'wrong' ? (
                     <IconX size={22} stroke={3} aria-hidden="true" />
                   ) : null}
                   {feedback.text}

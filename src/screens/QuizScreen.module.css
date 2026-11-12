@@ -91,20 +91,27 @@
 }
 
 .staffArea > .staffCard {
-  margin-block: auto;
+  /* Centred while answering; once answered, --card-top keeps it where it was so it
+     doesn't slide down as the other answers fold away (see QuizScreen). */
+  margin-top: var(--card-top, auto);
+  margin-bottom: auto;
 }
 
 /* Size the staff by whichever runs out first, width or height, so the whole card
    always fits above the answers (small phones, landscape). --staff-aspect is set
    inline from the session's staff size; 115px is roughly the card's header, hint
-   and padding. */
+   and padding. Once answered, --staff-cap holds it at that size (see QuizScreen). */
 .staffArea {
   container-type: size;
 }
 
 .staffIn {
   margin-top: var(--space-3);
-  max-width: max(120px, calc((100cqh - 115px) * var(--staff-aspect, 1.6)));
+  max-width: min(
+    var(--staff-cap, 100%),
+    max(100px, calc((100cqh - 115px) * var(--staff-aspect, 1.6)))
+  );
+  min-width: var(--staff-cap, 0px);
   margin-inline: auto;
 }
 
@@ -216,7 +223,9 @@
 }
 
 .staffIn {
-  transition: transform 120ms ease;
+  transition:
+    transform 120ms ease,
+    max-width 320ms var(--ease-out);
   animation: staff-in 450ms var(--ease-spring) both;
 }
 
@@ -234,10 +243,42 @@
 }
 
 .choices {
+  --choice-gap: var(--space-3);
   list-style: none;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  /* Each slot carries the gap below it (so collapsed slots take none); cancel the last. */
+  margin-bottom: calc(var(--choice-gap) * -1);
+}
+
+/* Once answered, the other choices fold away to leave room for the keyboard, which
+   opens in step with them (.keysReveal) so the card doesn't change size twice. */
+.slot {
   display: grid;
-  gap: var(--space-3);
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 360ms var(--ease-out) 250ms,
+    opacity 200ms ease 250ms;
+}
+
+.slotInner {
+  min-height: 0;
+  padding-bottom: var(--choice-gap);
+}
+
+.slot.gone {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows 360ms var(--ease-out) 250ms,
+    opacity 200ms ease 250ms,
+    visibility 0s 610ms;
+}
+
+.gone .slotInner {
+  overflow: hidden;
 }
 
 .choice {
@@ -370,6 +411,11 @@
     max-width: 1240px;
   }
 
+  /* Answers sit beside the staff here, so the card can stay centred as it grows. */
+  .staffArea > .staffCard {
+    margin-top: auto;
+  }
+
   /* Staff gets the bigger share; both columns sit centred in the space below the top bar. */
   .main {
     display: grid;
@@ -410,9 +456,12 @@
    answers compact and give the staff as much of the height as possible. */
 @media (orientation: portrait) and (max-width: 600px) {
   .main,
-  .answers,
-  .choices {
+  .answers {
     gap: var(--space-2);
+  }
+
+  .choices {
+    --choice-gap: var(--space-2);
   }
 
   .choiceFront {
@@ -442,5 +491,32 @@
 
   .choiceLabel {
     font-size: 1.375rem;
+  }
+}
+
+.keysReveal {
+  display: grid;
+  animation: keys-open 360ms var(--ease-out) 250ms both;
+}
+
+/* The room opens first; the keys fade in as it finishes. */
+.keysReveal > * {
+  min-height: 0;
+  overflow: hidden;
+  animation: keys-fade 500ms ease-out 450ms both;
+}
+
+@keyframes keys-open {
+  from {
+    grid-template-rows: 0fr;
+  }
+  to {
+    grid-template-rows: 1fr;
+  }
+}
+
+@keyframes keys-fade {
+  from {
+    opacity: 0;
   }
 }
