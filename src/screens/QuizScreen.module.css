@@ -97,27 +97,18 @@
 /* Size the staff by whichever runs out first, width or height, so the whole card
    always fits above the answers (small phones, landscape). --staff-aspect is set
    inline from the session's staff size; 115px is roughly the card's header, hint
-   and padding. Once answered, the keyboard (PianoKeys, 341 × 93) takes up to 40%
-   of that height and the staff shrinks into the rest. */
+   and padding. Once answered, --staff-cap holds it at that size (see QuizScreen). */
 .staffArea {
   container-type: size;
-}
-
-.staffCard {
-  --keys-h: 0px;
-}
-
-.staffCard.revealed {
-  --keys-w: min(100cqw - 32px, 360px, (100cqh - 115px) * 0.4 * 341 / 93);
-  --keys-h: calc(var(--keys-w) * 93 / 341 + var(--space-2));
 }
 
 .staffIn {
   margin-top: var(--space-3);
   max-width: min(
     var(--staff-cap, 100%),
-    max(100px, calc((100cqh - 115px - var(--keys-h)) * var(--staff-aspect, 1.6)))
+    max(100px, calc((100cqh - 115px) * var(--staff-aspect, 1.6)))
   );
+  min-width: var(--staff-cap, 0px);
   margin-inline: auto;
 }
 
@@ -258,7 +249,8 @@
   margin-bottom: calc(var(--choice-gap) * -1);
 }
 
-/* Once answered, the other choices fold away to leave room for the keyboard. */
+/* Once answered, the other choices fold away to leave room for the keyboard, which
+   opens in step with them (.keysReveal) so the card doesn't change size twice. */
 .slot {
   display: grid;
   grid-template-rows: 1fr;
@@ -491,5 +483,26 @@
 
   .choiceLabel {
     font-size: 1.375rem;
+  }
+}
+
+.keysReveal {
+  display: grid;
+  animation: keys-open 360ms var(--ease-out) 250ms both;
+}
+
+.keysReveal > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@keyframes keys-open {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
   }
 }

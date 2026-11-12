@@ -1,10 +1,8 @@
 .keys {
   display: block;
   width: 100%;
-  /* The quiz sets --keys-w to share the card's height with the staff. */
-  max-width: var(--keys-w, 360px);
+  max-width: 360px;
   margin: var(--space-2) auto 0;
-  animation: rise 360ms var(--ease-out);
 }
 
 .white {
@@ -39,11 +37,4 @@
 
 .dot {
   fill: var(--color-staff-line);
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
 }
