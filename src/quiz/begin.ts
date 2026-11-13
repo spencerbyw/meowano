@@ -10,7 +10,8 @@ export function beginRound(mode: QuizMode) {
   useQuiz.getState().start(mode)
 }
 
-// Leaving the quiz (home, results) turns the mic off.
+// Leaving the quiz (home, results) or the mic test turns the mic off.
+const usesMic = (screen: string) => screen === 'quiz' || screen === 'mictest'
 useQuiz.subscribe((state, prev) => {
-  if (prev.screen === 'quiz' && state.screen !== 'quiz') stopMic()
+  if (usesMic(prev.screen) && state.screen !== prev.screen) stopMic()
 })

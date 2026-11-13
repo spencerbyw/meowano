@@ -4,7 +4,7 @@ import { midiOf } from '../music/theory'
 import { useSettings } from '../settings/store'
 import { practiceWeight, useStats } from '../stats/store'
 
-export type Screen = 'start' | 'quiz' | 'summary' | 'stats'
+export type Screen = 'start' | 'quiz' | 'summary' | 'stats' | 'mictest'
 
 /**
  * - quiz: pick the answer from three choices
@@ -65,6 +65,8 @@ interface QuizState {
   finish: () => void
   goHome: () => void
   showStats: () => void
+  /** Temporary: the mic test screen, for checking what "Play the note" hears. */
+  showMicTest: () => void
 }
 
 const newQuestion = (mode: QuizMode, previous?: Question | null) => {
@@ -219,5 +221,6 @@ export const useQuiz = create<QuizState>()((set, get) => {
     finish: () => set({ screen: 'summary' }),
     goHome: () => set({ screen: 'start', question: null }),
     showStats: () => set({ screen: 'stats' }),
+    showMicTest: () => set({ screen: 'mictest', question: null }),
   }
 })

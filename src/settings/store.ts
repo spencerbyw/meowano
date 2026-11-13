@@ -21,6 +21,8 @@ interface SettingsState {
   silentMode: boolean
   /** "Play the note": after a right note, go on to the next by itself. */
   autoAdvance: boolean
+  /** How long Next counts down before going on (0.5–5 s). */
+  autoAdvanceSeconds: number
   preset: PresetId | 'custom'
   practice: PracticeSettings
   /** Questions per round; 0 means unlimited. */
@@ -33,6 +35,7 @@ interface SettingsState {
   setSound: (on: boolean) => void
   setSilentMode: (on: boolean) => void
   setAutoAdvance: (on: boolean) => void
+  setAutoAdvanceSeconds: (seconds: number) => void
   applyPreset: (preset: PresetId) => void
   updatePractice: (patch: Partial<PracticeSettings>) => void
 }
@@ -47,6 +50,7 @@ export const useSettings = create<SettingsState>()(
       sound: true,
       silentMode: true,
       autoAdvance: true,
+      autoAdvanceSeconds: 2,
       preset: DEFAULT_PRESET,
       practice: PRESETS[DEFAULT_PRESET],
       quizLength: 10,
@@ -59,6 +63,7 @@ export const useSettings = create<SettingsState>()(
       setSound: (sound) => set({ sound }),
       setSilentMode: (silentMode) => set({ silentMode }),
       setAutoAdvance: (autoAdvance) => set({ autoAdvance }),
+      setAutoAdvanceSeconds: (autoAdvanceSeconds) => set({ autoAdvanceSeconds }),
       applyPreset: (preset) => set({ preset, practice: PRESETS[preset] }),
       updatePractice: (patch) =>
         set((s) => ({ preset: 'custom', practice: { ...s.practice, ...patch } })),

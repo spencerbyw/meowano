@@ -170,6 +170,7 @@ export function StepSlider({
   value,
   min,
   max,
+  step = 1,
   onChange,
   valueText,
   preview,
@@ -179,6 +180,7 @@ export function StepSlider({
   value: number
   min: number
   max: number
+  step?: number
   onChange: (v: number) => void
   valueText: string
   preview?: ReactNode
@@ -192,7 +194,7 @@ export function StepSlider({
           value={[value]}
           min={min}
           max={max}
-          step={1}
+          step={step}
           onValueChange={([v]) => onChange(v)}
           aria-labelledby={id}
         >

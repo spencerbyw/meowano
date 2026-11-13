@@ -4,6 +4,7 @@ import {
   IconCat,
   IconDeviceDesktop,
   IconEgg,
+  IconMicrophone,
   IconMoon,
   IconMusic,
   IconPlant,
@@ -20,6 +21,8 @@ import { Dialog } from 'radix-ui'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { unlockAudio } from '../../audio/engine'
+import { startMic } from '../../audio/mic'
+import { useQuiz } from '../../quiz/store'
 import { PRESET_ORDER } from '../../settings/presets'
 import { useSettings } from '../../settings/store'
 import type {
@@ -272,6 +275,32 @@ export function SettingsDrawer() {
                 checked={settings.autoAdvance}
                 onChange={settings.setAutoAdvance}
               />
+              {settings.autoAdvance && (
+                <StepSlider
+                  label={t('settings.autoAdvanceSeconds')}
+                  value={settings.autoAdvanceSeconds}
+                  min={0.5}
+                  max={5}
+                  step={0.5}
+                  onChange={settings.setAutoAdvanceSeconds}
+                  valueText={t('settings.seconds', {
+                    count: settings.autoAdvanceSeconds,
+                  })}
+                />
+              )}
+              {/* TEMPORARY: mic test screen while tuning the pitch detection. */}
+              <Button3D
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setOpen(false)
+                  useQuiz.getState().showMicTest()
+                  void startMic()
+                }}
+              >
+                <IconMicrophone size={20} aria-hidden="true" />
+                Test the microphone
+              </Button3D>
             </Section>
 
             {/* App */}

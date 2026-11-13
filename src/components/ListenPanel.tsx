@@ -12,20 +12,19 @@ import styles from './ListenPanel.module.css'
 export function ListenPanel({ shake }: { shake?: boolean }) {
   const { t } = useTranslation()
   const status = useMic((s) => s.status)
-  const ring = useRef<HTMLSpanElement>(null)
+  const mic = useRef<HTMLSpanElement>(null)
 
-  // Drive the ring straight from the mic (25×/s) without re-rendering React.
+  // Drive the mic badge straight from the mic (25×/s) without re-rendering React.
   useEffect(
-    () =>
-      onMicLevel((level) => ring.current?.style.setProperty('--level', String(level))),
+    () => onMicLevel((level) => mic.current?.style.setProperty('--level', String(level))),
     [],
   )
 
   if (status === 'on') {
     return (
       <div className={[styles.panel, shake && styles.shake].filter(Boolean).join(' ')}>
-        <span className={styles.mic} aria-hidden="true">
-          <span ref={ring} className={styles.ring} />
+        <span ref={mic} className={styles.mic} aria-hidden="true">
+          <span className={styles.ring} />
           <IconMicrophone size={30} stroke={2.2} />
         </span>
         <span className={styles.text}>

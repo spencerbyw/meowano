@@ -22,7 +22,7 @@ export function NextButton({
   countdownLabel,
   className,
 }: NextButtonProps) {
-  const [left, setLeft] = useState(countdown ?? 0)
+  const [left, setLeft] = useState(Math.ceil(countdown ?? 0))
   const go = useRef(onNext)
   useEffect(() => {
     go.current = onNext

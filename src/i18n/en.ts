@@ -158,7 +158,9 @@ const en = {
     silentModeHint: 'Ignore the silent switch',
     playMode: 'Play the note',
     autoAdvance: 'Go on by itself',
-    autoAdvanceHint: 'After a right note, move to the next one in 3 seconds',
+    autoAdvanceHint: 'After a right note, move to the next one',
+    autoAdvanceSeconds: 'Wait before moving on',
+    seconds: '{{count}} s',
   },
   start: {
     howMany: 'How many questions?',

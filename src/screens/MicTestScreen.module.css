@@ -1,0 +1,140 @@
+/* TEMPORARY: see MicTestScreen.tsx */
+.top {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-3) var(--space-4);
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+}
+
+.title {
+  text-align: center;
+  font-size: 1.75rem;
+  color: var(--color-primary);
+  text-shadow: 0 2px 0 var(--color-primary-edge);
+}
+
+.main {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-2) var(--space-4) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 30px hsl(var(--color-shadow) / 0.12);
+}
+
+.label {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+}
+
+.note {
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.sub {
+  color: var(--color-text-muted);
+  font-weight: 700;
+  min-height: 1.4em;
+}
+
+.verdict {
+  font-weight: 800;
+}
+
+.meter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: var(--space-2);
+}
+
+.meterLabel {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.meterHint {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.bar {
+  position: relative;
+  height: 14px;
+  border-radius: 7px;
+  background: var(--color-bg-accent);
+  overflow: hidden;
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--color-primary);
+  transition: width 90ms linear;
+}
+
+.mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  margin-left: -1px;
+  background: var(--color-text);
+}
+
+.select {
+  font: inherit;
+  font-weight: 700;
+  font-size: 1.125rem;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.logHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-3);
+  min-height: 44px;
+}
+
+.log {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.log li {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-accent);
+  font-weight: 700;
+}
+
+.log li.hit {
+  background: color-mix(in srgb, var(--color-success, #2fbf8a) 25%, var(--color-surface));
+}

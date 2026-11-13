@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { detectPitch, NoteTracker, rmsOf } from './pitch'
+import { detectPitch, NoteTracker, rmsOf, type PitchReading } from './pitch'
 
 /**
  * The microphone for "Play the note". Start it from a tap (iOS needs a user
@@ -21,8 +21,19 @@ let analyser: AnalyserNode | null = null
 let raf = 0
 let lastFrame = 0
 let mutedUntil = 0
+let level = 0
 let buffer: Float32Array<ArrayBuffer> | null = null
 
+/** One analysis step, for the mic test screen. */
+export interface MicFrame {
+  rms: number
+  /** Below this RMS counts as silence. */
+  gate: number
+  reading: PitchReading | null
+  muted: boolean
+}
+
+const frameListeners = new Set<(frame: MicFrame) => void>()
 const noteListeners = new Set<(midi: number) => void>()
 const levelListeners = new Set<(level: number) => void>()
 const tracker = new NoteTracker((midi) => noteListeners.forEach((fn) => fn(midi)))
@@ -38,6 +49,12 @@ export function muteMic(ms: number) {
 export function onNotePlayed(fn: (midi: number) => void) {
   noteListeners.add(fn)
   return () => void noteListeners.delete(fn)
+}
+
+/** Every analysis step (about 25 a second): what the mic test screen shows. */
+export function onMicFrame(fn: (frame: MicFrame) => void) {
+  frameListeners.add(fn)
+  return () => void frameListeners.delete(fn)
 }
 
 /** Loudness 0–1, for a "can you hear me" meter. */
@@ -107,11 +124,18 @@ function loop(now: number) {
   lastFrame = now
   analyser.getFloatTimeDomainData(buffer)
   const rms = rmsOf(buffer)
-  // Roughly -60 dB … -10 dB mapped to 0 … 1.
-  const level = Math.min(1, Math.max(0, (20 * Math.log10(rms + 1e-9) + 60) / 50))
+  // About -65 dB (a quiet room) … -20 dB (a note close by) mapped to 0 … 1, rising
+  // at once and falling back gently, so a struck note visibly swells and fades.
+  const raw = Math.min(1, Math.max(0, (20 * Math.log10(rms + 1e-9) + 65) / 45))
+  level = Math.max(raw, level * 0.8)
   levelListeners.forEach((fn) => fn(level))
   const reading = rms > 0.004 ? detectPitch(buffer, ctx.sampleRate) : null
-  tracker.frame(rms, reading, now < mutedUntil)
+  const muted = now < mutedUntil
+  tracker.frame(rms, reading, muted)
+  if (frameListeners.size) {
+    const frame = { rms, gate: tracker.gate, reading, muted }
+    frameListeners.forEach((fn) => fn(frame))
+  }
 }
 
 export function stopMic() {

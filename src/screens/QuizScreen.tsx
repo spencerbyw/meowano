@@ -28,9 +28,6 @@ import { useStats } from '../stats/store'
 import { useWakeLock } from '../ui/useWakeLock'
 import styles from './QuizScreen.module.css'
 
-/** "Play the note": how long the Next button counts down after a right note. */
-const AUTO_ADVANCE_SECONDS = 3
-
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 export function QuizScreen() {
@@ -40,7 +37,7 @@ export function QuizScreen() {
   const currentStreak = useStats((s) => s.currentStreak)
   const allTimeBest = useStats((s) => s.bestStreak)
   const { answer, next, skip, finish, goHome } = useQuiz()
-  const { confirm, catMode, sound, autoAdvance } = useSettings()
+  const { confirm, catMode, sound, autoAdvance, autoAdvanceSeconds } = useSettings()
   const practice = useSettings((s) => s.practice)
   // One staff size for the whole session: tall enough for every note these
   // settings can produce, and wide enough for the biggest key signature.
@@ -447,7 +444,7 @@ export function QuizScreen() {
                 // Play the note: after a right note, carry on by itself.
                 countdown={
                   mode === 'play' && autoAdvance && feedback?.kind === 'correct'
-                    ? AUTO_ADVANCE_SECONDS
+                    ? autoAdvanceSeconds
                     : undefined
                 }
                 countdownLabel={(count) =>

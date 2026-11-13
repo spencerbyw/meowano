@@ -51,7 +51,7 @@ export function PianoKeys({ notes, t }: { notes: Pitch[]; t: TFunction }) {
           cx={x + WHITE_W / 2}
           cy={WHITE_H - 9}
           r={2.5}
-          className={styles.dot}
+          className={note ? styles.dotOnLit : styles.dot}
         />,
       )
     if (note)

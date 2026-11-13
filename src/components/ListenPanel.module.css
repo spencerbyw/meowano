@@ -26,15 +26,18 @@
   color: var(--color-text-muted);
 }
 
-/* Swells with what the mic hears, so she can see it's working. */
+/* Swells with what the mic hears (--level, 0–1, set from ListenPanel), so she can
+   see it's picking up her piano. */
 .ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   background: var(--color-primary);
-  opacity: calc(0.15 + var(--level, 0) * 0.35);
-  transform: scale(calc(1 + var(--level, 0) * 0.35));
-  transition: transform 90ms linear;
+  opacity: calc(0.12 + var(--level, 0) * 0.5);
+  transform: scale(calc(1 + var(--level, 0) * 0.45));
+  transition:
+    transform 80ms linear,
+    opacity 80ms linear;
   z-index: -1;
 }
 
@@ -44,7 +47,8 @@
 
 .mic:not(.micOff) {
   isolation: isolate;
-  animation: breathe 2.4s ease-in-out infinite;
+  transform: scale(calc(1 + var(--level, 0) * 0.1));
+  transition: transform 80ms linear;
 }
 
 .text {
@@ -73,12 +77,6 @@
 
 .shake {
   animation: shake 400ms ease;
-}
-
-@keyframes breathe {
-  50% {
-    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-primary) 18%, transparent);
-  }
 }
 
 @keyframes shake {

@@ -77,6 +77,8 @@ export const midiOfFreq = (freq: number) => 69 + 12 * Math.log2(freq / 440)
 const STABLE_FRAMES = 3
 /** Quieter than this (RMS) counts as silence. Raised automatically in a noisy room. */
 const MIN_GATE = 0.006
+/** Pitch readings less clear than this are ignored (0–1). */
+export const MIN_CLARITY = 0.8
 /** A jump in loudness this big means a new key was struck. */
 const ONSET_RATIO = 1.5
 
@@ -92,6 +94,8 @@ export class NoteTracker {
   private quiet = 0
   private noise = MIN_GATE / 2
   private history: number[] = []
+  /** Current silence threshold (RMS), for the mic test screen. */
+  gate = MIN_GATE
 
   private onNote: (midi: number) => void
 
@@ -107,6 +111,7 @@ export class NoteTracker {
     // Track the room's background noise so the gate sits a little above it.
     if (rms < this.noise * 2) this.noise = this.noise * 0.98 + rms * 0.02
     const gate = Math.max(MIN_GATE, this.noise * 2.5)
+    this.gate = gate
 
     const before = this.history.length ? this.history[0] : rms
     this.history.push(rms)
@@ -125,7 +130,7 @@ export class NoteTracker {
     }
     if (muted) this.armed = false
 
-    if (!reading || reading.clarity < 0.8) return
+    if (!reading || reading.clarity < MIN_CLARITY) return
     const midi = Math.round(midiOfFreq(reading.freq))
     if (midi === this.candidate) this.count++
     else {
