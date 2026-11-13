@@ -2,7 +2,7 @@ import { IconArrowLeft, IconTrash } from '@tabler/icons-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { onMicFrame, onNotePlayed, useMic, type MicFrame } from '../audio/mic'
-import { MIN_CLARITY, midiOfFreq } from '../audio/pitch'
+import { MIN_CLARITY, MIN_GATE, midiOfFreq } from '../audio/pitch'
 import { ListenPanel } from '../components/ListenPanel'
 import { Button3D } from '../components/ui/Button3D'
 import { formatPitchClass } from '../music/format'
@@ -72,7 +72,7 @@ export function MicTestScreen() {
   const heard = exact === null ? null : Math.round(exact)
   const cents = exact === null || heard === null ? 0 : Math.round((exact - heard) * 100)
   const level = frame ? db(frame.rms) : -120
-  const gate = frame ? db(frame.gate) : -44
+  const gate = db(frame ? frame.gate : MIN_GATE)
 
   const verdict = !frame
     ? 'Waiting for the mic…'

@@ -76,7 +76,7 @@ export const midiOfFreq = (freq: number) => 69 + 12 * Math.log2(freq / 440)
 /** Readings in a row that must agree before we call it a note (~120 ms at 25/s). */
 const STABLE_FRAMES = 3
 /** Quieter than this (RMS) counts as silence. Raised automatically in a noisy room. */
-const MIN_GATE = 0.006
+export const MIN_GATE = 0.001 // -60 dB
 /** Pitch readings less clear than this are ignored (0–1). */
 export const MIN_CLARITY = 0.8
 /** A jump in loudness this big means a new key was struck. */
@@ -84,14 +84,13 @@ const ONSET_RATIO = 1.5
 
 /**
  * Turns a stream of readings into "she played a note" events: one per key press.
- * A held or ringing note fires once; striking again (a jump in loudness) or a
- * moment of silence lets the next note through.
+ * Only a strike (a jump in loudness) lets a note through, and it fires once, so a
+ * held or ringing note counts once and a steady sound (a fridge's hum) never does.
  */
 export class NoteTracker {
   private candidate = -1
   private count = 0
-  private armed = true
-  private quiet = 0
+  private armed = false
   private noise = MIN_GATE / 2
   private history: number[] = []
   /** Current silence threshold (RMS), for the mic test screen. */
@@ -118,12 +117,10 @@ export class NoteTracker {
     if (this.history.length > 3) this.history.shift()
 
     if (rms < gate) {
-      if (++this.quiet >= 2) this.armed = true
       this.count = 0
       return
     }
-    this.quiet = 0
-    if (rms > before * ONSET_RATIO && rms > gate * 2) {
+    if (rms > before * ONSET_RATIO) {
       // A new strike: start listening for its pitch afresh.
       this.armed = !muted
       this.count = 0
@@ -146,7 +143,7 @@ export class NoteTracker {
   reset() {
     this.candidate = -1
     this.count = 0
-    this.armed = true
+    this.armed = false
     this.history = []
   }
 }

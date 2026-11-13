@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { detectPitch, NoteTracker, rmsOf, type PitchReading } from './pitch'
+import { detectPitch, MIN_GATE, NoteTracker, rmsOf, type PitchReading } from './pitch'
 
 /**
  * The microphone for "Play the note". Start it from a tap (iOS needs a user
@@ -129,7 +129,8 @@ function loop(now: number) {
   const raw = Math.min(1, Math.max(0, (20 * Math.log10(rms + 1e-9) + 65) / 45))
   level = Math.max(raw, level * 0.8)
   levelListeners.forEach((fn) => fn(level))
-  const reading = rms > 0.004 ? detectPitch(buffer, ctx.sampleRate) : null
+  // Only look for a pitch in sounds loud enough to possibly count.
+  const reading = rms > MIN_GATE ? detectPitch(buffer, ctx.sampleRate) : null
   const muted = now < mutedUntil
   tracker.frame(rms, reading, muted)
   if (frameListeners.size) {
