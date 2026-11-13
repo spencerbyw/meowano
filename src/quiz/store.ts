@@ -112,7 +112,8 @@ export const useQuiz = create<QuizState>()((set, get) => {
 
   /** The current question was answered right; returns the outcome for the caller. */
   const solve = () => {
-    const { question, wrongPicks, wrongNotes, streak, bestStreak, results, hadMiss } = get()
+    const { question, wrongPicks, wrongNotes, streak, bestStreak, results, hadMiss } =
+      get()
     if (!question) return 'ignored' as const
     const firstTry = wrongPicks.length === 0 && wrongNotes.length === 0 && !hadMiss
     const nextStreak = firstTry ? streak + 1 : 0

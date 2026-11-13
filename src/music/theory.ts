@@ -213,12 +213,15 @@ export function spellMidi(midi: number, key: Key): Pitch {
   })
   for (const letter of LETTERS) {
     const acc = key.accidentals[letter]
-    if (mod(NATURAL_SEMITONES[letter] + ACC_OFFSET[acc], 12) === pc) return pick(letter, acc)
+    if (mod(NATURAL_SEMITONES[letter] + ACC_OFFSET[acc], 12) === pc)
+      return pick(letter, acc)
   }
   for (const letter of LETTERS) {
     if (NATURAL_SEMITONES[letter] === pc) return pick(letter, '')
   }
   const acc: Accidental = key.fifths >= 0 ? '#' : 'b'
-  const letter = LETTERS.find((l) => mod(NATURAL_SEMITONES[l] + ACC_OFFSET[acc], 12) === pc)!
+  const letter = LETTERS.find(
+    (l) => mod(NATURAL_SEMITONES[l] + ACC_OFFSET[acc], 12) === pc,
+  )!
   return pick(letter, acc)
 }
