@@ -65,7 +65,7 @@ interface QuizState {
   finish: () => void
   goHome: () => void
   showStats: () => void
-  /** Temporary: the mic test screen, for checking what "Play the note" hears. */
+  /** The mic test screen, for checking what "Play the note" hears. */
   showMicTest: () => void
 }
 

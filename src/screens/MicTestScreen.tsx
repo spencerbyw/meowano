@@ -11,9 +11,9 @@ import { useQuiz } from '../quiz/store'
 import styles from './MicTestScreen.module.css'
 
 /**
- * TEMPORARY: a mic test for "Play the note". Shows what the pitch detector hears
- * frame by frame, and the notes it actually counts, against a chosen target note.
- * English only on purpose; remove once the mic is tuned.
+ * A mic test for "Play the note" (Settings → Play the note): shows what the pitch
+ * detector hears frame by frame, and the notes it actually counts, against a chosen
+ * target note. A troubleshooting tool, so English only.
  */
 
 const SHARPS = majorKey(0)

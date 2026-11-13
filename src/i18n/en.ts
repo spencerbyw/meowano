@@ -180,6 +180,7 @@ const en = {
       'The microphone is blocked. Allow it for this site in your browser settings, then try again.',
     unsupported: 'This browser can’t use the microphone.',
     stopped: 'The microphone stopped.',
+    stalled: 'The microphone stopped hearing anything. Tap to start it again.',
     tooHigh: 'That was {{note}} — too high!',
     tooLow: 'That was {{note}} — too low!',
   },

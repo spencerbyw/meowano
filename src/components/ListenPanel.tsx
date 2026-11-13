@@ -44,7 +44,9 @@ export function ListenPanel({ shake }: { shake?: boolean }) {
           ? t('listen.unsupported')
           : status === 'error'
             ? t('listen.stopped')
-            : t('listen.off')
+            : status === 'stalled'
+              ? t('listen.stalled')
+              : t('listen.off')
 
   return (
     <div className={styles.panel}>

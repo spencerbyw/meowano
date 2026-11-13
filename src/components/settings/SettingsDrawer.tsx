@@ -288,9 +288,9 @@ export function SettingsDrawer() {
                   })}
                 />
               )}
-              {/* TEMPORARY: mic test screen while tuning the pitch detection. */}
+              {/* Mic test screen: what "Play the note" hears, for troubleshooting. */}
               <Button3D
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 onClick={() => {
                   setOpen(false)
@@ -367,6 +367,15 @@ export function SettingsDrawer() {
                 />
               )}
             </Section>
+
+            {/* Which build is running (handy when the app is slow to pick up an update). */}
+            <p className={styles.build}>
+              {__BUILD_HASH__} ·{' '}
+              {new Date(__BUILD_DATE__).toLocaleString(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
+            </p>
           </div>
         </Dialog.Content>
       </Dialog.Portal>
