@@ -197,3 +197,31 @@ export function invert(notes: Pitch[], inversion: number): Pitch[] {
   }
   return out
 }
+
+/**
+ * Name a played note (MIDI number) the way this key would write it: the key's own
+ * notes first, then naturals, then sharps in sharp keys and flats in flat keys.
+ */
+export function spellMidi(midi: number, key: Key): Pitch {
+  const pc = mod(midi, 12)
+  const octaveFor = (letter: Letter, acc: Accidental) =>
+    Math.round((midi - NATURAL_SEMITONES[letter] - ACC_OFFSET[acc]) / 12) - 1
+  const pick = (letter: Letter, acc: Accidental): Pitch => ({
+    letter,
+    acc,
+    octave: octaveFor(letter, acc),
+  })
+  for (const letter of LETTERS) {
+    const acc = key.accidentals[letter]
+    if (mod(NATURAL_SEMITONES[letter] + ACC_OFFSET[acc], 12) === pc)
+      return pick(letter, acc)
+  }
+  for (const letter of LETTERS) {
+    if (NATURAL_SEMITONES[letter] === pc) return pick(letter, '')
+  }
+  const acc: Accidental = key.fifths >= 0 ? '#' : 'b'
+  const letter = LETTERS.find(
+    (l) => mod(NATURAL_SEMITONES[l] + ACC_OFFSET[acc], 12) === pc,
+  )!
+  return pick(letter, acc)
+}

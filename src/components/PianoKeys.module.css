@@ -35,6 +35,10 @@
   fill: var(--color-primary);
 }
 
+.dotOnLit {
+  fill: #fff;
+}
+
 .dot {
   fill: var(--color-staff-line);
 }
