@@ -394,11 +394,20 @@
 
 .footerButtons {
   display: flex;
+  /* Don't stretch: a taller neighbour would pull the 3D layers apart. */
+  align-items: flex-start;
   gap: var(--space-3);
 }
 
-.dontKnow {
-  flex: 1;
+.footerButtons > * {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Side by side on a phone there's little room: keep each label on one line. */
+.footerButtons .footerFront {
+  padding-inline: var(--space-3);
+  white-space: nowrap;
 }
 
 /* Landscape: staff on the left, answers on the right. */
@@ -457,6 +466,10 @@
 
   .choiceFront {
     min-height: 64px;
+  }
+
+  .footerButtons .footerFront {
+    font-size: 1.3125rem;
   }
 
   .choiceLabel {

@@ -456,14 +456,19 @@ export function QuizScreen() {
                 <Button3D
                   variant="ghost"
                   size="lg"
-                  className={styles.dontKnow}
+                  frontClassName={styles.footerFront}
                   onClick={onDontKnow}
                 >
                   <IconHelp size={24} aria-hidden="true" />
                   {t('quiz.dontKnow')}
                 </Button3D>
                 {length === 0 && results.length > 0 && (
-                  <Button3D variant="ghost" size="lg" onClick={finish}>
+                  <Button3D
+                    variant="ghost"
+                    size="lg"
+                    frontClassName={styles.footerFront}
+                    onClick={finish}
+                  >
                     <IconFlag size={22} aria-hidden="true" />
                     {t('quiz.end')}
                   </Button3D>
