@@ -411,11 +411,6 @@
     max-width: 1240px;
   }
 
-  /* Answers sit beside the staff here, so the card can stay centred as it grows. */
-  .staffArea > .staffCard {
-    margin-top: auto;
-  }
-
   /* Staff gets the bigger share; both columns sit centred in the space below the top bar. */
   .main {
     display: grid;

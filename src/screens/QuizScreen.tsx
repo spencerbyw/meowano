@@ -370,9 +370,6 @@ export function QuizScreen() {
                   key={feedback.text + results.length + wrongPicks.length}
                   className={styles.pop}
                 >
-                  {feedback.kind === 'wrong' ? (
-                    <IconX size={22} stroke={3} aria-hidden="true" />
-                  ) : null}
                   {feedback.text}
                 </span>
               ) : pending !== null ? (
