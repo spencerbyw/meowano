@@ -9,16 +9,19 @@ import {
   IconVolume,
   IconX,
 } from '@tabler/icons-react'
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { playChime, playNotes, useAudioStatus } from '../audio/engine'
+import { onNotePlayed } from '../audio/mic'
+import { ListenPanel } from '../components/ListenPanel'
 import { CatMark, type CatMood } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { PianoKeys } from '../components/PianoKeys'
 import { Staff } from '../components/Staff'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
-import { formatAnswer, formatStaffLabel } from '../music/format'
+import { formatAnswer, formatPitchClass, formatStaffLabel } from '../music/format'
 import { practiceBand, viewOf } from '../music/staffBand'
+import { midiOf, spellMidi } from '../music/theory'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import { useStats } from '../stats/store'
@@ -29,7 +32,8 @@ const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 export function QuizScreen() {
   const { t } = useTranslation()
-  const { question, wrongPicks, solved, results, length, isReturn } = useQuiz()
+  const { question, wrongPicks, wrongNotes, solved, results, length, isReturn, mode } =
+    useQuiz()
   const currentStreak = useStats((s) => s.currentStreak)
   const allTimeBest = useStats((s) => s.bestStreak)
   const { answer, next, skip, finish, goHome } = useQuiz()
@@ -46,24 +50,39 @@ export function QuizScreen() {
     return { band, width, aspect: width / viewOf(band).height }
   }, [practice])
   useWakeLock(true)
-  // Folding away the other answers frees up height, which would let the staff grow
-  // and the centred card slide down once answered. Hold both where they were while
-  // she was answering.
+  // Once answered, the answer area shrinks (the other choices fold away; in play
+  // mode the listening panel gives way to the answer), which would let the staff
+  // grow and the centred card slide down. Hold both where they were while she was
+  // answering: measured after every render until then, since the swap is instant.
   const staffRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLElement>(null)
+  const lastLayout = useRef<{ staff: number; top: number } | null>(null)
   const [held, setHeld] = useState<{ staff: number; top: number } | null>(null)
-  useLayoutEffect(() => {
+  const measure = () => {
     const staff = staffRef.current
     const card = cardRef.current
     const area = card?.parentElement
-    if (!solved || !staff || !card || !area) return setHeld(null)
+    if (!staff || !card || !area) return null
     const top =
       card.getBoundingClientRect().top -
       area.getBoundingClientRect().top -
       parseFloat(getComputedStyle(area).paddingTop) +
       area.scrollTop
-    setHeld({ staff: staff.offsetWidth, top })
+    return { staff: staff.offsetWidth, top }
+  }
+  useLayoutEffect(() => {
+    if (!solved) lastLayout.current = measure()
+  })
+  useLayoutEffect(() => {
+    setHeld(solved ? (lastLayout.current ?? measure()) : null)
   }, [solved])
+  useEffect(() => {
+    const onResize = () => {
+      if (!useQuiz.getState().solved) lastLayout.current = measure()
+    }
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
   const staffStyle = {
     '--staff-aspect': staffFit.aspect,
     ...(held ? { '--staff-cap': `${held.staff}px` } : {}),
@@ -86,6 +105,33 @@ export function QuizScreen() {
   } | null>(null)
   const [shake, setShake] = useState<number | null>(null)
   const promptRef = useRef<HTMLParagraphElement>(null)
+
+  // "Play the note": judge each note the mic hears.
+  useEffect(() => {
+    if (mode !== 'play') return
+    return onNotePlayed((midi) => {
+      const quiz = useQuiz.getState()
+      const q = quiz.question
+      if (!q) return
+      const outcome = quiz.answerNote(midi)
+      if (outcome === 'ignored') return
+      if (useSettings.getState().sound) void playChime(outcome)
+      if (outcome === 'correct') {
+        const praise = t(catMode ? 'quiz.praiseCat' : 'quiz.praise', {
+          returnObjects: true,
+        }) as string[]
+        setFeedback({ kind: 'correct', text: pick(praise) })
+      } else {
+        const played = spellMidi(midi, q.key)
+        setFeedback({
+          kind: 'wrong',
+          text: t(midi > midiOf(q.notes[0]) ? 'listen.tooHigh' : 'listen.tooLow', {
+            note: `${formatPitchClass(t, played)}${played.octave}`,
+          }),
+        })
+      }
+    })
+  }, [mode, catMode, t])
   const mood: CatMood =
     feedback?.kind === 'correct'
       ? 'happy'
@@ -202,7 +248,7 @@ export function QuizScreen() {
           {length > 0
             ? t('quiz.progress', { current, total: length })
             : t('quiz.progressUnlimited', { current })}
-          . {t(`quiz.prompt.${question.kind}`)}
+          . {t(mode === 'play' ? 'quiz.prompt.play' : `quiz.prompt.${question.kind}`)}
         </p>
         <div className={`scroll-area ${styles.staffArea}`}>
           <section
@@ -229,7 +275,7 @@ export function QuizScreen() {
                 )}
               </span>
               <p ref={promptRef} tabIndex={-1} className={styles.prompt}>
-                {t(`quiz.prompt.${question.kind}`)}
+                {t(mode === 'play' ? 'quiz.prompt.play' : `quiz.prompt.${question.kind}`)}
               </p>
             </div>
             {sound ? (
@@ -301,61 +347,72 @@ export function QuizScreen() {
         </div>
 
         <section className={styles.answers}>
-          <ol className={styles.choices}>
-            {question.choices.map((choice, i) => {
-              const { label, detail } = formatAnswer(t, choice)
-              const variant = variantFor(i)
-              const dimmed = solved && i !== question.correctIndex
-              return (
-                <li
-                  key={`${question.id}-${i}`}
-                  className={[styles.slot, dimmed && styles.gone]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <div className={styles.slotInner}>
-                    <Button3D
-                      variant={variant}
-                      size="lg"
-                      className={[
-                        styles.choice,
-                        dimmed && styles.dimmed,
-                        shake === i && variant === 'error' && styles.shake,
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
-                      frontClassName={styles.choiceFront}
-                      pressed={variant === 'error' || variant === 'success'}
-                      disabled={solved || wrongPicks.includes(i)}
-                      aria-describedby={pending === i ? 'confirm-hint' : undefined}
-                      onClick={() => onChoice(i)}
-                      onAnimationEnd={() => setShake(null)}
-                    >
-                      <span className={styles.choiceIcon} aria-hidden="true">
-                        {variant === 'success' && <IconCheck size={28} stroke={3} />}
-                        {variant === 'error' && <IconX size={28} stroke={3} />}
-                      </span>
-                      <span className={styles.choiceText}>
-                        <span className={styles.choiceLabel}>{label}</span>
-                        {detail && <span className={styles.choiceDetail}>{detail}</span>}
-                      </span>
-                      <span className={styles.choiceIcon}>
-                        {variant === 'pending' && (
-                          <span className={styles.sure}>{t('quiz.confirm')}</span>
+          {mode === 'play' && !solved ? (
+            <ListenPanel
+              key={`${question.id}-${wrongNotes.length}`}
+              shake={wrongNotes.length > 0}
+            />
+          ) : (
+            <ol className={styles.choices}>
+              {question.choices.map((choice, i) => {
+                // Playing it: once solved, just show the note it was.
+                if (mode === 'play' && i !== question.correctIndex) return null
+                const { label, detail } = formatAnswer(t, choice)
+                const variant = variantFor(i)
+                const dimmed = solved && i !== question.correctIndex
+                return (
+                  <li
+                    key={`${question.id}-${i}`}
+                    className={[styles.slot, dimmed && styles.gone]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <div className={styles.slotInner}>
+                      <Button3D
+                        variant={variant}
+                        size="lg"
+                        className={[
+                          styles.choice,
+                          dimmed && styles.dimmed,
+                          shake === i && variant === 'error' && styles.shake,
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        frontClassName={styles.choiceFront}
+                        pressed={variant === 'error' || variant === 'success'}
+                        disabled={solved || wrongPicks.includes(i)}
+                        aria-describedby={pending === i ? 'confirm-hint' : undefined}
+                        onClick={() => onChoice(i)}
+                        onAnimationEnd={() => setShake(null)}
+                      >
+                        <span className={styles.choiceIcon} aria-hidden="true">
+                          {variant === 'success' && <IconCheck size={28} stroke={3} />}
+                          {variant === 'error' && <IconX size={28} stroke={3} />}
+                        </span>
+                        <span className={styles.choiceText}>
+                          <span className={styles.choiceLabel}>{label}</span>
+                          {detail && (
+                            <span className={styles.choiceDetail}>{detail}</span>
+                          )}
+                        </span>
+                        <span className={styles.choiceIcon}>
+                          {variant === 'pending' && (
+                            <span className={styles.sure}>{t('quiz.confirm')}</span>
+                          )}
+                        </span>
+                        {variant === 'error' && (
+                          <span className="visually-hidden">, {t('quiz.wrong')}</span>
                         )}
-                      </span>
-                      {variant === 'error' && (
-                        <span className="visually-hidden">, {t('quiz.wrong')}</span>
-                      )}
-                      {variant === 'success' && (
-                        <span className="visually-hidden">, {t('quiz.correct')}</span>
-                      )}
-                    </Button3D>
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
+                        {variant === 'success' && (
+                          <span className="visually-hidden">, {t('quiz.correct')}</span>
+                        )}
+                      </Button3D>
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
+          )}
 
           <div className={styles.footer}>
             <p
