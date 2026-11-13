@@ -79,7 +79,7 @@ export function MicTestScreen() {
     : frame.muted
       ? 'Muted: Kiano is making a sound'
       : level < gate
-        ? 'Too quiet: below the noise gate, so it’s treated as silence'
+        ? 'Too quiet (below the gate)'
         : !reading
           ? 'Loud enough, but no clear pitch'
           : clarity < MIN_CLARITY
