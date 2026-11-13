@@ -105,10 +105,10 @@ export function MicTestScreen() {
           <section className={styles.card}>
             <h2 className={styles.label}>Hearing right now</h2>
             <p className={styles.note}>{heard === null ? '—' : name(heard)}</p>
-            <p className={styles.sub}>
+            <p className={`${styles.sub} ${styles.oneLine}`}>
               {reading
                 ? `${reading.freq.toFixed(1)} Hz · ${cents > 0 ? '+' : ''}${cents}¢ off`
-                : ' '}
+                : '\u00a0'}
             </p>
             <p className={styles.verdict}>{verdict}</p>
 
@@ -153,7 +153,7 @@ export function MicTestScreen() {
                 ),
               )}
             </select>
-            <p className={styles.sub}>
+            <p className={`${styles.sub} ${styles.oneLine}`}>
               {(440 * 2 ** ((target - 69) / 12)).toFixed(1)} Hz
               {heard !== null && !frame?.muted && level >= gate
                 ? heard === target

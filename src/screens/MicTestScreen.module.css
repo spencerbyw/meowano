@@ -44,13 +44,26 @@
   font-family: var(--font-display);
   font-size: 2.75rem;
   line-height: 1.1;
+  /* Fixed height so nothing below shifts as readings come and go. */
+  height: 1.1em;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
 .sub {
   color: var(--color-text-muted);
   font-weight: 700;
+  line-height: 1.4;
   min-height: 1.4em;
+}
+
+/* Live lines that change as it listens: always exactly one line tall. */
+.oneLine {
+  height: 1.4em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
 }
 
 .verdict {
