@@ -1,5 +1,4 @@
 import {
-  IconArrowRight,
   IconCheck,
   IconFlag,
   IconFlame,
@@ -14,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import { playChime, playNotes, useAudioStatus } from '../audio/engine'
 import { onNotePlayed } from '../audio/mic'
 import { ListenPanel } from '../components/ListenPanel'
+import { NextButton } from '../components/NextButton'
 import { CatMark, type CatMood } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { PianoKeys } from '../components/PianoKeys'
@@ -28,6 +28,9 @@ import { useStats } from '../stats/store'
 import { useWakeLock } from '../ui/useWakeLock'
 import styles from './QuizScreen.module.css'
 
+/** "Play the note": how long the Next button counts down after a right note. */
+const AUTO_ADVANCE_SECONDS = 3
+
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 export function QuizScreen() {
@@ -37,7 +40,7 @@ export function QuizScreen() {
   const currentStreak = useStats((s) => s.currentStreak)
   const allTimeBest = useStats((s) => s.bestStreak)
   const { answer, next, skip, finish, goHome } = useQuiz()
-  const { confirm, catMode, sound } = useSettings()
+  const { confirm, catMode, sound, autoAdvance } = useSettings()
   const practice = useSettings((s) => s.practice)
   // One staff size for the whole session: tall enough for every note these
   // settings can produce, and wide enough for the biggest key signature.
@@ -437,10 +440,20 @@ export function QuizScreen() {
             </p>
 
             {solved ? (
-              <Button3D size="lg" className={styles.next} onClick={onNext} autoFocus>
-                {isLast ? t('quiz.finish') : t('quiz.next')}
-                <IconArrowRight size={24} aria-hidden="true" />
-              </Button3D>
+              <NextButton
+                key={question.id}
+                label={isLast ? t('quiz.finish') : t('quiz.next')}
+                onNext={onNext}
+                // Play the note: after a right note, carry on by itself.
+                countdown={
+                  mode === 'play' && autoAdvance && feedback?.kind === 'correct'
+                    ? AUTO_ADVANCE_SECONDS
+                    : undefined
+                }
+                countdownLabel={(count) =>
+                  t(isLast ? 'quiz.finishIn' : 'quiz.nextIn', { count })
+                }
+              />
             ) : (
               <div className={styles.footerButtons}>
                 <Button3D

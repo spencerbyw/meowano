@@ -7,6 +7,7 @@ import {
   IconMoon,
   IconMusic,
   IconPlant,
+  IconPiano,
   IconPlant2,
   IconRocket,
   IconSun,
@@ -258,6 +259,19 @@ export function SettingsDrawer() {
                   />
                 </>
               )}
+            </Section>
+
+            {/* Play the note */}
+            <Section
+              title={t('settings.playMode')}
+              icon={<IconPiano size={22} aria-hidden="true" />}
+            >
+              <SwitchField
+                label={t('settings.autoAdvance')}
+                hint={t('settings.autoAdvanceHint')}
+                checked={settings.autoAdvance}
+                onChange={settings.setAutoAdvance}
+              />
             </Section>
 
             {/* App */}

@@ -392,10 +392,6 @@
   }
 }
 
-.next {
-  width: 100%;
-}
-
 .footerButtons {
   display: flex;
   gap: var(--space-3);

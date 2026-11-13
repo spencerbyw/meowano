@@ -1,0 +1,23 @@
+.next {
+  width: 100%;
+}
+
+/* Burns down from right to left while the countdown runs. */
+.fuse {
+  position: absolute;
+  left: var(--space-5);
+  right: var(--space-5);
+  bottom: 7px;
+  height: 5px;
+  border-radius: 3px;
+  background: currentColor;
+  opacity: 0.45;
+  transform-origin: left center;
+  animation: burn linear forwards;
+}
+
+@keyframes burn {
+  to {
+    transform: scaleX(0);
+  }
+}
