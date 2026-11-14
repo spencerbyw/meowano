@@ -52,8 +52,8 @@ export function QuizScreen() {
   useWakeLock(true)
   // Once answered, the answer area shrinks (the other choices fold away; in play
   // mode the listening panel gives way to the answer), which would let the staff
-  // grow and the centred card slide down. Hold both where they were while she was
-  // answering: measured after every render until then, since the swap is instant.
+  // grow and the centred card slide down. Hold both where they were while the question
+  // was open: measured after every render until then, since the swap is instant.
   const staffRef = useRef<HTMLDivElement>(null)
   const cardRef = useRef<HTMLElement>(null)
   const lastLayout = useRef<{ staff: number; top: number } | null>(null)

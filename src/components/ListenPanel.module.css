@@ -26,8 +26,8 @@
   color: var(--color-text-muted);
 }
 
-/* Swells with what the mic hears (--level, 0–1, set from ListenPanel), so she can
-   see it's picking up her piano. */
+/* Swells with what the mic hears (--level, 0–1, set from ListenPanel), so the player can
+   see it's picking up their piano. */
 .ring {
   position: absolute;
   inset: 0;
