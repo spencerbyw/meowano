@@ -4,9 +4,11 @@ import {
   IconCat,
   IconDeviceDesktop,
   IconEgg,
+  IconMicrophone,
   IconMoon,
   IconMusic,
   IconPlant,
+  IconPiano,
   IconPlant2,
   IconRocket,
   IconSun,
@@ -19,6 +21,8 @@ import { Dialog } from 'radix-ui'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { unlockAudio } from '../../audio/engine'
+import { startMic } from '../../audio/mic'
+import { useQuiz } from '../../quiz/store'
 import { PRESET_ORDER } from '../../settings/presets'
 import { useSettings } from '../../settings/store'
 import type {
@@ -260,6 +264,45 @@ export function SettingsDrawer() {
               )}
             </Section>
 
+            {/* Play the note */}
+            <Section
+              title={t('settings.playMode')}
+              icon={<IconPiano size={22} aria-hidden="true" />}
+            >
+              <SwitchField
+                label={t('settings.autoAdvance')}
+                hint={t('settings.autoAdvanceHint')}
+                checked={settings.autoAdvance}
+                onChange={settings.setAutoAdvance}
+              />
+              {settings.autoAdvance && (
+                <StepSlider
+                  label={t('settings.autoAdvanceSeconds')}
+                  value={settings.autoAdvanceSeconds}
+                  min={0.5}
+                  max={5}
+                  step={0.5}
+                  onChange={settings.setAutoAdvanceSeconds}
+                  valueText={t('settings.seconds', {
+                    count: settings.autoAdvanceSeconds,
+                  })}
+                />
+              )}
+              {/* Mic test screen: what "Play the note" hears, for troubleshooting. */}
+              <Button3D
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setOpen(false)
+                  useQuiz.getState().showMicTest()
+                  void startMic()
+                }}
+              >
+                <IconMicrophone size={20} aria-hidden="true" />
+                Test the microphone
+              </Button3D>
+            </Section>
+
             {/* App */}
             <Section
               title={t('settings.app')}
@@ -324,6 +367,15 @@ export function SettingsDrawer() {
                 />
               )}
             </Section>
+
+            {/* Which build is running (handy when the app is slow to pick up an update). */}
+            <p className={styles.build}>
+              {__BUILD_HASH__} ·{' '}
+              {new Date(__BUILD_DATE__).toLocaleString(undefined, {
+                dateStyle: 'medium',
+                timeStyle: 'short',
+              })}
+            </p>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

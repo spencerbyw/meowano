@@ -2,18 +2,19 @@ import {
   IconChartBar,
   IconChevronRight,
   IconInfinity,
-  IconPlayerPlayFilled,
+  IconListCheck,
+  IconPiano,
 } from '@tabler/icons-react'
 import { ToggleGroup } from 'radix-ui'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Confetti } from '../components/Confetti'
 import { Footer } from '../components/Footer'
-import { unlockAudio } from '../audio/engine'
 import { Logo } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { Splash } from '../components/Splash'
 import { Button3D } from '../components/ui/Button3D'
+import { beginRound } from '../quiz/begin'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import { QUIZ_LENGTHS, type QuizLength } from '../settings/types'
@@ -23,7 +24,6 @@ import styles from './StartScreen.module.css'
 export function StartScreen() {
   const { t } = useTranslation()
   const { quizLength, setQuizLength, preset, catMode } = useSettings()
-  const start = useQuiz((s) => s.start)
   const setSettingsOpen = useUi((s) => s.setSettingsOpen)
   const showStats = useQuiz((s) => s.showStats)
   const pet = usePetting()
@@ -88,17 +88,16 @@ export function StartScreen() {
               <IconChevronRight size={18} aria-hidden="true" />
             </button>
 
-            <Button3D
-              size="lg"
-              className={styles.play}
-              onClick={() => {
-                if (useSettings.getState().sound) unlockAudio()
-                start()
-              }}
-            >
-              <IconPlayerPlayFilled size={24} aria-hidden="true" />
-              {t('start.play')}
-            </Button3D>
+            <div className={styles.modes}>
+              <Button3D size="lg" onClick={() => beginRound('quiz')}>
+                <IconListCheck size={24} aria-hidden="true" />
+                {t('start.quizMe')}
+              </Button3D>
+              <Button3D variant="secondary" size="lg" onClick={() => beginRound('play')}>
+                <IconPiano size={24} aria-hidden="true" />
+                {t('start.playNote')}
+              </Button3D>
+            </div>
           </section>
 
           <Button3D

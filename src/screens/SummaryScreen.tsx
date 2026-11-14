@@ -5,19 +5,19 @@ import {
   IconTrophyFilled,
 } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
-import { unlockAudio } from '../audio/engine'
 import { Confetti } from '../components/Confetti'
 import { CatMark } from '../components/Logo'
 import { Staff } from '../components/Staff'
 import { Button3D } from '../components/ui/Button3D'
 import { formatAnswer, formatStaffLabel } from '../music/format'
+import { beginRound } from '../quiz/begin'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import styles from './SummaryScreen.module.css'
 
 export function SummaryScreen() {
   const { t } = useTranslation()
-  const { results, bestStreak, recordAtStart, start, goHome } = useQuiz()
+  const { results, bestStreak, recordAtStart, mode, goHome } = useQuiz()
   const newRecord = bestStreak > recordAtStart && bestStreak > 1
   const catMode = useSettings((s) => s.catMode)
 
@@ -96,14 +96,7 @@ export function SummaryScreen() {
         </main>
       </div>
       <div className={styles.actions}>
-        <Button3D
-          size="lg"
-          onClick={() => {
-            if (useSettings.getState().sound) unlockAudio()
-            start()
-          }}
-          autoFocus
-        >
+        <Button3D size="lg" onClick={() => beginRound(mode)} autoFocus>
           <IconRefresh size={24} aria-hidden="true" />
           {t('summary.again')}
         </Button3D>

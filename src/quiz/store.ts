@@ -1,9 +1,16 @@
 import { create } from 'zustand'
 import { generateQuestion, type Question } from '../music/generator'
+import { midiOf } from '../music/theory'
 import { useSettings } from '../settings/store'
 import { practiceWeight, useStats } from '../stats/store'
 
-export type Screen = 'start' | 'quiz' | 'summary' | 'stats'
+export type Screen = 'start' | 'quiz' | 'summary' | 'stats' | 'mictest'
+
+/**
+ * - quiz: pick the answer from three choices
+ * - play: play the note on the piano; the mic listens (single notes only)
+ */
+export type QuizMode = 'quiz' | 'play'
 
 export interface Result {
   question: Question
@@ -24,11 +31,14 @@ const UNLIMITED_RETURN_AFTER = 3
 
 interface QuizState {
   screen: Screen
+  mode: QuizMode
   /** Questions in this round; 0 = unlimited. */
   length: number
   question: Question | null
   /** Choices already tried and found wrong for the current question. */
   wrongPicks: number[]
+  /** Play mode: wrong notes played for the current question (MIDI numbers). */
+  wrongNotes: number[]
   solved: boolean
   results: Result[]
   /** First-try streak within this round. */
@@ -45,24 +55,34 @@ interface QuizState {
   /** The current question was given up on and its answer revealed. */
   gaveUp: boolean
 
-  start: () => void
+  start: (mode?: QuizMode) => void
   answer: (index: number) => 'correct' | 'wrong' | 'ignored'
+  /** Play mode: she played this note (MIDI number). Must match exactly, octave too. */
+  answerNote: (midi: number) => 'correct' | 'wrong' | 'ignored'
   next: () => void
   /** "Don't know": put the question off, or give up if it's already been put off. */
   skip: () => 'deferred' | 'gaveUp' | 'ignored'
   finish: () => void
   goHome: () => void
   showStats: () => void
+  /** The mic test screen, for checking what "Play the note" hears. */
+  showMicTest: () => void
 }
 
-const newQuestion = (previous?: Question | null) =>
-  generateQuestion(useSettings.getState().practice, {
-    previousStatKey: previous?.statKey,
-    weight: practiceWeight,
-  })
+const newQuestion = (mode: QuizMode, previous?: Question | null) => {
+  const practice = useSettings.getState().practice
+  return generateQuestion(
+    // Playing it: single notes only, and the octave always matters.
+    mode === 'play'
+      ? { ...practice, kinds: { note: true, dyad: false, triad: false }, octaves: true }
+      : practice,
+    { previousStatKey: previous?.statKey, weight: practiceWeight },
+  )
+}
 
 const freshQuestion = {
   wrongPicks: [],
+  wrongNotes: [],
   solved: false,
   isReturn: false,
   hadMiss: false,
@@ -72,7 +92,7 @@ const freshQuestion = {
 export const useQuiz = create<QuizState>()((set, get) => {
   /** Move on: a new question, a returning skipped one, or the summary. */
   const advance = () => {
-    const { length, results, question, deferred } = get()
+    const { length, results, question, deferred, mode } = get()
     if (length > 0 && results.length >= length) {
       set({ screen: 'summary' })
       return
@@ -89,11 +109,35 @@ export const useQuiz = create<QuizState>()((set, get) => {
       })
       return
     }
-    set({ ...freshQuestion, question: newQuestion(question) })
+    set({ ...freshQuestion, question: newQuestion(mode, question) })
+  }
+
+  /** The current question was answered right; returns the outcome for the caller. */
+  const solve = () => {
+    const { question, wrongPicks, wrongNotes, streak, bestStreak, results, hadMiss } =
+      get()
+    if (!question) return 'ignored' as const
+    const firstTry = wrongPicks.length === 0 && wrongNotes.length === 0 && !hadMiss
+    const nextStreak = firstTry ? streak + 1 : 0
+    set({
+      solved: true,
+      streak: nextStreak,
+      bestStreak: Math.max(bestStreak, nextStreak),
+      results: [...results, { question, firstTry }],
+    })
+    useStats.getState().record(question.statKey, firstTry)
+    return 'correct' as const
+  }
+
+  const miss = (patch: Partial<QuizState>) => {
+    set({ ...patch, streak: 0 })
+    useStats.setState({ currentStreak: 0 })
+    return 'wrong' as const
   }
 
   return {
     screen: 'start',
+    mode: 'quiz',
     length: 10,
     question: null,
     results: [],
@@ -103,12 +147,13 @@ export const useQuiz = create<QuizState>()((set, get) => {
     deferred: [],
     ...freshQuestion,
 
-    start: () =>
+    start: (mode = 'quiz') =>
       set({
         ...freshQuestion,
         screen: 'quiz',
+        mode,
         length: useSettings.getState().quizLength,
-        question: newQuestion(),
+        question: newQuestion(mode),
         deferred: [],
         results: [],
         streak: 0,
@@ -117,23 +162,17 @@ export const useQuiz = create<QuizState>()((set, get) => {
       }),
 
     answer: (index) => {
-      const { question, solved, wrongPicks, streak, bestStreak, results, hadMiss } = get()
+      const { question, solved, wrongPicks } = get()
       if (!question || solved || wrongPicks.includes(index)) return 'ignored'
-      if (index === question.correctIndex) {
-        const firstTry = wrongPicks.length === 0 && !hadMiss
-        const nextStreak = firstTry ? streak + 1 : 0
-        set({
-          solved: true,
-          streak: nextStreak,
-          bestStreak: Math.max(bestStreak, nextStreak),
-          results: [...results, { question, firstTry }],
-        })
-        useStats.getState().record(question.statKey, firstTry)
-        return 'correct'
-      }
-      set({ wrongPicks: [...wrongPicks, index], streak: 0 })
-      useStats.setState({ currentStreak: 0 })
-      return 'wrong'
+      if (index === question.correctIndex) return solve()
+      return miss({ wrongPicks: [...wrongPicks, index] })
+    },
+
+    answerNote: (midi) => {
+      const { question, solved, wrongNotes } = get()
+      if (!question || solved) return 'ignored'
+      if (midi === midiOf(question.notes[0])) return solve()
+      return miss({ wrongNotes: [...wrongNotes, midi] })
     },
 
     next: advance,
@@ -145,6 +184,7 @@ export const useQuiz = create<QuizState>()((set, get) => {
         isReturn,
         hadMiss,
         wrongPicks,
+        wrongNotes,
         results,
         deferred,
         length,
@@ -169,7 +209,7 @@ export const useQuiz = create<QuizState>()((set, get) => {
           ...deferred,
           {
             question,
-            hadMiss: hadMiss || wrongPicks.length > 0,
+            hadMiss: hadMiss || wrongPicks.length > 0 || wrongNotes.length > 0,
             dueAt: length > 0 ? Infinity : results.length + UNLIMITED_RETURN_AFTER,
           },
         ],
@@ -181,5 +221,6 @@ export const useQuiz = create<QuizState>()((set, get) => {
     finish: () => set({ screen: 'summary' }),
     goHome: () => set({ screen: 'start', question: null }),
     showStats: () => set({ screen: 'stats' }),
+    showMicTest: () => set({ screen: 'mictest', question: null }),
   }
 })

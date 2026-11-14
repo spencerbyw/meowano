@@ -2,6 +2,7 @@ import { CacheStorage, SplendidGrandPiano } from 'smplr'
 import { create } from 'zustand'
 import { midiOf, type Pitch } from '../music/theory'
 import { useSettings } from '../settings/store'
+import { micActive, muteMic } from './mic'
 
 /**
  * All sound lives here. Browsers (iOS especially) only allow audio after a user
@@ -41,6 +42,8 @@ type AudioSessionNavigator = Navigator & { audioSession?: { type: string } }
  */
 function chooseSession(): boolean {
   window.clearTimeout(releaseTimer)
+  // "Play the note" has the mic on: iOS must stay in record mode or the mic stops.
+  if (micActive()) return false
   const playback = useSettings.getState().silentMode
   const type = playback ? 'playback' : 'ambient'
   const session = (navigator as AudioSessionNavigator).audioSession
@@ -117,6 +120,8 @@ export async function playNotes(pitches: Pitch[], { roll = 0.025 } = {}) {
   await loadPiano()
   if (!piano || !ctx) return
   if (playback) releaseSoon(NOTE_SECONDS + pitches.length * roll)
+  // Don't let the mic take Kiano's own piano for her playing (it rings a while).
+  muteMic((NOTE_SECONDS + pitches.length * roll) * 1000 + 1500)
   const now = ctx.currentTime + 0.01
   pitches.forEach((p, i) => {
     piano!.start({
@@ -154,6 +159,7 @@ function tone(
 export async function playChime(kind: 'correct' | 'wrong') {
   const c = context()
   if (await ready(c)) releaseSoon(0.6)
+  muteMic(900)
   const t = c.currentTime + 0.01
   if (kind === 'correct') {
     // A bright little "bling": E6 then A6.
