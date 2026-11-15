@@ -55,41 +55,6 @@
   transition: left 400ms var(--ease-spring);
 }
 
-.yarnEdge {
-  fill: var(--color-primary-edge);
-}
-
-.yarnFace {
-  fill: var(--color-primary);
-}
-
-.yarnWind {
-  transform-box: view-box;
-  transform-origin: 12px 11px;
-  transform: rotate(calc(var(--done) * 3600deg));
-  transition: transform 400ms var(--ease-spring);
-}
-
-.yarnDark,
-.yarnLight {
-  fill: none;
-  stroke-width: 1.5;
-  stroke-linecap: round;
-}
-
-.yarnDark {
-  stroke: var(--color-primary-edge);
-}
-
-.yarnLight {
-  stroke: color-mix(in srgb, var(--color-primary) 55%, #fff);
-}
-
-.yarnShine {
-  fill: #fff;
-  opacity: 0.45;
-}
-
 .barFill {
   display: block;
   height: 100%;
@@ -555,6 +520,7 @@
 
   .answers {
     overflow-y: auto;
+    overflow-x: hidden;
     overscroll-behavior: contain;
     justify-content: center;
   }

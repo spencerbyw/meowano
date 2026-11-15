@@ -110,6 +110,8 @@ svg {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  /* Never sideways, even while something slides in. */
+  overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   display: flex;

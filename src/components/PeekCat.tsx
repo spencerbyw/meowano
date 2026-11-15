@@ -312,18 +312,17 @@ function Head({ face, blink }: { face: Face; blink: boolean }) {
   return (
     <>
       <g className={styles.earL}>
-        {/* A round base, hidden in the head, so a turning ear never shows a gap. */}
-        <circle cx="21.5" cy="22" r="5.6" className={styles.fur} />
         <path
-          d="M14.5 25 15.8 11.5c.2-1.5 1.9-2.2 3.1-1.3L28.6 18Z"
+          // Reaches well down into the head (hidden there), so however the ear
+          // turns it stays joined on.
+          d="M16.2 24 15.8 11.5c.2-1.5 1.9-2.2 3.1-1.3L28.6 18 28 29 18 30Z"
           className={styles.fur}
         />
         <path d="M19 14.5 25.5 19.6" className={styles.innerEar} />
       </g>
       <g className={styles.earR}>
-        <circle cx="42.5" cy="22" r="5.6" className={styles.fur} />
         <path
-          d="M49.5 25 48.2 11.5c-.2-1.5-1.9-2.2-3.1-1.3L35.4 18Z"
+          d="M47.8 24 48.2 11.5c-.2-1.5-1.9-2.2-3.1-1.3L35.4 18 36 29 46 30Z"
           className={styles.fur}
         />
         <path d="M45 14.5 38.5 19.6" className={styles.innerEar} />

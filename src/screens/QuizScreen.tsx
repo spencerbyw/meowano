@@ -18,6 +18,7 @@ import { PeekCat, type PeekMood } from '../components/PeekCat'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { PianoKeys } from '../components/PianoKeys'
 import { Staff } from '../components/Staff'
+import { YarnBall } from '../components/YarnBall'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatPitchClass, formatStaffLabel } from '../music/format'
 import { practiceBand, viewOf } from '../music/staffBand'
@@ -249,36 +250,7 @@ export function QuizScreen() {
                   className={styles.yarn}
                   style={{ '--done': results.length / length } as React.CSSProperties}
                 >
-                  <svg viewBox="0 0 24 24" width="100%" height="100%">
-                    <defs>
-                      <clipPath id="yarn-ball">
-                        <circle cx="12" cy="11" r="9.4" />
-                      </clipPath>
-                    </defs>
-                    {/* Like the buttons: a darker edge under a lighter face. */}
-                    <circle cx="12" cy="13" r="10" className={styles.yarnEdge} />
-                    <circle cx="12" cy="11" r="10" className={styles.yarnFace} />
-                    <g clipPath="url(#yarn-ball)">
-                      <g className={styles.yarnWind}>
-                        <path
-                          d="M2 7.5c6-2.5 13-1 19.5 5M1.5 12c6.5-2 13.5 0 19 7M4 3.5c5 0 11.5 3.5 15 11"
-                          className={styles.yarnDark}
-                        />
-                        <path
-                          d="M8 1.5c-2 5-1.5 13 3 20M14.5 1c-3 5-3.2 12.5.5 20.5"
-                          className={styles.yarnLight}
-                        />
-                      </g>
-                    </g>
-                    <ellipse
-                      cx="7.6"
-                      cy="6.4"
-                      rx="3"
-                      ry="1.7"
-                      transform="rotate(-35 7.6 6.4)"
-                      className={styles.yarnShine}
-                    />
-                  </svg>
+                  <YarnBall done={results.length / length} />
                 </span>
               )}
             </span>

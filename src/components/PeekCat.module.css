@@ -137,18 +137,18 @@ button.cat:focus-visible {
   stroke-linecap: round;
 }
 
-/* Ears: rotate about their base. */
+/* Ears: hinge at their inner corner, so they swing outward to flatten. */
 .earL,
 .earR {
   transition: transform 260ms var(--ease-spring);
 }
 
 .earL {
-  transform-origin: 21.5px 21.5px;
+  transform-origin: 26.5px 19.5px;
 }
 
 .earR {
-  transform-origin: 42.5px 21.5px;
+  transform-origin: 37.5px 19.5px;
 }
 
 .twitchL .earL {
@@ -179,25 +179,25 @@ button.cat:focus-visible {
 
 /* Listening for the piano: ears prick up with what the mic hears. */
 .hearMic .earL {
-  transform: rotate(calc(var(--level, 0) * 12deg)) scale(calc(1 + var(--level, 0) * 0.1));
+  transform: rotate(calc(var(--level, 0) * 10deg));
   transition: transform 90ms ease-out;
 }
 
 .hearMic .earR {
-  transform: rotate(calc(var(--level, 0) * -12deg)) scale(calc(1 + var(--level, 0) * 0.1));
+  transform: rotate(calc(var(--level, 0) * -10deg));
   transition: transform 90ms ease-out;
 }
 
 .listening .earL,
 .curious .earL,
 .startled .earL {
-  transform: rotate(8deg) scale(1.08);
+  transform: rotate(8deg);
 }
 
 .listening .earR,
 .curious .earR,
 .startled .earR {
-  transform: rotate(-8deg) scale(1.08);
+  transform: rotate(-8deg);
 }
 
 .purr .earL {
@@ -209,11 +209,11 @@ button.cat:focus-visible {
 }
 
 .sad .earL {
-  transform: rotate(-34deg);
+  transform: rotate(-30deg);
 }
 
 .sad .earR {
-  transform: rotate(34deg);
+  transform: rotate(30deg);
 }
 
 .asleep .earL,
