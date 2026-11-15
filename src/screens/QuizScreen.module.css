@@ -67,15 +67,6 @@
   transition: width 400ms var(--ease-spring);
 }
 
-/* Cat mode: a twisted strand of yarn. */
-.yarnFill {
-  background: repeating-linear-gradient(
-    115deg,
-    var(--color-primary) 0 5px,
-    color-mix(in srgb, var(--color-primary) 70%, #fff) 5px 7px
-  );
-}
-
 .streak {
   display: flex;
   flex-direction: column;

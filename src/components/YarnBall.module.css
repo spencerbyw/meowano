@@ -2,10 +2,6 @@
   fill: var(--color-primary-edge);
 }
 
-.shade {
-  fill: color-mix(in srgb, var(--color-primary) 55%, var(--color-primary-edge));
-}
-
 .face {
   fill: var(--color-primary);
 }
@@ -16,18 +12,9 @@
   transition: transform 400ms var(--ease-spring);
 }
 
-.dark,
-.light {
+.strand {
   fill: none;
-  stroke-linecap: round;
-}
-
-.dark {
   stroke: var(--color-primary-edge);
-  stroke-width: 1.8;
-}
-
-.light {
-  stroke: color-mix(in srgb, var(--color-primary) 50%, #fff);
-  stroke-width: 0.8;
+  stroke-width: 2.8;
+  stroke-linecap: round;
 }

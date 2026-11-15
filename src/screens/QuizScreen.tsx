@@ -238,9 +238,7 @@ export function QuizScreen() {
             <span className={styles.track} aria-hidden="true">
               <span className={styles.bar}>
                 <span
-                  className={[styles.barFill, catMode && styles.yarnFill]
-                    .filter(Boolean)
-                    .join(' ')}
+                  className={styles.barFill}
                   style={{ width: `${(results.length / length) * 100}%` }}
                 />
               </span>
