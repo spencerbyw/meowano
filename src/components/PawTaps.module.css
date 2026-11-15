@@ -1,0 +1,38 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.paw {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  fill: var(--color-primary);
+  opacity: 0;
+  animation: stamp 750ms ease-out forwards;
+}
+
+@keyframes stamp {
+  0% {
+    opacity: 0.75;
+    transform: rotate(var(--turn)) scale(0.4);
+  }
+  25% {
+    opacity: 0.6;
+    transform: rotate(var(--turn)) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--turn)) scale(1) translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paw {
+    display: none;
+  }
+}

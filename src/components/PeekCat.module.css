@@ -1,0 +1,608 @@
+/* The cat. Sizes from --cat-w (set by the screen); everything inside is in the
+   SVG's 64-unit space, where CSS px are SVG units. */
+.cat {
+  position: relative;
+  display: block;
+  width: var(--cat-w, 112px);
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button.cat {
+  cursor: pointer;
+}
+
+button.cat:focus-visible {
+  outline: 3px solid var(--color-secondary-edge);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+}
+
+/* Sits on its card's top edge: the edge line (y = 51) lines up with the card's top. */
+.peek {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--cat-w, 112px) * -0.7586);
+  margin-left: calc(var(--cat-w, 112px) / -2);
+  aspect-ratio: 58 / 51;
+  z-index: 1;
+}
+
+.head {
+  aspect-ratio: 58 / 48;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.svg g {
+  transform-box: view-box;
+}
+
+/* Colours */
+.fur {
+  fill: var(--cat-fur);
+}
+
+.innerEar {
+  stroke: var(--cat-ear);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.cheek {
+  fill: var(--cat-ear);
+  transition: opacity 300ms;
+}
+
+.eye {
+  fill: var(--cat-eye);
+}
+
+.shine {
+  fill: var(--cat-shine);
+}
+
+.line {
+  stroke: var(--cat-eye);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.brow {
+  stroke: var(--cat-mouth);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.heartEye {
+  fill: var(--cat-ear);
+}
+
+.nose {
+  fill: var(--cat-nose);
+}
+
+.mouth {
+  stroke: var(--cat-mouth);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.mouthOpen {
+  fill: #c2427a;
+  stroke: var(--cat-mouth);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+}
+
+.whiskers {
+  stroke: var(--cat-mouth);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  fill: none;
+  opacity: 0.85;
+  transform-origin: 32px 43px;
+  animation: whisk 5.5s ease-in-out infinite;
+}
+
+/* The paws rest on the card, outlined in the card's colour so they read in front
+   of the (same-coloured) chin. */
+.paw {
+  fill: var(--cat-fur);
+  stroke: var(--cat-paw-edge, var(--color-surface));
+  stroke-width: 1.3;
+  paint-order: stroke;
+}
+
+.toes {
+  stroke: var(--cat-mouth);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+}
+
+/* Ears: rotate about their base. */
+.earL,
+.earR {
+  transition: transform 260ms var(--ease-spring);
+}
+
+.earL {
+  transform-origin: 21.5px 21.5px;
+}
+
+.earR {
+  transform-origin: 42.5px 21.5px;
+}
+
+.twitchL .earL {
+  animation: twitch-l 420ms ease;
+}
+
+.twitchR .earR {
+  animation: twitch-r 420ms ease;
+}
+
+@keyframes twitch-l {
+  35% {
+    transform: rotate(-16deg);
+  }
+  60% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes twitch-r {
+  35% {
+    transform: rotate(16deg);
+  }
+  60% {
+    transform: rotate(-4deg);
+  }
+}
+
+/* Listening for the piano: ears prick up with what the mic hears. */
+.hearMic .earL {
+  transform: rotate(calc(var(--level, 0) * 12deg)) scale(calc(1 + var(--level, 0) * 0.1));
+  transition: transform 90ms ease-out;
+}
+
+.hearMic .earR {
+  transform: rotate(calc(var(--level, 0) * -12deg)) scale(calc(1 + var(--level, 0) * 0.1));
+  transition: transform 90ms ease-out;
+}
+
+.listening .earL,
+.curious .earL,
+.startled .earL {
+  transform: rotate(8deg) scale(1.08);
+}
+
+.listening .earR,
+.curious .earR,
+.startled .earR {
+  transform: rotate(-8deg) scale(1.08);
+}
+
+.sad .earL {
+  transform: rotate(-34deg);
+}
+
+.sad .earR {
+  transform: rotate(34deg);
+}
+
+.asleep .earL,
+.yawn .earL {
+  transform: rotate(-14deg);
+}
+
+.asleep .earR,
+.yawn .earR {
+  transform: rotate(14deg);
+}
+
+.confused .earL {
+  transform: rotate(-20deg);
+}
+
+/* Eyes look where you tap. */
+.eyes {
+  transform: translate(calc(var(--lx, 0) * 1px), calc(var(--ly, 0) * 1px));
+  transition: transform 220ms var(--ease-out);
+}
+
+.svg .open,
+.svg .blink {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 70ms ease-in;
+}
+
+.svg .blink {
+  transform: scaleY(0.1);
+}
+
+/* Head tilts a touch toward what it's looking at. */
+.tilt {
+  transform-origin: 32px 50px;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform 500ms var(--ease-out);
+}
+
+/* A new question: duck behind the card and pop back up. */
+.rise {
+  animation: rise 520ms var(--ease-spring) both;
+}
+
+@keyframes rise {
+  from {
+    transform: translateY(16px);
+  }
+}
+
+/* Moods: the whole head. */
+.bob {
+  transform-origin: 32px 50px;
+  animation: breathe 3.6s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  50% {
+    transform: translateY(0.6px) scaleY(0.985);
+  }
+}
+
+.happy .bob {
+  animation:
+    hop 700ms var(--ease-out),
+    breathe 3.6s ease-in-out 700ms infinite;
+}
+
+@keyframes hop {
+  30% {
+    transform: translateY(-4px) rotate(-3deg);
+  }
+  55% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-1.6px) rotate(2deg);
+  }
+}
+
+.love .bob {
+  animation: purr 260ms ease-in-out 6 alternate;
+}
+
+@keyframes purr {
+  from {
+    transform: rotate(-3.5deg);
+  }
+  to {
+    transform: rotate(3.5deg) translateY(-0.6px);
+  }
+}
+
+.sad .bob {
+  animation: flinch 600ms var(--ease-out) forwards;
+}
+
+@keyframes flinch {
+  15% {
+    transform: translateY(-2.5px) scale(1.04);
+  }
+  40% {
+    transform: translateY(2.4px) rotate(-1.5deg);
+  }
+  to {
+    transform: translateY(1.6px);
+  }
+}
+
+.confused .bob {
+  animation: puzzle 600ms var(--ease-spring) forwards;
+}
+
+@keyframes puzzle {
+  to {
+    transform: rotate(-10deg);
+  }
+}
+
+.curious .bob {
+  animation: lean 300ms var(--ease-spring) forwards;
+}
+
+@keyframes lean {
+  to {
+    transform: translateY(-1.8px) scale(1.03);
+  }
+}
+
+.listening .bob {
+  animation: sway 820ms ease-in-out infinite alternate;
+}
+
+@keyframes sway {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg) translateY(-0.8px);
+  }
+}
+
+.yawn .bob {
+  animation: yawn 2.4s ease-in-out;
+}
+
+@keyframes yawn {
+  30%,
+  70% {
+    transform: rotate(-5deg) translateY(-1.5px) scaleY(1.04);
+  }
+}
+
+.asleep .bob {
+  animation: snooze 3.4s ease-in-out infinite alternate;
+}
+
+@keyframes snooze {
+  from {
+    transform: translateY(2px) rotate(6deg);
+  }
+  to {
+    transform: translateY(3px) rotate(7deg) scaleY(0.98);
+  }
+}
+
+.startled .bob {
+  animation: jump 600ms var(--ease-spring);
+}
+
+@keyframes jump {
+  25% {
+    transform: translateY(-6px) scale(1.06);
+  }
+}
+
+@keyframes whisk {
+  0%,
+  90%,
+  100% {
+    transform: none;
+  }
+  93% {
+    transform: rotate(-2.5deg);
+  }
+  96% {
+    transform: rotate(2deg);
+  }
+}
+
+/* Paws */
+.happy .pawL {
+  animation: pat 220ms ease-in-out 4 alternate;
+}
+
+.happy .pawR {
+  animation: pat 220ms ease-in-out 110ms 4 alternate;
+}
+
+@keyframes pat {
+  to {
+    transform: translateY(-2.6px);
+  }
+}
+
+/* Petted: makes biscuits. */
+.love .pawL {
+  animation: knead 400ms ease-in-out 4 alternate;
+}
+
+.love .pawR {
+  animation: knead 400ms ease-in-out 400ms 4 alternate;
+}
+
+@keyframes knead {
+  to {
+    transform: translateY(1.4px) scaleY(0.9);
+  }
+}
+
+.sad .pawL,
+.sad .pawR {
+  animation: slip 700ms var(--ease-out);
+}
+
+.sad .pawR {
+  animation-delay: 60ms;
+}
+
+@keyframes slip {
+  30% {
+    transform: translateY(2.6px);
+  }
+}
+
+.startled .pawL,
+.startled .pawR {
+  animation: hop-paw 500ms var(--ease-spring);
+}
+
+@keyframes hop-paw {
+  30% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Floaters */
+.floaters {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.floater {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 18%;
+  aspect-ratio: 1;
+  font-family: var(--font-display);
+  font-size: calc(var(--cat-w, 112px) * 0.16);
+  line-height: 1;
+  opacity: 0;
+}
+
+.slot0 {
+  left: -2%;
+  top: 14%;
+}
+
+.slot1 {
+  right: -4%;
+  top: 2%;
+}
+
+.slot2 {
+  right: -16%;
+  top: 30%;
+}
+
+.note {
+  color: var(--color-secondary);
+  animation: float-up 1.5s ease-out infinite;
+}
+
+.heart {
+  color: var(--color-primary);
+  width: 15%;
+  animation: float-up 1.3s ease-out 2;
+}
+
+.sparkle {
+  color: var(--color-sunny);
+  text-shadow: 0 1px 0 var(--color-sunny-edge);
+  animation: twinkle 1.4s ease-in-out infinite;
+}
+
+.zzz {
+  color: var(--color-text-muted);
+  animation: float-up 2.4s ease-out infinite;
+}
+
+.slot1.note,
+.slot1.heart,
+.slot1.sparkle {
+  animation-delay: 0.45s;
+}
+
+.slot2.note,
+.slot2.heart,
+.slot2.sparkle {
+  animation-delay: 0.9s;
+}
+
+.slot1.zzz {
+  animation-delay: 0.8s;
+}
+
+.slot2.zzz {
+  animation-delay: 1.6s;
+}
+
+.drop {
+  color: var(--color-sky);
+  width: 9%;
+  right: 8%;
+  top: 24%;
+  animation: drip 1.6s ease-in forwards;
+}
+
+.question {
+  color: var(--color-secondary-edge);
+  font-size: calc(var(--cat-w, 112px) * 0.22);
+  right: -10%;
+  top: 0;
+  animation: pop-q 500ms var(--ease-spring) forwards;
+}
+
+:root[data-theme='dark'] .question {
+  color: var(--color-secondary);
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-22px) translateX(4px) scale(1.05) rotate(10deg);
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(45deg);
+  }
+}
+
+@keyframes drip {
+  0% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.5);
+  }
+  25%,
+  75% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes pop-q {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-30deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(12deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cat *,
+  .cat {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

@@ -2,7 +2,7 @@ import { IconArrowLeft, IconFlame, IconTrash } from '@tabler/icons-react'
 import { AlertDialog } from 'radix-ui'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CatMark } from '../components/Logo'
+import { PeekCat } from '../components/PeekCat'
 import { Staff } from '../components/Staff'
 import { Button3D } from '../components/ui/Button3D'
 import { formatPitchClass } from '../music/format'
@@ -89,7 +89,11 @@ export function StatsScreen() {
         <main className={styles.main}>
           {stats.answered === 0 ? (
             <div className={styles.empty}>
-              <CatMark size={88} />
+              <PeekCat
+                variant="head"
+                sleepy
+                style={{ '--cat-w': '100px' } as React.CSSProperties}
+              />
               <p>{t('stats.empty')}</p>
             </div>
           ) : (

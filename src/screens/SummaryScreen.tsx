@@ -6,7 +6,7 @@ import {
 } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { Confetti } from '../components/Confetti'
-import { CatMark } from '../components/Logo'
+import { PeekCat } from '../components/PeekCat'
 import { Staff } from '../components/Staff'
 import { Button3D } from '../components/ui/Button3D'
 import { formatAnswer, formatStaffLabel } from '../music/format'
@@ -32,7 +32,15 @@ export function SummaryScreen() {
         <main className={styles.main}>
           <div className={styles.hero}>
             {catMode ? (
-              <CatMark size={88} mood={correct > 0 ? 'happy' : 'idle'} />
+              <PeekCat
+                variant="head"
+                className={styles.cat}
+                mood={
+                  perfect ? 'love' : correct >= results.length * 0.6 ? 'happy' : 'idle'
+                }
+                streak={perfect ? 99 : bestStreak}
+                sleepy
+              />
             ) : (
               <IconStarFilled size={80} className={styles.star} aria-hidden="true" />
             )}

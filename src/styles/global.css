@@ -134,3 +134,18 @@ svg {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Squircle shape: four superellipse corners plus two bands to fill the middle.
+   A mask rather than border-radius so it works in every browser; anything outside
+   (box-shadow, outlines) is cut off, so use it on layers that don't need those. */
+.squircle {
+  --sq-mask:
+    var(--squircle-tl) top left / var(--sq) var(--sq) no-repeat,
+    var(--squircle-tr) top right / var(--sq) var(--sq) no-repeat,
+    var(--squircle-bl) bottom left / var(--sq) var(--sq) no-repeat,
+    var(--squircle-br) bottom right / var(--sq) var(--sq) no-repeat,
+    linear-gradient(#000 0 0) center / calc(100% - 2 * var(--sq) + 2px) 100% no-repeat,
+    linear-gradient(#000 0 0) center / 100% calc(100% - 2 * var(--sq) + 2px) no-repeat;
+  -webkit-mask: var(--sq-mask);
+  mask: var(--sq-mask);
+}

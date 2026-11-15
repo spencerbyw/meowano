@@ -71,11 +71,12 @@
 }
 
 .length {
+  --sq: 22px;
   min-height: 56px;
   display: grid;
   place-items: center;
   border: 3px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: calc(var(--sq) * 0.55);
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-display);

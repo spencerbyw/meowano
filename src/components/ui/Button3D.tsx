@@ -16,6 +16,7 @@ interface Button3DProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 /**
  * Squishy "3D" button, after Josh Comeau's
  * https://www.joshwcomeau.com/animation/3d-button/
+ * Squircle-shaped: the face and edge are masked (see .squircle in global.css).
  */
 export function Button3D({
   variant = 'primary',
@@ -42,8 +43,10 @@ export function Button3D({
       {...rest}
     >
       <span className={styles.shadow} aria-hidden="true" />
-      <span className={styles.edge} aria-hidden="true" />
-      <span className={[styles.front, frontClassName].filter(Boolean).join(' ')}>
+      <span className={`${styles.edge} squircle`} aria-hidden="true" />
+      <span
+        className={[styles.front, 'squircle', frontClassName].filter(Boolean).join(' ')}
+      >
         {children}
       </span>
     </button>

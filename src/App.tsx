@@ -1,3 +1,4 @@
+import { PawTaps } from './components/PawTaps'
 import { SettingsDrawer } from './components/settings/SettingsDrawer'
 import { useQuiz } from './quiz/store'
 import { MicTestScreen } from './screens/MicTestScreen'
@@ -25,6 +26,7 @@ export default function App() {
         <StartScreen />
       )}
       <SettingsDrawer />
+      <PawTaps />
     </>
   )
 }

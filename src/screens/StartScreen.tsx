@@ -67,7 +67,7 @@ export function StartScreen() {
                 <ToggleGroup.Item
                   key={n}
                   value={String(n)}
-                  className={styles.length}
+                  className={`${styles.length} squircle`}
                   aria-label={n === 0 ? t('start.unlimited') : String(n)}
                 >
                   {n === 0 ? (
