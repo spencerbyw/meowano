@@ -13,6 +13,7 @@ interface NextButtonProps {
   countdown?: number
   countdownLabel?: (secondsLeft: number) => string
   className?: string
+  frontClassName?: string
 }
 
 export function NextButton({
@@ -21,6 +22,7 @@ export function NextButton({
   countdown,
   countdownLabel,
   className,
+  frontClassName,
 }: NextButtonProps) {
   const [left, setLeft] = useState(Math.ceil(countdown ?? 0))
   const go = useRef(onNext)
@@ -46,6 +48,7 @@ export function NextButton({
     <Button3D
       size="lg"
       className={[styles.next, className].filter(Boolean).join(' ')}
+      frontClassName={frontClassName}
       onClick={onNext}
       autoFocus
     >

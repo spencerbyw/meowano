@@ -67,6 +67,7 @@
   --cat-ear: #ff7aae;
   --cat-eye: #ffd36b;
   --cat-shine: #fff8f1;
+  --cat-pupil: #1e1628;
   --cat-nose: #ff7aae;
   --cat-mouth: #b6a9c9;
 
@@ -109,6 +110,8 @@
   --cat-ear: #ff7aae;
   --cat-eye: #3b2f4a;
   --cat-shine: #ffffff;
+  /* Dark eyes already: no separate pupil. */
+  --cat-pupil: #3b2f4a;
   --cat-nose: #ff7aae;
   --cat-mouth: #3b2f4a;
 

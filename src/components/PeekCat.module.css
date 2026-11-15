@@ -67,6 +67,10 @@ button.cat:focus-visible {
   fill: var(--cat-eye);
 }
 
+.pupil {
+  fill: var(--cat-pupil);
+}
+
 .shine {
   fill: var(--cat-shine);
 }
@@ -196,6 +200,14 @@ button.cat:focus-visible {
   transform: rotate(-8deg) scale(1.08);
 }
 
+.purr .earL {
+  transform: rotate(-8deg);
+}
+
+.purr .earR {
+  transform: rotate(8deg);
+}
+
 .sad .earL {
   transform: rotate(-34deg);
 }
@@ -218,10 +230,16 @@ button.cat:focus-visible {
   transform: rotate(-20deg);
 }
 
-/* Eyes look where you tap. */
+/* Eyes look where you tap (--lx/--ly run -1…1): the eyes shift a little and the
+   pupils a little more, so they stay inside. */
 .eyes {
-  transform: translate(calc(var(--lx, 0) * 1px), calc(var(--ly, 0) * 1px));
-  transition: transform 220ms var(--ease-out);
+  transform: translate(calc(var(--lx, 0) * 0.5px), calc(var(--ly, 0) * 0.5px));
+  transition: transform 350ms var(--ease-out);
+}
+
+.pupils {
+  transform: translate(calc(var(--lx, 0) * 0.8px), calc(var(--ly, 0) * 0.7px));
+  transition: transform 350ms var(--ease-out);
 }
 
 .svg .open,
@@ -293,6 +311,20 @@ button.cat:focus-visible {
   }
   to {
     transform: rotate(3.5deg) translateY(-0.6px);
+  }
+}
+
+.purr .bob {
+  animation: purr-soft 90ms ease-in-out 14 alternate;
+}
+
+/* A contented little vibration. */
+@keyframes purr-soft {
+  from {
+    transform: rotate(-1deg);
+  }
+  to {
+    transform: rotate(1deg) translateY(-0.3px);
   }
 }
 
@@ -409,10 +441,12 @@ button.cat:focus-visible {
 }
 
 /* Petted: makes biscuits. */
+.purr .pawL,
 .love .pawL {
   animation: knead 400ms ease-in-out 4 alternate;
 }
 
+.purr .pawR,
 .love .pawR {
   animation: knead 400ms ease-in-out 400ms 4 alternate;
 }
@@ -498,6 +532,14 @@ button.cat:focus-visible {
   color: var(--color-sunny);
   text-shadow: 0 1px 0 var(--color-sunny-edge);
   animation: twinkle 1.4s ease-in-out infinite;
+}
+
+.prr {
+  width: auto;
+  color: var(--color-primary);
+  font-size: calc(var(--cat-w, 112px) * 0.12);
+  white-space: nowrap;
+  animation: float-up 1.4s ease-out;
 }
 
 .zzz {

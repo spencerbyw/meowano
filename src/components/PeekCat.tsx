@@ -14,7 +14,7 @@ import styles from './PeekCat.module.css'
 export type PeekMood =
   'idle' | 'happy' | 'love' | 'sad' | 'confused' | 'curious' | 'listening'
 
-type Face = PeekMood | 'yawn' | 'asleep' | 'startled'
+type Face = PeekMood | 'purr' | 'yawn' | 'asleep' | 'startled'
 
 interface PeekCatProps {
   mood?: PeekMood
@@ -39,6 +39,10 @@ interface PeekCatProps {
 const YAWN_AFTER_MS = 20_000
 const SLEEP_AFTER_MS = 45_000
 const PET_MS = 1600
+/** Pets closer together than this count as one petting session… */
+const PET_GAP_MS = 1200
+/** …and this many in a row earn heart eyes (the start screen's confetti, too). */
+const PETS_FOR_LOVE = 5
 /** Look back down at the music this long after the last tap. */
 const LOOK_HOLD_MS = 2500
 
@@ -61,12 +65,16 @@ export function PeekCat({
   const clip = `peek${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   const [rest, setRest] = useState<'awake' | 'yawn' | 'asleep' | 'startled'>('awake')
   const [petting, setPetting] = useState(0)
+  const [loved, setLoved] = useState(false)
+  const pets = useRef({ count: 0, last: 0 })
   const [blink, setBlink] = useState(false)
   const [twitch, setTwitch] = useState<'L' | 'R' | null>(null)
   const wake = useRef(() => {})
 
   const face: Face = petting
-    ? 'love'
+    ? loved
+      ? 'love'
+      : 'purr'
     : rest === 'startled'
       ? 'startled'
       : rest !== 'awake' && mood !== 'listening' && mood !== 'curious'
@@ -164,22 +172,23 @@ export function PeekCat({
     const look = (x: number, y: number) => {
       el.style.setProperty('--lx', x.toFixed(2))
       el.style.setProperty('--ly', y.toFixed(2))
-      el.style.setProperty('--tilt', `${(x * 2.5).toFixed(2)}deg`)
+      el.style.setProperty('--tilt', `${(x * 1.5).toFixed(2)}deg`)
     }
     const onPointer = (e: PointerEvent) => {
       const r = el.getBoundingClientRect()
       const dx = e.clientX - (r.left + r.width / 2)
       const dy = e.clientY - (r.top + r.height * 0.6)
       const d = Math.hypot(dx, dy) || 1
-      const reach = Math.min(1, d / 140)
-      look((dx / d) * reach * 1.7, (dy / d) * reach * 1.4)
+      // Ease toward full reach over a few hundred px, so nearby taps get a glance.
+      const reach = Math.min(1, d / 260)
+      look((dx / d) * reach, (dy / d) * reach * 0.8)
       seen.at = performance.now()
     }
-    const home = variant === 'peek' ? 0.9 : 0.2
+    const home = variant === 'peek' ? 0.6 : 0.15
     const id = window.setInterval(() => {
       if (performance.now() - seen.at < LOOK_HOLD_MS) return
       if (Math.random() < 0.22)
-        look((Math.random() * 2 - 1) * 1.5, Math.random() * 0.8 - 0.4)
+        look((Math.random() * 2 - 1) * 0.8, Math.random() * 0.5 - 0.25)
       else look(0, home)
     }, 1700)
     look(0, home)
@@ -205,11 +214,20 @@ export function PeekCat({
 
   useEffect(() => {
     if (!petting) return
-    const id = window.setTimeout(() => setPetting(0), PET_MS)
+    const id = window.setTimeout(() => {
+      setPetting(0)
+      setLoved(false)
+    }, PET_MS)
     return () => window.clearTimeout(id)
   }, [petting])
 
+  // A pet or two: contented purring. Keep going and it's heart eyes.
   const pet = () => {
+    const now = Date.now()
+    const p = pets.current
+    p.count = now - p.last <= PET_GAP_MS ? p.count + 1 : 1
+    p.last = now
+    if (p.count >= PETS_FOR_LOVE) setLoved(true)
     setPetting((n) => n + 1)
     onPet?.()
   }
@@ -290,10 +308,12 @@ export function PeekCat({
 }
 
 function Head({ face, blink }: { face: Face; blink: boolean }) {
-  const cheeks = face === 'happy' || face === 'love' ? 0.7 : 0.28
+  const cheeks = face === 'happy' || face === 'love' || face === 'purr' ? 0.7 : 0.28
   return (
     <>
       <g className={styles.earL}>
+        {/* A round base, hidden in the head, so a turning ear never shows a gap. */}
+        <circle cx="21.5" cy="22" r="5.6" className={styles.fur} />
         <path
           d="M14.5 25 15.8 11.5c.2-1.5 1.9-2.2 3.1-1.3L28.6 18Z"
           className={styles.fur}
@@ -301,6 +321,7 @@ function Head({ face, blink }: { face: Face; blink: boolean }) {
         <path d="M19 14.5 25.5 19.6" className={styles.innerEar} />
       </g>
       <g className={styles.earR}>
+        <circle cx="42.5" cy="22" r="5.6" className={styles.fur} />
         <path
           d="M49.5 25 48.2 11.5c-.2-1.5-1.9-2.2-3.1-1.3L35.4 18Z"
           className={styles.fur}
@@ -350,6 +371,7 @@ function Head({ face, blink }: { face: Face; blink: boolean }) {
 function Eyes({ face, blink }: { face: Face; blink: boolean }) {
   switch (face) {
     case 'happy':
+    case 'purr':
       return (
         <path
           d="M20.4 36.6Q24 31.2 27.6 36.6M36.4 36.6Q40 31.2 43.6 36.6"
@@ -398,6 +420,10 @@ function Eyes({ face, blink }: { face: Face; blink: boolean }) {
             r={face === 'startled' ? 4.6 : 4.2}
             className={styles.eye}
           />
+          <g className={styles.pupils}>
+            <circle cx="24" cy="35.3" r="2.7" className={styles.pupil} />
+            <circle cx="40" cy="35.3" r="2.7" className={styles.pupil} />
+          </g>
           <circle cx="25.5" cy="33.3" r="1.5" className={styles.shine} />
           <circle cx="41.5" cy="33.3" r="1.5" className={styles.shine} />
         </>
@@ -414,6 +440,15 @@ function Eyes({ face, blink }: { face: Face; blink: boolean }) {
               ry={sad ? 3.4 : 3.9}
               className={styles.eye}
             />
+            <g className={styles.pupils}>
+              <ellipse
+                cx="24"
+                cy="35.6"
+                rx="2.1"
+                ry={sad ? 2.2 : 2.6}
+                className={styles.pupil}
+              />
+            </g>
             <circle cx="25.2" cy="33.8" r="1.15" className={styles.shine} />
             <circle cx="22.9" cy="36.9" r="0.5" className={styles.shine} />
           </g>
@@ -425,6 +460,15 @@ function Eyes({ face, blink }: { face: Face; blink: boolean }) {
               ry={sad ? 3.4 : 3.9}
               className={styles.eye}
             />
+            <g className={styles.pupils}>
+              <ellipse
+                cx="40"
+                cy="35.6"
+                rx="2.1"
+                ry={sad ? 2.2 : 2.6}
+                className={styles.pupil}
+              />
+            </g>
             <circle cx="41.2" cy="33.8" r="1.15" className={styles.shine} />
             <circle cx="38.9" cy="36.9" r="0.5" className={styles.shine} />
           </g>
@@ -518,6 +562,7 @@ function Floaters({ face, streak }: { face: Face; streak: number }) {
       { glyph: '✦', kind: styles.sparkle, slot: 1 },
       { glyph: '✧', kind: styles.sparkle, slot: 2 },
     )
+  if (face === 'purr') items.push({ glyph: 'prr', kind: styles.prr, slot: 1 })
   if (face === 'sad') items.push({ glyph: <Drop />, kind: styles.drop, slot: 1 })
   if (face === 'confused') items.push({ glyph: '?', kind: styles.question, slot: 1 })
   if (face === 'curious') items.push({ glyph: '!', kind: styles.question, slot: 1 })

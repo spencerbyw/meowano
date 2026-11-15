@@ -237,7 +237,9 @@ export function QuizScreen() {
             <span className={styles.track} aria-hidden="true">
               <span className={styles.bar}>
                 <span
-                  className={styles.barFill}
+                  className={[styles.barFill, catMode && styles.yarnFill]
+                    .filter(Boolean)
+                    .join(' ')}
                   style={{ width: `${(results.length / length) * 100}%` }}
                 />
               </span>
@@ -247,11 +249,34 @@ export function QuizScreen() {
                   className={styles.yarn}
                   style={{ '--done': results.length / length } as React.CSSProperties}
                 >
-                  <svg viewBox="0 0 20 20" width="100%" height="100%">
-                    <circle cx="10" cy="10" r="9" className={styles.yarnBall} />
-                    <path
-                      d="M3.5 6.5C8 5 13 7 16.5 12M2 10.5c5-1 10 1 13 6.5M6 2.6c3 2.5 4.5 7 3.6 15.9M13 2.3c-2.2 3-2.6 8-1.2 15.6"
-                      className={styles.yarnLines}
+                  <svg viewBox="0 0 24 24" width="100%" height="100%">
+                    <defs>
+                      <clipPath id="yarn-ball">
+                        <circle cx="12" cy="11" r="9.4" />
+                      </clipPath>
+                    </defs>
+                    {/* Like the buttons: a darker edge under a lighter face. */}
+                    <circle cx="12" cy="13" r="10" className={styles.yarnEdge} />
+                    <circle cx="12" cy="11" r="10" className={styles.yarnFace} />
+                    <g clipPath="url(#yarn-ball)">
+                      <g className={styles.yarnWind}>
+                        <path
+                          d="M2 7.5c6-2.5 13-1 19.5 5M1.5 12c6.5-2 13.5 0 19 7M4 3.5c5 0 11.5 3.5 15 11"
+                          className={styles.yarnDark}
+                        />
+                        <path
+                          d="M8 1.5c-2 5-1.5 13 3 20M14.5 1c-3 5-3.2 12.5.5 20.5"
+                          className={styles.yarnLight}
+                        />
+                      </g>
+                    </g>
+                    <ellipse
+                      cx="7.6"
+                      cy="6.4"
+                      rx="3"
+                      ry="1.7"
+                      transform="rotate(-35 7.6 6.4)"
+                      className={styles.yarnShine}
                     />
                   </svg>
                 </span>
@@ -276,7 +301,9 @@ export function QuizScreen() {
         <SettingsButton />
       </header>
 
-      <main className={styles.main}>
+      <main
+        className={[styles.main, catMode && styles.catMain].filter(Boolean).join(' ')}
+      >
         <p className="visually-hidden" aria-live="polite">
           {length > 0
             ? t('quiz.progress', { current, total: length })
@@ -497,6 +524,7 @@ export function QuizScreen() {
 
             {solved ? (
               <NextButton
+                frontClassName={styles.compactFront}
                 key={question.id}
                 label={isLast ? t('quiz.finish') : t('quiz.next')}
                 onNext={onNext}
@@ -515,7 +543,7 @@ export function QuizScreen() {
                 <Button3D
                   variant="ghost"
                   size="lg"
-                  frontClassName={styles.footerFront}
+                  frontClassName={`${styles.footerFront} ${styles.compactFront}`}
                   onClick={onDontKnow}
                 >
                   <IconHelp size={24} aria-hidden="true" />
@@ -525,7 +553,7 @@ export function QuizScreen() {
                   <Button3D
                     variant="ghost"
                     size="lg"
-                    frontClassName={styles.footerFront}
+                    frontClassName={`${styles.footerFront} ${styles.compactFront}`}
                     onClick={finish}
                   >
                     <IconFlag size={22} aria-hidden="true" />
