@@ -83,7 +83,7 @@ export const MIN_CLARITY = 0.8
 const ONSET_RATIO = 1.5
 
 /**
- * Turns a stream of readings into "she played a note" events: one per key press.
+ * Turns a stream of readings into "a note was played" events: one per key press.
  * Only a strike (a jump in loudness) lets a note through, and it fires once, so a
  * held or ringing note counts once and a steady sound (a fridge's hum) never does.
  */

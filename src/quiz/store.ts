@@ -57,7 +57,7 @@ interface QuizState {
 
   start: (mode?: QuizMode) => void
   answer: (index: number) => 'correct' | 'wrong' | 'ignored'
-  /** Play mode: she played this note (MIDI number). Must match exactly, octave too. */
+  /** Play mode: the note played (MIDI number). Must match exactly, octave too. */
   answerNote: (midi: number) => 'correct' | 'wrong' | 'ignored'
   next: () => void
   /** "Don't know": put the question off, or give up if it's already been put off. */

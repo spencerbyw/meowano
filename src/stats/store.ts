@@ -109,7 +109,7 @@ export const useStats = create<StatsState>()(
 )
 
 /**
- * How much more often to show a staff, based on her history with it.
+ * How much more often to show a staff, based on the player's history with it.
  * Unseen or always-right items weigh 1; frequently missed ones up to ~5.
  * The +2 in the denominator keeps a single slip from dominating.
  */

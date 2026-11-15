@@ -120,7 +120,7 @@ export async function playNotes(pitches: Pitch[], { roll = 0.025 } = {}) {
   await loadPiano()
   if (!piano || !ctx) return
   if (playback) releaseSoon(NOTE_SECONDS + pitches.length * roll)
-  // Don't let the mic take Kiano's own piano for her playing (it rings a while).
+  // Don't let the mic take Kiano's own piano for the player's (it rings a while).
   muteMic((NOTE_SECONDS + pitches.length * roll) * 1000 + 1500)
   const now = ctx.currentTime + 0.01
   pitches.forEach((p, i) => {
