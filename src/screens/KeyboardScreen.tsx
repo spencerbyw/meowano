@@ -249,10 +249,10 @@ function Minimap({
   const H = 34
 
   // Centre the window where the pointer is. Turned sideways, "along the keyboard"
-  // runs up the screen.
+  // runs down the screen.
   const moveTo = (e: React.PointerEvent) => {
     const r = ref.current!.getBoundingClientRect()
-    const along = sideways ? (r.bottom - e.clientY) / r.height : (e.clientX - r.left) / r.width
+    const along = sideways ? (e.clientY - r.top) / r.height : (e.clientX - r.left) / r.width
     onMove(Math.round(along * WHITES.length - visible / 2))
   }
 

@@ -4,7 +4,7 @@
 }
 
 /* Phones held upright: the whole screen turns a quarter turn, so it reads with
-   the phone on its side (top of the phone to the left). The safe areas turn too. */
+   the phone on its side (top of the phone to the right). The safe areas turn too. */
 .sideways {
   position: fixed;
   top: 0;
@@ -13,8 +13,8 @@
   width: 100dvh;
   height: 100dvw;
   transform-origin: top left;
-  transform: translateY(100dvh) rotate(-90deg);
-  padding: var(--safe-left) var(--safe-top) var(--safe-right) var(--safe-bottom);
+  transform: translateX(100dvw) rotate(90deg);
+  padding: var(--safe-right) var(--safe-bottom) var(--safe-left) var(--safe-top);
   background: var(--color-bg);
 }
 
