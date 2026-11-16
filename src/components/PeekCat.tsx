@@ -86,6 +86,9 @@ export function PeekCat({
     if (!sleepy) return
     let state: typeof rest = 'awake'
     const timers: number[] = []
+    // Kept apart from `timers`, so re-arming (another tap, a new mood) can't cancel
+    // it and leave the cat stuck looking startled.
+    let settle = 0
     const set = (s: typeof rest) => {
       state = s
       setRest(s)
@@ -103,11 +106,9 @@ export function PeekCat({
     wake.current = () => {
       if (state === 'asleep') {
         set('startled')
-        arm()
-        timers.push(window.setTimeout(() => set('awake'), 700))
-        return
-      }
-      if (state === 'yawn') set('awake')
+        window.clearTimeout(settle)
+        settle = window.setTimeout(() => state === 'startled' && set('awake'), 700)
+      } else if (state === 'yawn') set('awake')
       arm()
     }
     const onInput = () => wake.current()
@@ -116,6 +117,7 @@ export function PeekCat({
     arm()
     return () => {
       timers.forEach((id) => window.clearTimeout(id))
+      window.clearTimeout(settle)
       window.removeEventListener('pointerdown', onInput)
       window.removeEventListener('keydown', onInput)
       wake.current = () => {}
