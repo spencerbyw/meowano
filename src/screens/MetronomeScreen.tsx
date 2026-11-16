@@ -201,9 +201,8 @@ export function MetronomeScreen() {
             />
             <div className={styles.tempoRow}>
               <Button3D
-                variant="ghost"
+                variant="secondary"
                 size="sm"
-                className={styles.step}
                 aria-label={t('metronome.slower')}
                 onClick={() => setBpm(bpm - 1)}
               >
@@ -214,9 +213,8 @@ export function MetronomeScreen() {
                 <span className={styles.bpmUnit}>{t('metronome.bpm')}</span>
               </p>
               <Button3D
-                variant="ghost"
+                variant="secondary"
                 size="sm"
-                className={styles.step}
                 aria-label={t('metronome.faster')}
                 onClick={() => setBpm(bpm + 1)}
               >

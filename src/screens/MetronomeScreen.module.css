@@ -51,19 +51,6 @@
   justify-content: space-between;
 }
 
-/* Slower and faster: pink keys, so they stand out on the white card. */
-.tempoRow .step {
-  --face: #ffe4ef;
-  --edge: #f2b2cc;
-  --ink: var(--color-primary-edge);
-}
-
-:root[data-theme='dark'] .tempoRow .step {
-  --face: var(--color-surface-raised);
-  --edge: var(--color-choice-edge);
-  --ink: var(--color-primary);
-}
-
 .bpm {
   display: flex;
   flex-direction: column;

@@ -433,7 +433,7 @@ function drumPaw(el: SVGGElement, side: Side, hit: DrumHit) {
    turning about the neck. */
 const HEAD_ORIGIN = '32px 54px'
 const LEAN = (count: number) =>
-  count % 2 === 0 ? pose(-1.6, 0, -9) : pose(1.6, 0, 9)
+  count % 2 === 0 ? pose(-1.2, 0, -6.75) : pose(1.2, 0, 6.75)
 const UPRIGHT = pose(0, 0, 0)
 
 /**
@@ -453,7 +453,7 @@ function swayHead(el: SVGGElement, hit: DrumHit) {
   el.animate(
     [
       { offset: 0, transform: from === 'none' ? UPRIGHT : from, easing: 'ease-in' },
-      { offset: 0.5, transform: pose(0, hit.accent ? 1.6 : 1, 0), easing: 'ease-out' },
+      { offset: 0.5, transform: pose(0, hit.accent ? 1.2 : 0.75, 0), easing: 'ease-out' },
       { offset: 1, transform: end },
     ],
     { duration: hit.seconds * 1000, fill: 'forwards' },

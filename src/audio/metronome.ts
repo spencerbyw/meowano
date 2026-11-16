@@ -227,57 +227,120 @@ const TAP: Ring = { freq: 1080, tau: 0.0009, drive: 1.6, soft: true }
 /** These are short and very loud for their length: this sits them with the rest. */
 const RING_LEVEL = 0.55
 
-/** A ramp through a few [seconds after t, value] points. */
-function glide(param: AudioParam, t: number, points: [number, number][]) {
-  param.setValueAtTime(points[0][1], t)
-  for (const [at, v] of points.slice(1)) param.exponentialRampToValueAtTime(v, t + at)
+/**
+ * A mew, built like a voice: a rounded buzz from the throat (with a little wobble
+ * and breath) shaped by a mouth. A cat's vocal tract is short, so what makes the
+ * "mee-ow" is mostly the lowest resonance sweeping up as the jaw opens and back
+ * down as it closes, while the higher ones stay up high. The pitch rises then
+ * falls, and it starts on a hummed "m".
+ */
+interface Mew {
+  /** Seconds, start to end. */
+  dur: number
+  /** Pitch (Hz) at the start, at its highest, and at the end. */
+  pitch: [number, number, number]
+  /** The lowest resonance (Hz): jaw closed, wide open, closing again. */
+  f1: [number, number, number]
+  /** How far through (0–1) the pitch peaks and the jaw is widest. */
+  peak: number
 }
 
-/**
- * A kitten's mew, kept short enough to keep time with. A buzzy voice that rises
- * then falls in pitch, through a "mouth": two resonances (the vowel) gliding from
- * "ee" to "oo" and lips that open from a hummed "m" and close again on the "w".
- */
-const MEW_S = 0.19
-function mew(c: AudioContext, t: number, accent: boolean) {
-  const k = accent ? 1.2 : 1
+const MEW: Mew = {
+  dur: 0.32,
+  pitch: [720, 980, 640],
+  f1: [650, 1750, 750],
+  peak: 0.38,
+}
+
+const throats = new WeakMap<BaseAudioContext, PeriodicWave>()
+
+/** A voice-like buzz: harmonics falling off steeply (rounder than a sawtooth). */
+function throatWave(c: BaseAudioContext) {
+  let wave = throats.get(c)
+  if (!wave) {
+    const n = 48
+    const imag = new Float32Array(n)
+    for (let i = 1; i < n; i++) imag[i] = 1 / i ** 1.6
+    wave = c.createPeriodicWave(new Float32Array(n), imag)
+    throats.set(c, wave)
+  }
+  return wave
+}
+
+function mew(c: AudioContext, t: number, accent: boolean, m: Mew = MEW) {
+  const k = accent ? 1.15 : 1
+  const { dur, peak } = m
+  const at = (x: number) => t + x * dur
+  const end = t + dur
+
+  // The throat: pitch up, then down, with a slight wobble.
   const voice = c.createOscillator()
-  voice.type = 'sawtooth'
-  glide(voice.frequency, t, [
-    [0, 600 * k],
-    [0.05, 860 * k],
-    [0.12, 760 * k],
-    [MEW_S, 560 * k],
-  ])
+  voice.setPeriodicWave(throatWave(c))
+  voice.frequency.setValueAtTime(m.pitch[0] * k, t)
+  voice.frequency.exponentialRampToValueAtTime(m.pitch[1] * k, at(peak))
+  voice.frequency.exponentialRampToValueAtTime(m.pitch[2] * k, end)
+  const wobble = c.createOscillator()
+  wobble.frequency.value = 7
+  const depth = c.createGain()
+  depth.gain.value = m.pitch[1] * k * 0.012
+  wobble.connect(depth).connect(voice.frequency)
 
-  const lips = c.createBiquadFilter()
-  lips.type = 'lowpass'
-  lips.Q.value = 0.7
-  glide(lips.frequency, t, [
-    [0, 450],
-    [0.045, 5200],
-    [0.12, 3600],
-    [MEW_S, 1100],
-  ])
+  // A breath of air alongside it.
+  const air = c.createBufferSource()
+  air.buffer = noiseBuffer(c)
+  const airLevel = c.createGain()
+  airLevel.gain.value = 0.06
 
-  const level = envelope(c, t, accent ? 0.5 : 0.4, MEW_S - 0.02, 0.018)
-  // The vowel: "ee" has its two resonances far apart, "oo" both low and close.
-  const vowel: { gain: number; q: number; points: [number, number][] }[] = [
-    { gain: 1, q: 4, points: [[0, 750], [0.06, 1050], [MEW_S, 700]] },
-    { gain: 0.7, q: 7, points: [[0, 2300], [0.06, 2700], [MEW_S, 1200]] },
+  // Loudness: a quiet hum (the "m"), opening out, then fading on the "w".
+  const level = c.createGain()
+  level.gain.setValueAtTime(0.0001, t)
+  level.gain.linearRampToValueAtTime(0.25, t + 0.025)
+  level.gain.linearRampToValueAtTime(1, t + 0.06)
+  level.gain.setValueAtTime(1, at(0.6))
+  level.gain.exponentialRampToValueAtTime(0.0001, end)
+  const out = c.createGain()
+  out.gain.value = accent ? 0.25 : 0.2
+  level.connect(out).connect(output(c))
+
+  // The mouth: resonances in parallel. F1 does the vowel; F2 and F3 stay high.
+  const mouth = c.createGain()
+  voice.connect(mouth)
+  air.connect(airLevel).connect(mouth)
+  const f1 = (f: BiquadFilterNode) => {
+    f.frequency.setValueAtTime(m.f1[0], t)
+    f.frequency.linearRampToValueAtTime(m.f1[0], t + 0.03)
+    f.frequency.exponentialRampToValueAtTime(m.f1[1], at(peak))
+    f.frequency.exponentialRampToValueAtTime(m.f1[2], end)
+  }
+  const resonances: [number, number, number, ((f: BiquadFilterNode) => void)?][] = [
+    // [Hz, Q, gain, glide]
+    [0, 3, 1, f1],
+    [3100, 6, 0.3],
+    [5200, 8, 0.1],
   ]
-  for (const { gain, q, points } of vowel) {
+  for (const [hz, q, gain, move] of resonances) {
     const f = c.createBiquadFilter()
     f.type = 'bandpass'
     f.Q.value = q
-    glide(f.frequency, t, points)
+    if (move) move(f)
+    else f.frequency.value = hz
     const g = c.createGain()
     g.gain.value = gain
-    lips.connect(f).connect(g).connect(level)
+    mouth.connect(f).connect(g).connect(level)
   }
-  voice.connect(lips)
+  // The "m": a low hum through the nose, only at the start.
+  const nose = c.createBiquadFilter()
+  nose.type = 'lowpass'
+  nose.frequency.value = 500
+  const noseLevel = c.createGain()
+  noseLevel.gain.setValueAtTime(0.6, t)
+  noseLevel.gain.linearRampToValueAtTime(0, t + 0.07)
+  voice.connect(nose).connect(noseLevel).connect(level)
+
   voice.start(t)
-  voice.stop(t + MEW_S + 0.02)
+  wobble.start(t)
+  air.start(t, Math.random() * 0.5)
+  for (const s of [voice, wobble, air]) s.stop(end + 0.02)
 }
 
 function play(c: AudioContext, sound: ClickSound, accent: boolean, t: number) {

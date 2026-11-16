@@ -75,8 +75,9 @@ button.cat:focus-visible {
   fill: var(--cat-shine);
 }
 
+/* Closed eyes: drawn in the same soft colour as the mouth and toes. */
 .line {
-  stroke: var(--cat-eye);
+  stroke: var(--cat-mouth);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
