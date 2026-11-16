@@ -8,7 +8,7 @@ import styles from './PeekCat.module.css'
  * eyes, blinks, twitches its ears, and if nothing happens for a while, yawns and
  * dozes off until the next tap.
  *
- * Drawn in the same 64-unit space as the logo's CatMark, so it's the same cat.
+ * Drawn in a 64-unit space.
  */
 
 export type PeekMood =
@@ -320,14 +320,14 @@ function Head({ face, blink }: { face: Face; blink: boolean }) {
           d="M16.2 24 15.8 11.5c.2-1.5 1.9-2.2 3.1-1.3L28.6 18 28 29 18 30Z"
           className={styles.fur}
         />
-        <path d="M19 14.5 25.5 19.6" className={styles.innerEar} />
+        <path d="M18.2 14.6c.1-1 1-1.3 1.7-.8l5.6 4.6-4.8 3.3-2.4-.6Z" className={styles.innerEar} />
       </g>
       <g className={styles.earR}>
         <path
           d="M47.8 24 48.2 11.5c-.2-1.5-1.9-2.2-3.1-1.3L35.4 18 36 29 46 30Z"
           className={styles.fur}
         />
-        <path d="M45 14.5 38.5 19.6" className={styles.innerEar} />
+        <path d="M45.8 14.6c-.1-1-1-1.3-1.7-.8l-5.6 4.6 4.8 3.3 2.4-.6Z" className={styles.innerEar} />
       </g>
       <path
         d="M14.5 25C18 20.2 23.6 17.6 28 17.4c2.6-.6 5.4-.6 8 0 4.4.2 10 2.8 13.5 7.6 2.3 3.4 3.5 7.3 3.5 11.3C53 47.5 43.6 54 32 54s-21-6.5-21-17.7c0-4 1.2-7.9 3.5-11.3Z"
@@ -336,7 +336,7 @@ function Head({ face, blink }: { face: Face; blink: boolean }) {
 
       <ellipse
         cx="17.6"
-        cy="41.4"
+        cy="42.6"
         rx="3.2"
         ry="1.9"
         className={styles.cheek}
@@ -344,11 +344,17 @@ function Head({ face, blink }: { face: Face; blink: boolean }) {
       />
       <ellipse
         cx="46.4"
-        cy="41.4"
+        cy="42.6"
         rx="3.2"
         ry="1.9"
         className={styles.cheek}
         opacity={cheeks}
+      />
+
+      {/* A pale muzzle, like a tuxedo cat's: a lighter, friendly middle to the face. */}
+      <path
+        d="M32 40.8c3.2 0 4.4 1.6 5.6 3.2 2 .2 3.4 1.6 3.4 3.4 0 2.6-2.8 4.2-5.6 4.2-1.3 0-2.5-.4-3.4-1.1-.9.7-2.1 1.1-3.4 1.1-2.8 0-5.6-1.6-5.6-4.2 0-1.8 1.4-3.2 3.4-3.4 1.2-1.6 2.4-3.2 5.6-3.2Z"
+        className={styles.muzzle}
       />
 
       <g className={styles.eyes}>
@@ -356,14 +362,14 @@ function Head({ face, blink }: { face: Face; blink: boolean }) {
       </g>
 
       <path
-        d="M29.6 41.2h4.8c.7 0 1 .8.6 1.3l-2.4 2.3c-.3.3-.8.3-1.1 0l-2.4-2.3c-.5-.5-.2-1.3.5-1.3Z"
+        d="M30.4 42.4h3.2c.6 0 .9.7.5 1.1l-1.6 1.6c-.3.3-.7.3-1 0l-1.6-1.6c-.4-.4-.1-1.1.5-1.1Z"
         className={styles.nose}
       />
       <Mouth face={face} />
 
       <g className={styles.whiskers}>
-        <path d="M15.5 42.6 6 41.2M15.6 44.8 6.6 46.2" />
-        <path d="M48.5 42.6 58 41.2M48.4 44.8 57.4 46.2" />
+        <path d="M15.5 44 6 42.6M15.6 46.2 6.6 47.6" />
+        <path d="M48.5 44 58 42.6M48.4 46.2 57.4 47.6" />
       </g>
     </>
   )
@@ -375,15 +381,15 @@ function Eyes({ face, blink }: { face: Face; blink: boolean }) {
     case 'purr':
       return (
         <path
-          d="M20.4 36.6Q24 31.2 27.6 36.6M36.4 36.6Q40 31.2 43.6 36.6"
+          d="M20.4 37.8Q24 32.4 27.6 37.8M36.4 37.8Q40 32.4 43.6 37.8"
           className={styles.line}
         />
       )
     case 'love':
       return (
         <>
-          <Heart x={24} y={35} />
-          <Heart x={40} y={35} />
+          <Heart x={24} y={36.2} />
+          <Heart x={40} y={36.2} />
         </>
       )
     case 'listening':
@@ -392,8 +398,8 @@ function Eyes({ face, blink }: { face: Face; blink: boolean }) {
         <path
           d={
             face === 'asleep'
-              ? 'M20.6 36.2Q24 38 27.4 36.2M36.6 36.2Q40 38 43.4 36.2'
-              : 'M20.6 35.2Q24 38.6 27.4 35.2M36.6 35.2Q40 38.6 43.4 35.2'
+              ? 'M20.6 37.4Q24 39.2 27.4 37.4M36.6 37.4Q40 39.2 43.4 37.4'
+              : 'M20.6 36.4Q24 39.8 27.4 36.4M36.6 36.4Q40 39.8 43.4 36.4'
           }
           className={styles.line}
         />
@@ -401,83 +407,46 @@ function Eyes({ face, blink }: { face: Face; blink: boolean }) {
     case 'yawn':
       return (
         <path
-          d="M20.6 34.6 27 36.4 20.8 38M43.4 34.6 37 36.4 43.2 38"
+          d="M20.6 35.8 27 37.6 20.8 39.2M43.4 35.8 37 37.6 43.2 39.2"
           className={styles.line}
         />
       )
     case 'startled':
-    case 'curious':
+    case 'curious': {
+      // Round and wide; startled a touch wider, with a smaller glint.
+      const r = face === 'startled' ? 4.6 : 4.3
+      const glint = face === 'startled' ? 1.3 : 1.6
       return (
         <>
-          <circle
-            cx="24"
-            cy="35"
-            r={face === 'startled' ? 4.6 : 4.2}
-            className={styles.eye}
-          />
-          <circle
-            cx="40"
-            cy="35"
-            r={face === 'startled' ? 4.6 : 4.2}
-            className={styles.eye}
-          />
-          <g className={styles.pupils}>
-            <circle cx="24" cy="35.3" r="2.7" className={styles.pupil} />
-            <circle cx="40" cy="35.3" r="2.7" className={styles.pupil} />
-          </g>
-          <circle cx="25.5" cy="33.3" r="1.5" className={styles.shine} />
-          <circle cx="41.5" cy="33.3" r="1.5" className={styles.shine} />
+          <circle cx="24" cy="36.4" r={r} className={styles.eye} />
+          <circle cx="40" cy="36.4" r={r} className={styles.eye} />
+          <circle cx="25.3" cy="34.8" r={glint} className={styles.shine} />
+          <circle cx="41.3" cy="34.8" r={glint} className={styles.shine} />
         </>
       )
+    }
     default: {
       const sad = face === 'sad'
       return (
         <>
-          <g className={blink ? styles.blink : styles.open}>
-            <ellipse
-              cx="24"
-              cy="35.4"
-              rx="3.3"
-              ry={sad ? 3.4 : 3.9}
-              className={styles.eye}
-            />
-            <g className={styles.pupils}>
+          {[24, 40].map((x) => (
+            <g key={x} className={blink ? styles.blink : styles.open}>
               <ellipse
-                cx="24"
-                cy="35.6"
-                rx="2.1"
-                ry={sad ? 2.2 : 2.6}
-                className={styles.pupil}
+                cx={x}
+                cy={sad ? 37 : 36.6}
+                rx="3.6"
+                ry={sad ? 3.6 : 4.2}
+                className={styles.eye}
               />
+              <circle cx={x + 1.2} cy={sad ? 35.6 : 35.1} r="1.5" className={styles.shine} />
+              <circle cx={x - 1.3} cy={sad ? 38.4 : 38.3} r=".65" className={styles.shine} />
             </g>
-            <circle cx="25.2" cy="33.8" r="1.15" className={styles.shine} />
-            <circle cx="22.9" cy="36.9" r="0.5" className={styles.shine} />
-          </g>
-          <g className={blink ? styles.blink : styles.open}>
-            <ellipse
-              cx="40"
-              cy="35.4"
-              rx="3.3"
-              ry={sad ? 3.4 : 3.9}
-              className={styles.eye}
-            />
-            <g className={styles.pupils}>
-              <ellipse
-                cx="40"
-                cy="35.6"
-                rx="2.1"
-                ry={sad ? 2.2 : 2.6}
-                className={styles.pupil}
-              />
-            </g>
-            <circle cx="41.2" cy="33.8" r="1.15" className={styles.shine} />
-            <circle cx="38.9" cy="36.9" r="0.5" className={styles.shine} />
-          </g>
+          ))}
           {sad && (
-            <path d="M20.2 30.6 26.8 28.8M43.8 30.6 37.2 28.8" className={styles.brow} />
+            <path d="M20.2 31.6 26.8 29.8M43.8 31.6 37.2 29.8" className={styles.brow} />
           )}
           {face === 'confused' && (
-            <path d="M37.2 29.6Q40.4 27.6 43.6 29.4" className={styles.brow} />
+            <path d="M37.2 30.6Q40.4 28.6 43.6 30.4" className={styles.brow} />
           )}
         </>
       )

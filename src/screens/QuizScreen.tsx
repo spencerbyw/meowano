@@ -249,7 +249,7 @@ export function QuizScreen() {
           aria-label={t('quiz.streakLabel', { count: currentStreak, best: allTimeBest })}
         >
           <span className={styles.streakNow} aria-hidden="true">
-            <IconFlame size={20} />
+            <IconFlame size={22} />
             {currentStreak}
           </span>
           <span className={styles.streakBest} aria-hidden="true">
