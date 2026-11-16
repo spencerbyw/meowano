@@ -6,8 +6,20 @@ import { releaseAudio, wakeAudio } from './engine'
  * listeners at the moment it's actually heard, so animations land on the click.
  */
 
-export type ClickSound = 'click' | 'wood' | 'beep' | 'tick' | 'mew'
-export const CLICK_SOUNDS: ClickSound[] = ['click', 'wood', 'beep', 'tick', 'mew']
+export type ClickSound =
+  'click' | 'wood' | 'beep' | 'tick' | 'mew' | 'snap1' | 'snap2' | 'snap3' | 'snap4'
+// The four snaps are candidates to compare; the one that sounds right stays.
+export const CLICK_SOUNDS: ClickSound[] = [
+  'snap1',
+  'snap2',
+  'snap3',
+  'snap4',
+  'click',
+  'wood',
+  'beep',
+  'tick',
+  'mew',
+]
 
 export interface Beat {
   /** Beats since starting (0, 1, 2…). */
@@ -173,8 +185,75 @@ function burst(c: AudioContext, t: number, dur: number, filter: BiquadFilterType
   src.stop(t + dur + 0.02)
 }
 
+/** A very short two-sided pulse: the "pop" of a speaker kicked by a voltage step. */
+let pulse: AudioBuffer | null = null
+function popBuffer(c: AudioContext) {
+  if (!pulse || pulse.sampleRate !== c.sampleRate) {
+    const n = Math.round(c.sampleRate * 0.004)
+    pulse = c.createBuffer(1, n, c.sampleRate)
+    const data = pulse.getChannelData(0)
+    const half = Math.round(c.sampleRate * 0.0009)
+    for (let i = 0; i < n; i++) data[i] = i < half ? 1 : i < half * 2 ? -0.7 : 0
+  }
+  return pulse
+}
+
+function pop(c: AudioContext, t: number, to: AudioNode) {
+  const src = c.createBufferSource()
+  src.buffer = popBuffer(c)
+  src.connect(to)
+  src.start(t)
+}
+
+function filter(c: AudioContext, type: BiquadFilterType, freq: number, q: number, to: AudioNode) {
+  const f = c.createBiquadFilter()
+  f.type = type
+  f.frequency.value = freq
+  f.Q.value = q
+  f.connect(to)
+  return f
+}
+
 function play(c: AudioContext, sound: ClickSound, accent: boolean, t: number) {
+  const up = accent ? 1.2 : 1
+  const loud = accent ? 1.25 : 1
   switch (sound) {
+    /* Snaps: a dull pulse, somewhere between knuckles on a table and an electrical
+       pop. Four takes on it to compare. */
+    // 1: a low knock (a quick downward thump) with a soft muffled tap on top.
+    case 'snap1': {
+      const body = envelope(c, t, 0.6 * loud, 0.05)
+      const o = osc(c, 'sine', 230 * up, t, 0.07, body)
+      o.frequency.exponentialRampToValueAtTime(130 * up, t + 0.03)
+      burst(c, t, 0.01, 'lowpass', 1800, envelope(c, t, 0.22 * loud, 0.012))
+      break
+    }
+    // 2: a speaker "pop" ringing a little, like a knuckle on a hollow box.
+    case 'snap2': {
+      const g = c.createGain()
+      g.gain.value = 0.5 * loud
+      g.connect(output(c))
+      pop(c, t, filter(c, 'lowpass', 900 * up, 0.8, g))
+      const ring = c.createGain()
+      ring.gain.value = 0.2 * loud
+      ring.connect(output(c))
+      pop(c, t, filter(c, 'bandpass', 420 * up, 7, ring))
+      break
+    }
+    // 3: a woody "thock": a resonant knock over a soft thump.
+    case 'snap3': {
+      burst(c, t, 0.004, 'lowpass', 4000, filter(c, 'bandpass', 680 * up, 9, envelope(c, t, 2.4 * loud, 0.04)))
+      const body = envelope(c, t, 0.45 * loud, 0.035)
+      osc(c, 'sine', 170 * up, t, 0.05, body)
+      break
+    }
+    // 4: an electric pop: a pitch that drops very fast, rounded off.
+    case 'snap4': {
+      const lp = filter(c, 'lowpass', 1500 * up, 0.7, envelope(c, t, 0.65 * loud, 0.035))
+      const o = osc(c, 'triangle', 900 * up, t, 0.05, lp)
+      o.frequency.exponentialRampToValueAtTime(95 * up, t + 0.016)
+      break
+    }
     // Soft, short and woody-electronic: the default, easy to listen to for a while.
     case 'click': {
       const tone = envelope(c, t, accent ? 0.42 : 0.3, 0.035)

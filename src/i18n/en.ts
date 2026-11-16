@@ -278,7 +278,17 @@ const en = {
     tapCat: 'Tap the cat in time to set the tempo',
     beats: 'Beats per bar',
     sound: 'Sound',
-    sounds: { click: 'Click', wood: 'Woodblock', beep: 'Beep', tick: 'Tick', mew: 'Mew' },
+    sounds: {
+      snap1: 'Snap 1',
+      snap2: 'Snap 2',
+      snap3: 'Snap 3',
+      snap4: 'Snap 4',
+      click: 'Click',
+      wood: 'Woodblock',
+      beep: 'Beep',
+      tick: 'Tick',
+      mew: 'Mew',
+    },
     tempoNames: {
       largo: 'Largo',
       adagio: 'Adagio',

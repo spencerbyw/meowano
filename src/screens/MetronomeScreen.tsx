@@ -1,10 +1,17 @@
 import {
   IconArrowLeft,
+  IconBolt,
+  IconCat,
+  IconClick,
   IconMinus,
   IconPawFilled,
   IconPlayerPlayFilled,
   IconPlayerStopFilled,
   IconPlus,
+  IconSparkle,
+  IconWaveSquare,
+  IconWood,
+  type Icon,
 } from '@tabler/icons-react'
 import { Slider, ToggleGroup } from 'radix-ui'
 import { useEffect, useRef, useState } from 'react'
@@ -42,7 +49,19 @@ const PATTERNS: DrumPattern[] = ['alternate', 'both', 'clap']
 const BARS_PER_PATTERN = 8
 /** Taps further apart than this start a new tap tempo. */
 const TAP_RESET_MS = 2000
-const BEAT_CHOICES = [1, 2, 3, 4, 5, 6, 7]
+const SOUND_ICONS: Record<ClickSound, Icon> = {
+  snap1: IconBolt,
+  snap2: IconBolt,
+  snap3: IconBolt,
+  snap4: IconBolt,
+  click: IconClick,
+  wood: IconWood,
+  beep: IconWaveSquare,
+  tick: IconSparkle,
+  mew: IconCat,
+}
+
+const BEAT_CHOICES = [1, 2, 3, 4, 5, 6, 7, 8]
 
 const otherPattern = (current?: DrumPattern) => {
   const choices = PATTERNS.filter((p) => p !== current)
@@ -291,11 +310,15 @@ export function MetronomeScreen() {
                 void previewClick(v as ClickSound)
               }}
             >
-              {CLICK_SOUNDS.map((s) => (
-                <ToggleGroup.Item key={s} value={s} className={styles.sound}>
-                  {t(`metronome.sounds.${s}`)}
-                </ToggleGroup.Item>
-              ))}
+              {CLICK_SOUNDS.map((s) => {
+                const SoundIcon = SOUND_ICONS[s]
+                return (
+                  <ToggleGroup.Item key={s} value={s} className={styles.sound}>
+                    <SoundIcon size={18} aria-hidden="true" />
+                    {t(`metronome.sounds.${s}`)}
+                  </ToggleGroup.Item>
+                )
+              })}
             </ToggleGroup.Root>
           </section>
         </main>

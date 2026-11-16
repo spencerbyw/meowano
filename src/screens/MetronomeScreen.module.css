@@ -114,6 +114,10 @@
   color: hsl(var(--color-shadow) / 0.25);
 }
 
+:root[data-theme='dark'] .beatPaw.first {
+  color: rgb(255 255 255 / 0.3);
+}
+
 .beatPaw.now {
   color: var(--color-primary);
   transform: scale(1.25) rotate(-8deg);
@@ -197,8 +201,9 @@
 
 .chips {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--space-1);
+  /* Two rows of four. */
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
 }
 
 .chip {
@@ -233,8 +238,11 @@
 }
 
 .sound {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-height: 40px;
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-3) 0 10px;
   border: 3px solid var(--color-border);
   border-radius: var(--radius-pill);
   background: var(--color-bg);
