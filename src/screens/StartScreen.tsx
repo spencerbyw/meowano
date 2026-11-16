@@ -1,10 +1,4 @@
-import {
-  IconChartBar,
-  IconChevronRight,
-  IconInfinity,
-  IconListCheck,
-  IconPiano,
-} from '@tabler/icons-react'
+import { IconChevronRight, IconInfinity, IconListCheck, IconPiano } from '@tabler/icons-react'
 import { ToggleGroup } from 'radix-ui'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,7 +10,6 @@ import { Splash } from '../components/Splash'
 import { Toybox } from '../components/Toybox'
 import { Button3D } from '../components/ui/Button3D'
 import { beginRound } from '../quiz/begin'
-import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import { QUIZ_LENGTHS, type QuizLength } from '../settings/types'
 import { useUi } from '../ui/store'
@@ -26,7 +19,6 @@ export function StartScreen() {
   const { t } = useTranslation()
   const { quizLength, setQuizLength, preset, catMode } = useSettings()
   const setSettingsOpen = useUi((s) => s.setSettingsOpen)
-  const showStats = useQuiz((s) => s.showStats)
   const pet = usePetting()
 
   return (
@@ -101,16 +93,6 @@ export function StartScreen() {
               </Button3D>
             </div>
           </section>
-
-          <Button3D
-            variant="ghost"
-            size="sm"
-            className={styles.statsButton}
-            onClick={showStats}
-          >
-            <IconChartBar size={20} aria-hidden="true" />
-            {t('stats.open')}
-          </Button3D>
         </main>
       </div>
       <Footer />

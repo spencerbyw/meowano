@@ -234,7 +234,6 @@ const en = {
     gaveUp: 'It was {{answer}}',
   },
   stats: {
-    open: 'My stats',
     title: 'My stats',
     back: 'Back',
     empty: 'No practice yet. Play a round and your progress will show up here!',
@@ -262,6 +261,7 @@ const en = {
     back: 'Back',
     tools: {
       metronome: { name: 'Metronome', hint: 'Keep the beat' },
+      stats: { name: 'My stats', hint: 'See how you’re doing' },
     },
   },
   metronome: {

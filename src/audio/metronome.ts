@@ -227,6 +227,59 @@ const TAP: Ring = { freq: 1080, tau: 0.0009, drive: 1.6, soft: true }
 /** These are short and very loud for their length: this sits them with the rest. */
 const RING_LEVEL = 0.55
 
+/** A ramp through a few [seconds after t, value] points. */
+function glide(param: AudioParam, t: number, points: [number, number][]) {
+  param.setValueAtTime(points[0][1], t)
+  for (const [at, v] of points.slice(1)) param.exponentialRampToValueAtTime(v, t + at)
+}
+
+/**
+ * A kitten's mew, kept short enough to keep time with. A buzzy voice that rises
+ * then falls in pitch, through a "mouth": two resonances (the vowel) gliding from
+ * "ee" to "oo" and lips that open from a hummed "m" and close again on the "w".
+ */
+const MEW_S = 0.19
+function mew(c: AudioContext, t: number, accent: boolean) {
+  const k = accent ? 1.2 : 1
+  const voice = c.createOscillator()
+  voice.type = 'sawtooth'
+  glide(voice.frequency, t, [
+    [0, 600 * k],
+    [0.05, 860 * k],
+    [0.12, 760 * k],
+    [MEW_S, 560 * k],
+  ])
+
+  const lips = c.createBiquadFilter()
+  lips.type = 'lowpass'
+  lips.Q.value = 0.7
+  glide(lips.frequency, t, [
+    [0, 450],
+    [0.045, 5200],
+    [0.12, 3600],
+    [MEW_S, 1100],
+  ])
+
+  const level = envelope(c, t, accent ? 0.5 : 0.4, MEW_S - 0.02, 0.018)
+  // The vowel: "ee" has its two resonances far apart, "oo" both low and close.
+  const vowel: { gain: number; q: number; points: [number, number][] }[] = [
+    { gain: 1, q: 4, points: [[0, 750], [0.06, 1050], [MEW_S, 700]] },
+    { gain: 0.7, q: 7, points: [[0, 2300], [0.06, 2700], [MEW_S, 1200]] },
+  ]
+  for (const { gain, q, points } of vowel) {
+    const f = c.createBiquadFilter()
+    f.type = 'bandpass'
+    f.Q.value = q
+    glide(f.frequency, t, points)
+    const g = c.createGain()
+    g.gain.value = gain
+    lips.connect(f).connect(g).connect(level)
+  }
+  voice.connect(lips)
+  voice.start(t)
+  voice.stop(t + MEW_S + 0.02)
+}
+
 function play(c: AudioContext, sound: ClickSound, accent: boolean, t: number) {
   const up = accent ? 1.2 : 1
   const loud = accent ? 1.25 : 1
@@ -269,18 +322,8 @@ function play(c: AudioContext, sound: ClickSound, accent: boolean, t: number) {
     case 'tick':
       burst(c, t, accent ? 0.07 : 0.04, 'highpass', 6500, envelope(c, t, accent ? 0.5 : 0.32, accent ? 0.06 : 0.03))
       break
-    // A tiny kitten mew: a quick rise and fall in pitch.
-    case 'mew': {
-      const base = accent ? 1.35 : 1
-      const f = c.createBiquadFilter()
-      f.type = 'lowpass'
-      f.frequency.value = 2400
-      const g = envelope(c, t, accent ? 0.3 : 0.22, 0.13, 0.012)
-      f.connect(g)
-      const o = osc(c, 'triangle', 620 * base, t, 0.15, f)
-      o.frequency.exponentialRampToValueAtTime(980 * base, t + 0.045)
-      o.frequency.exponentialRampToValueAtTime(700 * base, t + 0.14)
+    case 'mew':
+      mew(c, t, accent)
       break
-    }
   }
 }

@@ -51,6 +51,19 @@
   justify-content: space-between;
 }
 
+/* Slower and faster: pink keys, so they stand out on the white card. */
+.tempoRow .step {
+  --face: #ffe4ef;
+  --edge: #f2b2cc;
+  --ink: var(--color-primary-edge);
+}
+
+:root[data-theme='dark'] .tempoRow .step {
+  --face: var(--color-surface-raised);
+  --edge: var(--color-choice-edge);
+  --ink: var(--color-primary);
+}
+
 .bpm {
   display: flex;
   flex-direction: column;
@@ -265,9 +278,17 @@
   box-shadow: 0 10px 30px hsl(var(--color-shadow) / 0.12);
 }
 
+/* Like the settings drawer's section titles. */
 .label {
-  font-size: 1rem;
-  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 1.125rem;
+  color: var(--color-primary-edge);
+}
+
+:root[data-theme='dark'] .label {
+  color: var(--color-primary);
 }
 
 .label:not(:first-child) {
@@ -368,9 +389,11 @@
     grid-area: start;
   }
 
+  /* Its top lines up with the tempo card's (below the cat). */
   .more {
     grid-area: panel;
-    align-self: center;
+    align-self: start;
+    margin-top: calc(var(--cat-w) * 0.7586);
   }
 
   /* Always open here. */
@@ -400,6 +423,10 @@
 
   .card {
     align-self: center;
+  }
+
+  .more {
+    margin-top: 0;
   }
 
   .moreButton {

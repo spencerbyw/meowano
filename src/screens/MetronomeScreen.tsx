@@ -7,11 +7,13 @@ import {
   IconClick,
   IconHandFinger,
   IconMinus,
+  IconPaw,
   IconPawFilled,
   IconPlayerPlayFilled,
   IconPlayerStopFilled,
   IconPlus,
   IconSparkle,
+  IconVolume,
   IconWaveSquare,
   IconWood,
   type Icon,
@@ -47,7 +49,7 @@ const TEMPOS = [
 ] as const
 const tempoOf = (bpm: number) => TEMPOS.findLast(([from]) => bpm >= from)![1]
 
-const PATTERNS: DrumPattern[] = ['alternate', 'both', 'clap']
+const PATTERNS: DrumPattern[] = ['alternate', 'both', 'clap', 'sway']
 /** The cat switches how it keeps time after this many bars. */
 const BARS_PER_PATTERN = 8
 /** Taps further apart than this start a new tap tempo. */
@@ -88,7 +90,6 @@ export function MetronomeScreen() {
   /** The pattern for the next beat: picked a beat early, so the paws get there in time. */
   const upcoming = useRef<DrumPattern>('alternate')
   const taps = useRef<number[]>([])
-  const card = useRef<HTMLElement>(null)
 
   useEffect(() => setMetronome({ bpm, beats, sound }), [bpm, beats, sound])
 
@@ -101,11 +102,6 @@ export function MetronomeScreen() {
         upcoming.current =
           (beat.count + 1) % period === 0 ? otherPattern(pattern.current) : pattern.current
         setHit({ ...beat, pattern: pattern.current, next: upcoming.current })
-        // The card takes the hit: a little bump (bigger on beat 1).
-        card.current?.animate(
-          [{ transform: `translateY(${beat.accent ? 2 : 1}px)` }, { transform: 'none' }],
-          { duration: Math.min(220, beat.seconds * 600), easing: 'ease-out' },
-        )
       }),
     [beats],
   )
@@ -194,7 +190,7 @@ export function MetronomeScreen() {
 
       <div className="scroll-area">
         <main className={styles.main}>
-          <section ref={card} className={styles.card}>
+          <section className={styles.card}>
             <PeekCat
               className={styles.cat}
               mood={mood}
@@ -207,10 +203,11 @@ export function MetronomeScreen() {
               <Button3D
                 variant="ghost"
                 size="sm"
+                className={styles.step}
                 aria-label={t('metronome.slower')}
                 onClick={() => setBpm(bpm - 1)}
               >
-                <IconMinus size={22} aria-hidden="true" />
+                <IconMinus size={24} stroke={2.75} aria-hidden="true" />
               </Button3D>
               <p className={styles.bpm} aria-live="polite">
                 <span className={styles.bpmNumber}>{bpm}</span>
@@ -219,10 +216,11 @@ export function MetronomeScreen() {
               <Button3D
                 variant="ghost"
                 size="sm"
+                className={styles.step}
                 aria-label={t('metronome.faster')}
                 onClick={() => setBpm(bpm + 1)}
               >
-                <IconPlus size={22} aria-hidden="true" />
+                <IconPlus size={24} stroke={2.75} aria-hidden="true" />
               </Button3D>
             </div>
             <p className={styles.tempoName}>
@@ -321,6 +319,7 @@ export function MetronomeScreen() {
             >
               <section className={styles.panel}>
                 <h2 id="beats-label" className={styles.label}>
+                  <IconPaw size={22} aria-hidden="true" />
                   {t('metronome.beats')}
                 </h2>
                 <ToggleGroup.Root
@@ -338,6 +337,7 @@ export function MetronomeScreen() {
                 </ToggleGroup.Root>
 
                 <h2 id="sound-label" className={styles.label}>
+                  <IconVolume size={22} aria-hidden="true" />
                   {t('metronome.sound')}
                 </h2>
                 <ToggleGroup.Root

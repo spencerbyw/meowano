@@ -1,4 +1,4 @@
-import { IconChevronRight, IconMetronome } from '@tabler/icons-react'
+import { IconChartBar, IconChevronRight, IconMetronome } from '@tabler/icons-react'
 import { Popover } from 'radix-ui'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -6,14 +6,19 @@ import { useQuiz, type Tool } from '../quiz/store'
 import { Button3D } from './ui/Button3D'
 import styles from './Toybox.module.css'
 
-const TOOLS: { id: Tool; icon: ReactNode }[] = [
+type Entry = Tool | 'stats'
+
+/** The tools, then (last, set apart) the player's stats. */
+const ENTRIES: { id: Entry; icon: ReactNode }[] = [
   { id: 'metronome', icon: <IconMetronome size={26} aria-hidden="true" /> },
+  { id: 'stats', icon: <IconChartBar size={26} aria-hidden="true" /> },
 ]
 
 /** The toybox: a button that springs open a menu of practice tools. */
 export function Toybox({ className }: { className?: string }) {
   const { t } = useTranslation()
   const openTool = useQuiz((s) => s.openTool)
+  const showStats = useQuiz((s) => s.showStats)
   const [open, setOpen] = useState(false)
 
   return (
@@ -39,14 +44,19 @@ export function Toybox({ className }: { className?: string }) {
         >
           <h2 className={styles.title}>{t('toybox.title')}</h2>
           <ul className={styles.tools}>
-            {TOOLS.map(({ id, icon }, i) => (
-              <li key={id} style={{ '--i': i } as React.CSSProperties}>
+            {ENTRIES.map(({ id, icon }, i) => (
+              <li
+                key={id}
+                className={id === 'stats' ? styles.stats : undefined}
+                style={{ '--i': i } as React.CSSProperties}
+              >
                 <button
                   type="button"
                   className={styles.tool}
                   onClick={() => {
                     setOpen(false)
-                    openTool(id)
+                    if (id === 'stats') showStats()
+                    else openTool(id)
                   }}
                 >
                   <span className={styles.toolIcon}>{icon}</span>

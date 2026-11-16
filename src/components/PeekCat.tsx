@@ -38,8 +38,8 @@ interface PeekCatProps {
   style?: CSSProperties
 }
 
-/** Ways to keep the beat: alternate paws, both together, or clap. */
-export type DrumPattern = 'alternate' | 'both' | 'clap'
+/** Ways to keep the beat: alternate paws, both together, clap, or (paws still) sway the head side to side. */
+export type DrumPattern = 'alternate' | 'both' | 'clap' | 'sway'
 
 export interface DrumHit {
   /** Beats so far; each new one moves the paws. */
@@ -90,6 +90,7 @@ export function PeekCat({
   const wake = useRef(() => {})
   const pawL = useRef<SVGGElement>(null)
   const pawR = useRef<SVGGElement>(null)
+  const head = useRef<SVGGElement>(null)
   // Once it has drummed, the paws keep their place in the page (see below).
   const [drummed, setDrummed] = useState(false)
   const steadyPaws = drummed || drum !== undefined
@@ -150,7 +151,8 @@ export function PeekCat({
 
   useEffect(() => wake.current(), [mood, beat, peek])
 
-  // Drumming: move the paws for each beat as it sounds; when it stops, settle them.
+  // Drumming: move the paws (or the head) for each beat as it sounds; when it
+  // stops, settle them.
   const drumCount = drum?.count
   const drumRef = useRef(drum)
   useEffect(() => {
@@ -167,7 +169,11 @@ export function PeekCat({
     for (const [el, side] of paws) {
       if (!el) continue
       if (hit) drumPaw(el, side, hit)
-      else restPaw(el)
+      else easeHome(el)
+    }
+    if (head.current) {
+      if (hit) swayHead(head.current, hit)
+      else easeHome(head.current)
     }
   }, [drumCount])
 
@@ -313,11 +319,13 @@ export function PeekCat({
         <g clipPath={peekVariant ? `url(#${clip})` : undefined}>
           <g key={peek} className={styles.rise}>
             <g className={styles.tilt}>
-              <g
-                key={`${face}-${beat ?? ''}-${petting}-${drum?.count ?? ''}`}
-                className={styles.bob}
-              >
-                <Head face={face} blink={blink && OPEN_EYES.includes(face)} />
+              <g ref={head}>
+                <g
+                  key={`${face}-${beat ?? ''}-${petting}-${drum?.count ?? ''}`}
+                  className={styles.bob}
+                >
+                  <Head face={face} blink={blink && OPEN_EYES.includes(face)} />
+                </g>
               </g>
             </g>
           </g>
@@ -381,11 +389,13 @@ const PAW_ORIGIN = { L: '21px 56.7px', R: '43px 56.7px' }
 
 /** Does this paw hit on this beat? Alternating: left on even beats, right on odd. */
 const hits = (pattern: DrumPattern, side: Side, count: number) =>
-  pattern !== 'alternate' || (count % 2 === 0) === (side === 'L')
+  pattern === 'sway' ? false : pattern !== 'alternate' || (count % 2 === 0) === (side === 'L')
 
 /** Where a paw is as a beat sounds. */
 function poseAt(pattern: DrumPattern, side: Side, count: number) {
   if (pattern === 'clap') return CLAP(side)
+  // Swaying: the paws rest on the card.
+  if (pattern === 'sway') return DOWN
   return hits(pattern, side, count) ? DOWN : UP(side)
 }
 
@@ -408,7 +418,7 @@ function drumPaw(el: SVGGElement, side: Side, hit: DrumHit) {
   if (hits(hit.pattern, side, hit.count)) {
     frames.push({ offset: 0.07, transform: squash(start, hit.accent), easing: 'ease-out' })
   }
-  if (start === end) {
+  if (start === end && (start !== DOWN || hits(hit.pattern, side, hit.count))) {
     // Back to the same pose: lift off the card, or (clapping) open out onto it.
     const mid = start === DOWN ? pose(0, hit.accent ? -6 : -4.5, 0) : DOWN
     frames.push({ offset: 0.5, transform: mid, easing: 'ease-in' })
@@ -419,8 +429,39 @@ function drumPaw(el: SVGGElement, side: Side, hit: DrumHit) {
   el.animate(frames, { duration: hit.seconds * 1000, fill: 'forwards' })
 }
 
-/** Stopped: ease back down onto the card, then hand back to the moods. */
-function restPaw(el: SVGGElement) {
+/* Swaying: the head leans to the left on even beats and the right on odd ones,
+   turning about the neck. */
+const HEAD_ORIGIN = '32px 54px'
+const LEAN = (count: number) =>
+  count % 2 === 0 ? pose(-1.6, 0, -9) : pose(1.6, 0, 9)
+const UPRIGHT = pose(0, 0, 0)
+
+/**
+ * One beat of swaying: from wherever the head is, swinging through the middle (a
+ * little low, like a pendulum) to lean the other way just as the next beat sounds.
+ * Upright when the next beat isn't a sway.
+ */
+function swayHead(el: SVGGElement, hit: DrumHit) {
+  if (hit.pattern !== 'sway' && hit.next !== 'sway') {
+    easeHome(el)
+    return
+  }
+  const from = getComputedStyle(el).transform
+  el.getAnimations().forEach((a) => a.cancel())
+  el.style.transformOrigin = HEAD_ORIGIN
+  const end = hit.next === 'sway' ? LEAN(hit.count + 1) : UPRIGHT
+  el.animate(
+    [
+      { offset: 0, transform: from === 'none' ? UPRIGHT : from, easing: 'ease-in' },
+      { offset: 0.5, transform: pose(0, hit.accent ? 1.6 : 1, 0), easing: 'ease-out' },
+      { offset: 1, transform: end },
+    ],
+    { duration: hit.seconds * 1000, fill: 'forwards' },
+  )
+}
+
+/** Ease back down onto the card (or upright), then hand back to the moods. */
+function easeHome(el: SVGGElement) {
   if (!el.getAnimations().length) return
   const from = getComputedStyle(el).transform
   el.getAnimations().forEach((a) => a.cancel())

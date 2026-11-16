@@ -28,7 +28,8 @@
   margin-block: auto;
   max-width: var(--content-max);
   margin-inline: auto;
-  padding: var(--space-6) var(--space-4) var(--space-4);
+  /* Clear of the toybox and settings buttons in the top corners. */
+  padding: 76px var(--space-4) var(--space-5);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -128,10 +129,6 @@
   color: var(--color-text);
 }
 
-.statsButton {
-  margin-top: calc(var(--space-6) * -1);
-}
-
 .modes {
   margin-top: var(--space-2);
   display: flex;
@@ -139,12 +136,21 @@
   gap: var(--space-3);
 }
 
+/* Smaller phones: a little less air, so it all fits without scrolling. */
+@media (orientation: portrait) and (max-height: 700px) {
+  .main {
+    padding-top: 66px;
+    padding-bottom: var(--space-3);
+    gap: var(--space-6);
+  }
+}
+
 @media (orientation: landscape) and (max-height: 560px) {
   .main {
     flex-direction: row;
     gap: var(--space-6);
     max-width: 900px;
-    padding-top: var(--space-4);
+    padding-block: var(--space-4);
   }
 
   .panel {
