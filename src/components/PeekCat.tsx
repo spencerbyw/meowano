@@ -385,6 +385,8 @@ const DOWN = pose(0, 0, 0)
 const UP = (side: Side, lift = 6) => pose(0, -lift, side === 'L' ? -6 : 6)
 /** Clapping: each paw turned on its side, bottoms meeting in front of the chin. */
 const CLAP = (side: Side) => (side === 'L' ? pose(11, -9, -80) : pose(-11, -9, 80))
+/** Between claps: still up and turned, just pulled a little apart. */
+const CLAP_OPEN = (side: Side) => (side === 'L' ? pose(5, -8.5, -74) : pose(-5, -8.5, 74))
 const PAW_ORIGIN = { L: '21px 56.7px', R: '43px 56.7px' }
 
 /** Does this paw hit on this beat? Alternating: left on even beats, right on odd. */
@@ -419,8 +421,8 @@ function drumPaw(el: SVGGElement, side: Side, hit: DrumHit) {
     frames.push({ offset: 0.07, transform: squash(start, hit.accent), easing: 'ease-out' })
   }
   if (start === end && (start !== DOWN || hits(hit.pattern, side, hit.count))) {
-    // Back to the same pose: lift off the card, or (clapping) open out onto it.
-    const mid = start === DOWN ? pose(0, hit.accent ? -6 : -4.5, 0) : DOWN
+    // Back to the same pose: lift off the card, or (clapping) part a little.
+    const mid = start === DOWN ? pose(0, hit.accent ? -6 : -4.5, 0) : CLAP_OPEN(side)
     frames.push({ offset: 0.5, transform: mid, easing: 'ease-in' })
   } else {
     frames[frames.length - 1].easing = 'ease-in-out'
