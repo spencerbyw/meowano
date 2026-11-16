@@ -561,7 +561,6 @@ function Floaters({ face, streak }: { face: Face; streak: number }) {
       { glyph: '✦', kind: styles.sparkle, slot: 1 },
       { glyph: '✧', kind: styles.sparkle, slot: 2 },
     )
-  if (face === 'purr') items.push({ glyph: 'prr', kind: styles.prr, slot: 1 })
   if (face === 'sad') items.push({ glyph: <Drop />, kind: styles.drop, slot: 1 })
   if (face === 'confused') items.push({ glyph: '?', kind: styles.question, slot: 1 })
   if (face === 'curious') items.push({ glyph: '!', kind: styles.question, slot: 1 })

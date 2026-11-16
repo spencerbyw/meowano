@@ -534,14 +534,6 @@ button.cat:focus-visible {
   animation: twinkle 1.4s ease-in-out infinite;
 }
 
-.prr {
-  width: auto;
-  color: var(--color-primary);
-  font-size: calc(var(--cat-w, 112px) * 0.12);
-  white-space: nowrap;
-  animation: float-up 1.4s ease-out;
-}
-
 .zzz {
   color: var(--color-text-muted);
   animation: float-up 2.4s ease-out infinite;

@@ -37,24 +37,6 @@
   overflow: hidden;
 }
 
-.track {
-  position: relative;
-  display: block;
-  width: 100%;
-}
-
-/* Sits at the bar's end as it fills; its strands turn as it rolls along
-   (one full turn per 10%). */
-.yarn {
-  position: absolute;
-  top: 50%;
-  left: calc(var(--done) * 100%);
-  width: 26px;
-  height: 26px;
-  margin: -14px 0 0 -10px;
-  transition: left 400ms var(--ease-spring);
-}
-
 .barFill {
   display: block;
   height: 100%;
@@ -509,11 +491,15 @@
     padding-inline: var(--space-2);
   }
 
+  /* A scroll box clips at its edges, so it reaches a little past the buttons:
+     room for a wrong answer's shake (8px each way). */
   .answers {
     overflow-y: auto;
     overflow-x: hidden;
     overscroll-behavior: contain;
     justify-content: center;
+    padding-inline: 12px;
+    margin-inline: -12px;
   }
 
   .staffCard {

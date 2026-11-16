@@ -18,7 +18,6 @@ import { PeekCat, type PeekMood } from '../components/PeekCat'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { PianoKeys } from '../components/PianoKeys'
 import { Staff } from '../components/Staff'
-import { YarnBall } from '../components/YarnBall'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatPitchClass, formatStaffLabel } from '../music/format'
 import { practiceBand, viewOf } from '../music/staffBand'
@@ -235,22 +234,11 @@ export function QuizScreen() {
               : t('quiz.progressUnlimited', { current })}
           </span>
           {length > 0 && (
-            <span className={styles.track} aria-hidden="true">
-              <span className={styles.bar}>
-                <span
-                  className={styles.barFill}
-                  style={{ width: `${(results.length / length) * 100}%` }}
-                />
-              </span>
-              {/* Cat mode: the bar is yarn, unrolling from a ball as you go. */}
-              {catMode && (
-                <span
-                  className={styles.yarn}
-                  style={{ '--done': results.length / length } as React.CSSProperties}
-                >
-                  <YarnBall done={results.length / length} />
-                </span>
-              )}
+            <span className={styles.bar} aria-hidden="true">
+              <span
+                className={styles.barFill}
+                style={{ width: `${(results.length / length) * 100}%` }}
+              />
             </span>
           )}
         </div>
