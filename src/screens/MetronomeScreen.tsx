@@ -50,10 +50,11 @@ const BARS_PER_PATTERN = 8
 /** Taps further apart than this start a new tap tempo. */
 const TAP_RESET_MS = 2000
 const SOUND_ICONS: Record<ClickSound, Icon> = {
-  snap1: IconBolt,
-  snap2: IconBolt,
-  snap3: IconBolt,
-  snap4: IconBolt,
+  snap: IconBolt,
+  snapCode: IconBolt,
+  snapWarm: IconBolt,
+  snapFull: IconBolt,
+  snapTight: IconBolt,
   click: IconClick,
   wood: IconWood,
   beep: IconWaveSquare,
