@@ -1,4 +1,4 @@
-import { IconChartBar, IconChevronRight, IconMetronome } from '@tabler/icons-react'
+import { IconChartBar, IconChevronRight, IconMetronome, IconPiano } from '@tabler/icons-react'
 import { Popover } from 'radix-ui'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,6 +11,7 @@ type Entry = Tool | 'stats'
 /** The tools, then (last, set apart) the player's stats. */
 const ENTRIES: { id: Entry; icon: ReactNode }[] = [
   { id: 'metronome', icon: <IconMetronome size={26} aria-hidden="true" /> },
+  { id: 'keyboard', icon: <IconPiano size={26} aria-hidden="true" /> },
   { id: 'stats', icon: <IconChartBar size={26} aria-hidden="true" /> },
 ]
 

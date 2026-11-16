@@ -6,7 +6,7 @@ import { practiceWeight, useStats } from '../stats/store'
 
 export type Screen = 'start' | 'quiz' | 'summary' | 'stats' | 'mictest' | Tool
 /** The toybox's tools, each a screen of its own. */
-export type Tool = 'metronome'
+export type Tool = 'metronome' | 'keyboard'
 
 /**
  * - quiz: pick the answer from three choices

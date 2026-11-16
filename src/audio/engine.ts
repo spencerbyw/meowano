@@ -1,4 +1,4 @@
-import { CacheStorage, SplendidGrandPiano } from 'smplr'
+import { CacheStorage, SplendidGrandPiano, type StopFn } from 'smplr'
 import { create } from 'zustand'
 import { midiOf, type Pitch } from '../music/theory'
 import { useSettings } from '../settings/store'
@@ -146,6 +146,46 @@ export async function playNotes(pitches: Pitch[], { roll = 0.025 } = {}) {
       duration: NOTE_SECONDS,
     })
   })
+}
+
+/** The notes there are piano samples for (A1 to E6): the keyboard's range. */
+export const PIANO_RANGE = { low: LOW_MIDI, high: HIGH_MIDI }
+
+/** Lifting a key: lets go of the note (it fades as a real piano's would). */
+const HELD_RELEASE_S = 1.2
+
+/**
+ * Press a piano key down: the note sounds until the returned function is called
+ * (the key lifted). Plays at once when the piano is ready; if it's still loading,
+ * it sounds when it can, unless the key's already been let go.
+ */
+let held = 0
+
+export function holdNote(midi: number): () => void {
+  let stop: StopFn | undefined
+  let lifted = false
+  held++
+  const press = () => {
+    if (!piano || !ctx || lifted) return
+    stop = piano.start({ note: midi, velocity: VELOCITY })
+  }
+  if (piano && ctx?.state === 'running' && useAudioStatus.getState().piano === 'ready') {
+    // Ready: no waiting, not even a tick.
+    chooseSession()
+    press()
+  } else {
+    unlockAudio()
+    void ready(context())
+      .then(loadPiano)
+      .then(press)
+  }
+  return () => {
+    if (lifted) return
+    lifted = true
+    stop?.()
+    // Hand the audio back only once every key is up.
+    if (--held === 0) releaseAudio(HELD_RELEASE_S)
+  }
 }
 
 // ---------------------------------------------------------------------------

@@ -36,6 +36,7 @@ import { Button3D } from '../components/ui/Button3D'
 import { useQuiz } from '../quiz/store'
 import { useSettings } from '../settings/store'
 import { MAX_BPM, MIN_BPM, clampBpm, useToybox } from '../toybox/store'
+import { useMediaQuery } from '../ui/useMediaQuery'
 import styles from './MetronomeScreen.module.css'
 
 /** Tempo words, from the slowest (the number is where each one starts). */
@@ -443,15 +444,4 @@ function useWakeLock(on: boolean) {
       void lock?.release()
     }
   }, [on])
-}
-
-function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
-  useEffect(() => {
-    const list = window.matchMedia(query)
-    const onChange = () => setMatches(list.matches)
-    list.addEventListener('change', onChange)
-    return () => list.removeEventListener('change', onChange)
-  }, [query])
-  return matches
 }
