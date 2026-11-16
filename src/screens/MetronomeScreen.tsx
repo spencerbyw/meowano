@@ -90,6 +90,7 @@ export function MetronomeScreen() {
   /** The pattern for the next beat: picked a beat early, so the paws get there in time. */
   const upcoming = useRef<DrumPattern>('alternate')
   const taps = useRef<number[]>([])
+  const holdToRepeat = useHoldToRepeat()
 
   useEffect(() => setMetronome({ bpm, beats, sound }), [bpm, beats, sound])
 
@@ -201,10 +202,11 @@ export function MetronomeScreen() {
             />
             <div className={styles.tempoRow}>
               <Button3D
-                variant="secondary"
+                variant="primary"
                 size="sm"
+                className={styles.step}
                 aria-label={t('metronome.slower')}
-                onClick={() => setBpm(bpm - 1)}
+                {...holdToRepeat(() => nudgeBpm(-1))}
               >
                 <IconMinus size={24} stroke={2.75} aria-hidden="true" />
               </Button3D>
@@ -213,10 +215,11 @@ export function MetronomeScreen() {
                 <span className={styles.bpmUnit}>{t('metronome.bpm')}</span>
               </p>
               <Button3D
-                variant="secondary"
+                variant="primary"
                 size="sm"
+                className={styles.step}
                 aria-label={t('metronome.faster')}
-                onClick={() => setBpm(bpm + 1)}
+                {...holdToRepeat(() => nudgeBpm(+1))}
               >
                 <IconPlus size={24} stroke={2.75} aria-hidden="true" />
               </Button3D>
@@ -366,6 +369,52 @@ export function MetronomeScreen() {
       </div>
     </div>
   )
+}
+
+/** One step slower or faster, from the tempo as it is right now. */
+function nudgeBpm(by: number) {
+  const { bpm, setBpm } = useToybox.getState()
+  setBpm(bpm + by)
+}
+
+/** Hold before repeating, then the gap between steps: quicker the longer it's held. */
+const HOLD_MS = 400
+const REPEAT_MS = 110
+const FASTEST_MS = 35
+
+/**
+ * Press for one step; hold to keep stepping, faster and faster. Keyboards get a
+ * step per press (and their own key repeat).
+ */
+function useHoldToRepeat() {
+  // Kept across renders (each step re-renders), so letting go always stops it.
+  const timer = useRef<number | undefined>(undefined)
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+  return (step: () => void) => holdHandlers(step, timer)
+}
+
+function holdHandlers(step: () => void, timer: { current: number | undefined }) {
+  const stop = () => window.clearTimeout(timer.current)
+  const go = (gap: number) => {
+    step()
+    timer.current = window.setTimeout(() => go(Math.max(FASTEST_MS, gap * 0.9)), gap)
+  }
+  return {
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.button !== 0) return
+      stop()
+      step()
+      timer.current = window.setTimeout(() => go(REPEAT_MS), HOLD_MS)
+    },
+    onPointerUp: stop,
+    onPointerLeave: stop,
+    onPointerCancel: stop,
+    // A click from the keyboard (a pointer press has already stepped).
+    onClick: (e: React.MouseEvent) => {
+      if (e.detail === 0) step()
+    },
+    onContextMenu: (e: React.MouseEvent) => e.preventDefault(),
+  }
 }
 
 /** Keep the screen on while it's ticking (where the browser allows it). */

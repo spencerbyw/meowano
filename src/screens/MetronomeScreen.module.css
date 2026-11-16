@@ -51,6 +51,11 @@
   justify-content: space-between;
 }
 
+/* Held down to keep stepping: no callout or text selection on a long press. */
+.step {
+  -webkit-touch-callout: none;
+}
+
 .bpm {
   display: flex;
   flex-direction: column;
