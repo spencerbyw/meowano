@@ -13,6 +13,7 @@ import { Footer } from '../components/Footer'
 import { Logo } from '../components/Logo'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { Splash } from '../components/Splash'
+import { Toybox } from '../components/Toybox'
 import { Button3D } from '../components/ui/Button3D'
 import { beginRound } from '../quiz/begin'
 import { useQuiz } from '../quiz/store'
@@ -34,6 +35,7 @@ export function StartScreen() {
         .filter(Boolean)
         .join(' ')}
     >
+      <Toybox className={styles.toybox} />
       <SettingsButton className={styles.settings} />
       <div className="scroll-area">
         <main className={styles.main}>

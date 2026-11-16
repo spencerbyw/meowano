@@ -103,6 +103,13 @@
   z-index: 1;
 }
 
+.toybox {
+  position: absolute;
+  top: calc(var(--safe-top) + var(--space-3));
+  left: calc(var(--safe-left) + var(--space-4));
+  z-index: 1;
+}
+
 .level {
   align-self: center;
   display: inline-flex;

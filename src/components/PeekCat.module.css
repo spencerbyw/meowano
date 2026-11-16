@@ -626,6 +626,152 @@ button.cat:focus-visible {
   }
 }
 
+/* Drumming along with the metronome. Each strike starts as the paw hits (on the
+   beat) and lands again just as the next one is due, so it keeps time. --beat is
+   one beat, in seconds. */
+.cat.drumming .pawL {
+  transform-origin: 21px 56.7px;
+}
+
+.cat.drumming .pawR {
+  transform-origin: 43px 56.7px;
+}
+
+.cat.drumming .bob {
+  animation: nod var(--beat, 0.6s) ease-out;
+}
+
+.cat.drumming.accent .bob {
+  animation-name: nod-big;
+}
+
+@keyframes nod {
+  from {
+    transform: translateY(1px) scaleY(0.98);
+  }
+}
+
+@keyframes nod-big {
+  from {
+    transform: translateY(2px) scaleY(0.96);
+  }
+}
+
+/* Beat 1: ears up. */
+.cat.drumming.accent .earL {
+  animation: ear-up-l 320ms var(--ease-out);
+}
+
+.cat.drumming.accent .earR {
+  animation: ear-up-r 320ms var(--ease-out);
+}
+
+@keyframes ear-up-l {
+  30% {
+    transform: rotate(9deg) translateY(-1px);
+  }
+}
+
+@keyframes ear-up-r {
+  30% {
+    transform: rotate(-9deg) translateY(-1px);
+  }
+}
+
+/* Taking turns: each paw has two beats to lift and come back down. */
+.cat.alternate .strike {
+  animation: strike calc(var(--beat, 0.6s) * 2) ease-in-out;
+}
+
+.cat.both .strike {
+  animation: strike-both var(--beat, 0.6s) ease-in-out;
+}
+
+@keyframes strike {
+  0% {
+    transform: translateY(0.4px) scale(1.06, 0.86);
+  }
+  12% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-6px) rotate(-6deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes strike-both {
+  0% {
+    transform: translateY(0.4px) scale(1.06, 0.86);
+  }
+  15% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-4.5px);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+.cat.alternate .pawR.strike {
+  animation-name: strike-r;
+}
+
+@keyframes strike-r {
+  0% {
+    transform: translateY(0.4px) scale(1.06, 0.86);
+  }
+  12% {
+    transform: none;
+  }
+  50% {
+    transform: translateY(-6px) rotate(6deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* Clapping: the paws meet in front of the chin on the beat, and drop back to the
+   card's edge in between. */
+.cat.clap .pawL.strike {
+  animation: clap-l var(--beat, 0.6s) ease-in-out;
+}
+
+.cat.clap .pawR.strike {
+  animation: clap-r var(--beat, 0.6s) ease-in-out;
+}
+
+@keyframes clap-l {
+  0%,
+  100% {
+    transform: translate(5.6px, -8px) rotate(-14deg) scale(0.92, 1.02);
+  }
+  10% {
+    transform: translate(5.2px, -8px) rotate(-14deg);
+  }
+  55% {
+    transform: none;
+  }
+}
+
+@keyframes clap-r {
+  0%,
+  100% {
+    transform: translate(-5.6px, -8px) rotate(14deg) scale(0.92, 1.02);
+  }
+  10% {
+    transform: translate(-5.2px, -8px) rotate(14deg);
+  }
+  55% {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cat *,
   .cat {

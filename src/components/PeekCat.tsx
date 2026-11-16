@@ -30,10 +30,25 @@ interface PeekCatProps {
   hearMic?: boolean
   /** Yawn, then nap, when left alone. */
   sleepy?: boolean
+  /** Metronome: the latest beat, drummed on the card's edge with the paws. */
+  drum?: DrumHit
   onPet?: () => void
   petLabel?: string
   className?: string
   style?: CSSProperties
+}
+
+/** Ways to keep the beat: alternate paws, both together, or clap. */
+export type DrumPattern = 'alternate' | 'both' | 'clap'
+
+export interface DrumHit {
+  /** Beats so far; each new one replays the strike. */
+  count: number
+  pattern: DrumPattern
+  /** Beat 1 of the bar: a bigger hit, ears up. */
+  accent: boolean
+  /** Seconds until the next beat, so each strike lands back down on time. */
+  seconds: number
 }
 
 const YAWN_AFTER_MS = 20_000
@@ -56,6 +71,7 @@ export function PeekCat({
   streak = 0,
   hearMic,
   sleepy,
+  drum,
   onPet,
   petLabel,
   className,
@@ -241,10 +257,17 @@ export function PeekCat({
     styles[face],
     hearMic && styles.hearMic,
     twitch && styles[`twitch${twitch}`],
+    drum && styles.drumming,
+    drum && styles[drum.pattern],
+    drum?.accent && styles.accent,
     className,
   ]
     .filter(Boolean)
     .join(' ')
+
+  const drumStyle = drum
+    ? ({ ...style, '--beat': `${drum.seconds}s` } as CSSProperties)
+    : style
 
   const inner = (
     <>
@@ -263,7 +286,10 @@ export function PeekCat({
         <g clipPath={peekVariant ? `url(#${clip})` : undefined}>
           <g key={peek} className={styles.rise}>
             <g className={styles.tilt}>
-              <g key={`${face}-${beat ?? ''}-${petting}`} className={styles.bob}>
+              <g
+                key={`${face}-${beat ?? ''}-${petting}-${drum?.count ?? ''}`}
+                className={styles.bob}
+              >
                 <Head face={face} blink={blink && OPEN_EYES.includes(face)} />
               </g>
             </g>
@@ -271,11 +297,11 @@ export function PeekCat({
         </g>
         {peekVariant && (
           <g key={`paws-${face}-${beat ?? ''}-${petting}`} className={styles.paws}>
-            <g className={styles.pawL}>
+            <g key={`L${drumKey(drum, 'L')}`} className={pawClass(drum, 'L')}>
               <ellipse cx="21" cy="52.2" rx="6.2" ry="4.5" className={styles.paw} />
               <path d="M19.2 56.4v-1.9M22.8 56.4v-1.9" className={styles.toes} />
             </g>
-            <g className={styles.pawR}>
+            <g key={`R${drumKey(drum, 'R')}`} className={pawClass(drum, 'R')}>
               <ellipse cx="43" cy="52.2" rx="6.2" ry="4.5" className={styles.paw} />
               <path d="M41.2 56.4v-1.9M44.8 56.4v-1.9" className={styles.toes} />
             </g>
@@ -291,7 +317,7 @@ export function PeekCat({
       ref={root as React.RefObject<HTMLButtonElement>}
       type="button"
       className={classes}
-      style={style}
+      style={drumStyle}
       onClick={pet}
       aria-label={petLabel}
     >
@@ -301,12 +327,29 @@ export function PeekCat({
     <span
       ref={root as React.RefObject<HTMLSpanElement>}
       className={classes}
-      style={style}
+      style={drumStyle}
       aria-hidden="true"
     >
       {inner}
     </span>
   )
+}
+
+/**
+ * Drumming, each paw restarts its strike when it hits: both on every beat, or
+ * alternating (left on even beats, right on odd). The key is the paw's last hit.
+ */
+function drumKey(drum: DrumHit | undefined, side: 'L' | 'R') {
+  if (!drum) return ''
+  if (drum.pattern !== 'alternate') return drum.count
+  const left = drum.count % 2 === 0
+  return (side === 'L') === left ? drum.count : drum.count - 1
+}
+
+function pawClass(drum: DrumHit | undefined, side: 'L' | 'R') {
+  const paw = side === 'L' ? styles.pawL : styles.pawR
+  // A paw that hasn't hit yet (the right one, on the very first beat) stays put.
+  return drum && Number(drumKey(drum, side)) >= 0 ? `${paw} ${styles.strike}` : paw
 }
 
 function Head({ face, blink }: { face: Face; blink: boolean }) {
