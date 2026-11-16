@@ -4,7 +4,9 @@ import { midiOf } from '../music/theory'
 import { useSettings } from '../settings/store'
 import { practiceWeight, useStats } from '../stats/store'
 
-export type Screen = 'start' | 'quiz' | 'summary' | 'stats' | 'mictest'
+export type Screen = 'start' | 'quiz' | 'summary' | 'stats' | 'mictest' | Tool
+/** The toybox's tools, each a screen of its own. */
+export type Tool = 'metronome'
 
 /**
  * - quiz: pick the answer from three choices
@@ -67,6 +69,8 @@ interface QuizState {
   showStats: () => void
   /** The mic test screen, for checking what "Play the note" hears. */
   showMicTest: () => void
+  /** One of the toybox's tools. */
+  openTool: (tool: Tool) => void
 }
 
 const newQuestion = (mode: QuizMode, previous?: Question | null) => {
@@ -222,5 +226,6 @@ export const useQuiz = create<QuizState>()((set, get) => {
     goHome: () => set({ screen: 'start', question: null }),
     showStats: () => set({ screen: 'stats' }),
     showMicTest: () => set({ screen: 'mictest', question: null }),
+    openTool: (tool) => set({ screen: tool, question: null }),
   }
 })

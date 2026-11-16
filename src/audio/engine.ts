@@ -106,6 +106,21 @@ function loadPiano(): Promise<void> {
   return pianoReady
 }
 
+/**
+ * For tools that make their own sounds (the metronome): the audio context, awake
+ * and with the right iOS session. Call from a tap handler.
+ */
+export async function wakeAudio(): Promise<AudioContext> {
+  const c = context()
+  await ready(c)
+  return c
+}
+
+/** When a tool's sounds stop: lets 'playback' go once the last one has rung out. */
+export function releaseAudio(afterSeconds = 0) {
+  if (useSettings.getState().silentMode) releaseSoon(afterSeconds)
+}
+
 /** Call from a tap/click handler: wakes the audio context and starts loading samples. */
 export function unlockAudio() {
   const c = context()

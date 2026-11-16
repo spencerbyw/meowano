@@ -75,8 +75,9 @@ button.cat:focus-visible {
   fill: var(--cat-shine);
 }
 
+/* Closed eyes: drawn in the same soft colour as the mouth and toes. */
 .line {
-  stroke: var(--cat-eye);
+  stroke: var(--cat-mouth);
   stroke-width: 2.5;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -623,6 +624,49 @@ button.cat:focus-visible {
   to {
     opacity: 1;
     transform: rotate(12deg);
+  }
+}
+
+/* Drumming along with the metronome: the paws are moved from code, beat by beat
+   (see drumPaw); here, the head nods on each beat. --beat is one beat, in seconds. */
+.cat.drumming .bob {
+  animation: nod var(--beat, 0.6s) ease-out;
+}
+
+.cat.drumming.accent .bob {
+  animation-name: nod-big;
+}
+
+@keyframes nod {
+  from {
+    transform: translateY(1px) scaleY(0.98);
+  }
+}
+
+@keyframes nod-big {
+  from {
+    transform: translateY(2px) scaleY(0.96);
+  }
+}
+
+/* Beat 1: ears up. */
+.cat.drumming.accent .earL {
+  animation: ear-up-l 320ms var(--ease-out);
+}
+
+.cat.drumming.accent .earR {
+  animation: ear-up-r 320ms var(--ease-out);
+}
+
+@keyframes ear-up-l {
+  30% {
+    transform: rotate(9deg) translateY(-1px);
+  }
+}
+
+@keyframes ear-up-r {
+  30% {
+    transform: rotate(-9deg) translateY(-1px);
   }
 }
 
