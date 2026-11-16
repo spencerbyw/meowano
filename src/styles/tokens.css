@@ -71,8 +71,9 @@
   --cat-pupil: #1e1628;
   --cat-nose: #ff7aae;
   --cat-mouth: #b6a9c9;
-  /* The white muzzle, and the mouth drawn on it (the same in both themes). */
-  --cat-muzzle: #fff8f1;
+  /* The muzzle, and the mouth drawn on it. A dusty pale pink on the black cat,
+     softer than white; the white cat's sets it to its fur colour. */
+  --cat-muzzle: #e4d8e6;
   --cat-muzzle-line: #3b2f4a;
 
   color-scheme: light;
@@ -118,6 +119,7 @@
   --cat-pupil: #3b2f4a;
   --cat-nose: #ff7aae;
   --cat-mouth: #3b2f4a;
+  --cat-muzzle: #fff8f1;
 
   color-scheme: dark;
 }

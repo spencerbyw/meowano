@@ -351,7 +351,7 @@ function Head({ face, blink }: { face: Face; blink: boolean }) {
         opacity={cheeks}
       />
 
-      {/* A white muzzle, like a tuxedo cat's: a bright, friendly middle to the face. */}
+      {/* A pale muzzle, like a tuxedo cat's: a lighter, friendly middle to the face. */}
       <path
         d="M32 40.8c3.2 0 4.4 1.6 5.6 3.2 2 .2 3.4 1.6 3.4 3.4 0 2.6-2.8 4.2-5.6 4.2-1.3 0-2.5-.4-3.4-1.1-.9.7-2.1 1.1-3.4 1.1-2.8 0-5.6-1.6-5.6-4.2 0-1.8 1.4-3.2 3.4-3.4 1.2-1.6 2.4-3.2 5.6-3.2Z"
         className={styles.muzzle}
