@@ -110,14 +110,19 @@
   box-shadow: inset 0 -3px 0 var(--color-primary-edge);
 }
 
-/* Stats: not a toy, so set apart at the bottom, in the other candy colour. */
-.stats {
-  margin-top: var(--space-1);
-  padding-top: var(--space-3);
+/* A dashed line between each. */
+.tools > li + li {
+  padding-top: var(--space-2);
   border-top: 2px dashed var(--color-border);
 }
 
-.stats .toolIcon {
+/* Each its own colour. */
+.sunny .toolIcon {
+  background: var(--color-sunny);
+  box-shadow: inset 0 -3px 0 var(--color-sunny-edge);
+}
+
+.purple .toolIcon {
   background: var(--color-secondary);
   box-shadow: inset 0 -3px 0 var(--color-secondary-edge);
 }

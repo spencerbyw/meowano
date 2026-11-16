@@ -2,7 +2,13 @@ import { IconArrowLeft, IconChevronLeft, IconChevronRight } from '@tabler/icons-
 import type { TFunction } from 'i18next'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PIANO_RANGE, holdNote, unlockAudio, useAudioStatus } from '../audio/engine'
+import {
+  PIANO_RANGE,
+  holdNote,
+  setPianoRoom,
+  unlockAudio,
+  useAudioStatus,
+} from '../audio/engine'
 import { PeekCat } from '../components/PeekCat'
 import { Button3D } from '../components/ui/Button3D'
 import { useQuiz } from '../quiz/store'
@@ -48,8 +54,13 @@ export function KeyboardScreen() {
   const first = Math.max(0, Math.min(lastFirst, wantFirst))
   const pressed = usePlaying(keysRef)
 
-  // Start loading the piano now (opening this screen was a tap).
-  useEffect(() => unlockAudio(), [])
+  // Start loading the piano now (opening this screen was a tap), and play it in
+  // the room, so held notes keep ringing.
+  useEffect(() => {
+    unlockAudio()
+    setPianoRoom(true)
+    return () => setPianoRoom(false)
+  }, [])
 
   useLayoutEffect(() => {
     const el = keysRef.current

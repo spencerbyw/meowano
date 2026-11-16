@@ -18,7 +18,7 @@ export const useToybox = create<{
   persist(
     (set) => ({
       bpm: 100,
-      beats: 4,
+      beats: 1,
       sound: 'pop',
       setBpm: (bpm) => set({ bpm: clampBpm(bpm) }),
       setBeats: (beats) => set({ beats }),
@@ -26,11 +26,13 @@ export const useToybox = create<{
     }),
     {
       name: 'kiano-toybox',
-      version: 2,
-      // Sounds come and go while they're being tried out: anything unknown is Pop.
-      migrate: (saved) => {
-        const s = saved as { sound?: ClickSound }
+      version: 3,
+      migrate: (saved, version) => {
+        const s = saved as { sound?: ClickSound; beats?: number }
+        // Sounds came and went while they were being tried out: anything unknown is Pop.
         if (!s.sound || !CLICK_SOUNDS.includes(s.sound)) s.sound = 'pop'
+        // One beat per bar is the default now; 4 was the old default, not a choice.
+        if (version < 3 && s.beats === 4) s.beats = 1
         return s as never
       },
     },
