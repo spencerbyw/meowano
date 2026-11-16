@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { PeekCat } from './PeekCat'
 import styles from './Logo.module.css'
 
 export type CatMood = 'idle' | 'happy' | 'surprised'
@@ -118,21 +119,17 @@ export function Logo({
   children,
 }: LogoProps) {
   const Word = asHeading ? 'h1' : 'span'
-  const cat = <CatMark size={size === 'lg' ? 72 : 36} mood={mood} />
   return (
     <span className={`${styles.logo} ${styles[size]}`}>
-      {onCatClick ? (
-        <button
-          type="button"
-          className={[styles.catButton, catClassName].filter(Boolean).join(' ')}
-          onClick={onCatClick}
-          aria-label={catLabel}
-        >
-          {cat}
-        </button>
-      ) : (
-        cat
-      )}
+      {/* The cat's alive: it blinks, watches your taps, and naps if left alone. */}
+      <PeekCat
+        variant="head"
+        mood={mood === 'happy' ? 'happy' : mood === 'surprised' ? 'curious' : 'idle'}
+        sleepy
+        onPet={onCatClick}
+        petLabel={onCatClick ? catLabel : undefined}
+        className={[styles.cat, catClassName].filter(Boolean).join(' ')}
+      />
       <Word className={styles.word}>
         Kiano
         {children}

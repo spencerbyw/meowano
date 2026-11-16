@@ -14,7 +14,7 @@ import { playChime, playNotes, useAudioStatus } from '../audio/engine'
 import { onNotePlayed } from '../audio/mic'
 import { ListenPanel } from '../components/ListenPanel'
 import { NextButton } from '../components/NextButton'
-import { CatMark, type CatMood } from '../components/Logo'
+import { PeekCat, type PeekMood } from '../components/PeekCat'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { PianoKeys } from '../components/PianoKeys'
 import { Staff } from '../components/Staff'
@@ -90,10 +90,18 @@ export function QuizScreen() {
   const pianoStatus = useAudioStatus((s) => s.piano)
   // Bumped on each tap of the staff to restart the little "ring" animation.
   const [rings, setRings] = useState(0)
+  // The cat closes its eyes and sways while the notes play.
+  const [hearing, setHearing] = useState(0)
+  useEffect(() => {
+    if (!hearing) return
+    const id = window.setTimeout(() => setHearing(0), 1900)
+    return () => window.clearTimeout(id)
+  }, [hearing])
 
   const hear = () => {
     if (!question) return
     setRings((n) => n + 1)
+    setHearing((n) => n + 1)
     void playNotes(question.notes)
   }
 
@@ -132,12 +140,20 @@ export function QuizScreen() {
       }
     })
   }, [mode, catMode, t])
-  const mood: CatMood =
-    feedback?.kind === 'correct'
-      ? 'happy'
-      : feedback?.kind === 'wrong'
-        ? 'surprised'
-        : 'idle'
+  const mood: PeekMood =
+    hearing && feedback?.kind !== 'correct'
+      ? 'listening'
+      : feedback?.kind === 'correct'
+        ? currentStreak >= 5
+          ? 'love'
+          : 'happy'
+        : feedback?.kind === 'wrong'
+          ? 'sad'
+          : feedback?.kind === 'info' && solved
+            ? 'confused'
+            : pending !== null
+              ? 'curious'
+              : 'idle'
 
   const staffLabel = useMemo(
     () => (question ? formatStaffLabel(t, question) : ''),
@@ -243,14 +259,20 @@ export function QuizScreen() {
         <SettingsButton />
       </header>
 
-      <main className={styles.main}>
+      <main
+        className={[styles.main, catMode && styles.catMain].filter(Boolean).join(' ')}
+      >
         <p className="visually-hidden" aria-live="polite">
           {length > 0
             ? t('quiz.progress', { current, total: length })
             : t('quiz.progressUnlimited', { current })}
           . {t(mode === 'play' ? 'quiz.prompt.play' : `quiz.prompt.${question.kind}`)}
         </p>
-        <div className={`scroll-area ${styles.staffArea}`}>
+        <div
+          className={['scroll-area', styles.staffArea, catMode && styles.withCat]
+            .filter(Boolean)
+            .join(' ')}
+        >
           <section
             ref={cardRef}
             className={styles.staffCard}
@@ -260,24 +282,46 @@ export function QuizScreen() {
                 : undefined
             }
           >
-            <div className={styles.cardHead}>
-              <span
-                key={`${mood}-${results.length}-${wrongPicks.length}`}
-                className={[styles.mascot, mood !== 'idle' && styles.react]
-                  .filter(Boolean)
-                  .join(' ')}
-                aria-hidden="true"
+            {catMode && (
+              <PeekCat
+                mood={mood}
+                beat={`${results.length}-${wrongPicks.length}-${wrongNotes.length}-${hearing}`}
+                peek={question.id}
+                streak={currentStreak}
+                hearMic={mode === 'play' && !solved}
+                sleepy
+                petLabel={t('app.petCat')}
+                className={styles.cat}
+              />
+            )}
+            {catMode ? (
+              // The cat asks the question, in a speech bubble beside it.
+              <p
+                key={`bubble-${question.id}`}
+                ref={promptRef}
+                tabIndex={-1}
+                className={`${styles.prompt} ${styles.bubble}`}
               >
-                {catMode ? (
-                  <CatMark size={40} mood={mood} />
-                ) : (
-                  <IconMusic size={28} stroke={2.2} />
-                )}
-              </span>
-              <p ref={promptRef} tabIndex={-1} className={styles.prompt}>
                 {t(mode === 'play' ? 'quiz.prompt.play' : `quiz.prompt.${question.kind}`)}
               </p>
-            </div>
+            ) : (
+              <div className={styles.cardHead}>
+                <span
+                  key={`${mood}-${results.length}-${wrongPicks.length}`}
+                  className={[styles.mascot, mood !== 'idle' && styles.react]
+                    .filter(Boolean)
+                    .join(' ')}
+                  aria-hidden="true"
+                >
+                  <IconMusic size={28} stroke={2.2} />
+                </span>
+                <p ref={promptRef} tabIndex={-1} className={styles.prompt}>
+                  {t(
+                    mode === 'play' ? 'quiz.prompt.play' : `quiz.prompt.${question.kind}`,
+                  )}
+                </p>
+              </div>
+            )}
             {sound ? (
               <button
                 type="button"
@@ -438,6 +482,7 @@ export function QuizScreen() {
 
             {solved ? (
               <NextButton
+                frontClassName={styles.compactFront}
                 key={question.id}
                 label={isLast ? t('quiz.finish') : t('quiz.next')}
                 onNext={onNext}
@@ -456,7 +501,7 @@ export function QuizScreen() {
                 <Button3D
                   variant="ghost"
                   size="lg"
-                  frontClassName={styles.footerFront}
+                  frontClassName={`${styles.footerFront} ${styles.compactFront}`}
                   onClick={onDontKnow}
                 >
                   <IconHelp size={24} aria-hidden="true" />
@@ -466,7 +511,7 @@ export function QuizScreen() {
                   <Button3D
                     variant="ghost"
                     size="lg"
-                    frontClassName={styles.footerFront}
+                    frontClassName={`${styles.footerFront} ${styles.compactFront}`}
                     onClick={finish}
                   >
                     <IconFlag size={22} aria-hidden="true" />

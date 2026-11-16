@@ -27,6 +27,10 @@
   color: var(--color-sunny);
 }
 
+.cat {
+  --cat-w: 116px;
+}
+
 .title {
   font-size: clamp(2rem, 8vw, 2.75rem);
   text-align: center;

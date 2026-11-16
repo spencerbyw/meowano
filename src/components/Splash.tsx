@@ -13,9 +13,13 @@ export function Splash({ className }: { className?: string }) {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    const id = setInterval(() => setIndex((i) => i + 1), INTERVAL_MS)
+    // The tagline first, then a random line each time (never the same twice running).
+    const id = setInterval(
+      () => setIndex((i) => i + 1 + Math.floor(Math.random() * (lines.length - 1))),
+      INTERVAL_MS,
+    )
     return () => clearInterval(id)
-  }, [])
+  }, [lines.length])
 
   const line = lines[index % lines.length]
   // It hangs off the logo's right edge, so longer lines are set smaller to keep

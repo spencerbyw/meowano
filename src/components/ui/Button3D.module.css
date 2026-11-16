@@ -3,7 +3,9 @@
   --edge: var(--color-primary-edge);
   --ink: var(--color-primary-text);
   --lift: 5px;
-  --radius: var(--radius-md);
+  /* Squircle corner size; the blurred shadow (unmasked) uses a matching radius. */
+  --sq: 24px;
+  --radius: calc(var(--sq) * 0.55);
 
   position: relative;
   display: block;
@@ -13,6 +15,7 @@
   padding-top: var(--lift);
   cursor: pointer;
   outline-offset: 4px;
+  border-radius: calc(var(--radius) + 4px);
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
@@ -56,6 +59,14 @@
     transform 600ms var(--ease-out),
     background-color 200ms ease,
     color 200ms ease;
+}
+
+.sm {
+  --sq: 20px;
+}
+
+.lg {
+  --sq: 30px;
 }
 
 .sm .front {
