@@ -52,10 +52,11 @@ button.cat:focus-visible {
 }
 
 .innerEar {
-  stroke: var(--cat-ear);
-  stroke-width: 2;
-  stroke-linecap: round;
-  fill: none;
+  fill: var(--cat-ear);
+}
+
+.muzzle {
+  fill: var(--cat-muzzle);
 }
 
 .cheek {
@@ -63,12 +64,11 @@ button.cat:focus-visible {
   transition: opacity 300ms;
 }
 
+/* Dark "bean" eyes, with a thin rim of eye colour so they show on dark fur. */
 .eye {
-  fill: var(--cat-eye);
-}
-
-.pupil {
   fill: var(--cat-pupil);
+  stroke: var(--cat-eye);
+  stroke-width: 1;
 }
 
 .shine {
@@ -99,7 +99,7 @@ button.cat:focus-visible {
 }
 
 .mouth {
-  stroke: var(--cat-mouth);
+  stroke: var(--cat-muzzle-line);
   stroke-width: 1.6;
   stroke-linecap: round;
   fill: none;
@@ -107,7 +107,7 @@ button.cat:focus-visible {
 
 .mouthOpen {
   fill: #c2427a;
-  stroke: var(--cat-mouth);
+  stroke: var(--cat-muzzle-line);
   stroke-width: 1.2;
   stroke-linejoin: round;
 }
@@ -230,15 +230,9 @@ button.cat:focus-visible {
   transform: rotate(-20deg);
 }
 
-/* Eyes look where you tap (--lx/--ly run -1…1): the eyes shift a little and the
-   pupils a little more, so they stay inside. */
+/* Eyes look where you tap (--lx/--ly run -1…1), shifting a little. */
 .eyes {
   transform: translate(calc(var(--lx, 0) * 0.5px), calc(var(--ly, 0) * 0.5px));
-  transition: transform 350ms var(--ease-out);
-}
-
-.pupils {
-  transform: translate(calc(var(--lx, 0) * 0.8px), calc(var(--ly, 0) * 0.7px));
   transition: transform 350ms var(--ease-out);
 }
 

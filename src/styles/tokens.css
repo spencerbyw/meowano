@@ -67,9 +67,13 @@
   --cat-ear: #ff7aae;
   --cat-eye: #ffd36b;
   --cat-shine: #fff8f1;
+  /* The eyes are this colour, with a thin rim of --cat-eye. */
   --cat-pupil: #1e1628;
   --cat-nose: #ff7aae;
   --cat-mouth: #b6a9c9;
+  /* The white muzzle, and the mouth drawn on it (the same in both themes). */
+  --cat-muzzle: #fff8f1;
+  --cat-muzzle-line: #3b2f4a;
 
   color-scheme: light;
 }
@@ -110,7 +114,7 @@
   --cat-ear: #ff7aae;
   --cat-eye: #3b2f4a;
   --cat-shine: #ffffff;
-  /* Dark eyes already: no separate pupil. */
+  /* Eye and rim the same colour: no rim needed on the white cat. */
   --cat-pupil: #3b2f4a;
   --cat-nose: #ff7aae;
   --cat-mouth: #3b2f4a;
