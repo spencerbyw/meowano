@@ -6,31 +6,8 @@ import { releaseAudio, wakeAudio } from './engine'
  * listeners at the moment it's actually heard, so animations land on the click.
  */
 
-export type ClickSound =
-  | 'snap'
-  | 'snapCode'
-  | 'snapWarm'
-  | 'snapFull'
-  | 'snapTight'
-  | 'click'
-  | 'wood'
-  | 'beep'
-  | 'tick'
-  | 'mew'
-// The snaps are to compare: the recording, the same sound made in code, and three
-// takes on it. The one that sounds right stays.
-export const CLICK_SOUNDS: ClickSound[] = [
-  'snap',
-  'snapCode',
-  'snapWarm',
-  'snapFull',
-  'snapTight',
-  'click',
-  'wood',
-  'beep',
-  'tick',
-  'mew',
-]
+export type ClickSound = 'pop' | 'tap' | 'click' | 'wood' | 'beep' | 'tick' | 'mew'
+export const CLICK_SOUNDS: ClickSound[] = ['pop', 'tap', 'click', 'wood', 'beep', 'tick', 'mew']
 
 export interface Beat {
   /** Beats since starting (0, 1, 2…). */
@@ -52,7 +29,7 @@ interface Options {
 const LOOKAHEAD_S = 0.12
 const TICK_MS = 25
 
-let opts: Options = { bpm: 100, beats: 4, sound: 'click' }
+let opts: Options = { bpm: 100, beats: 4, sound: 'pop' }
 let ctx: AudioContext | null = null
 let out: GainNode | null = null
 let timer: number | undefined
@@ -65,7 +42,6 @@ const queue: (Beat & { time: number })[] = []
 const listeners = new Set<(beat: Beat) => void>()
 
 export function setMetronome(next: Partial<Options>) {
-  if (next.sound === 'snap' && ctx) void loadRecording(ctx)
   const retempo = next.bpm !== undefined && next.bpm !== opts.bpm
   opts = { ...opts, ...next }
   // A new tempo applies from the next beat, not after the old (maybe long) gap.
@@ -88,7 +64,6 @@ export function onBeat(cb: (beat: Beat) => void) {
 
 export async function startMetronome() {
   const c = await wakeAudio()
-  if (opts.sound === 'snap') await loadRecording(c)
   stopTimers()
   ctx = c
   running = true
@@ -111,7 +86,6 @@ export function stopMetronome() {
 /** Play one click now, to hear what a sound is like. */
 export async function previewClick(sound: ClickSound) {
   const c = await wakeAudio()
-  if (sound === 'snap') await loadRecording(c)
   play(c, sound, true, c.currentTime + 0.02)
   if (!running) releaseAudio(0.4)
 }
@@ -199,26 +173,9 @@ function burst(c: AudioContext, t: number, dur: number, filter: BiquadFilterType
   src.stop(t + dur + 0.02)
 }
 
-/** The recorded snap (a few milliseconds long), fetched and decoded once. */
-let recording: Promise<AudioBuffer | null> | null = null
-let recorded: AudioBuffer | null = null
-function loadRecording(c: AudioContext) {
-  recording ??= fetch(`${import.meta.env.BASE_URL}sounds/sample_snap.wav`)
-    .then((r) => r.arrayBuffer())
-    .then((data) => c.decodeAudioData(data))
-    .then((buffer) => (recorded = buffer))
-    .catch((err: unknown) => {
-      console.warn('Snap sound failed to load', err)
-      recording = null
-      return null
-    })
-  return recording
-}
-
-function playBuffer(c: AudioContext, buffer: AudioBuffer, t: number, gain: number, rate = 1) {
+function playBuffer(c: AudioContext, buffer: AudioBuffer, t: number, gain: number) {
   const src = c.createBufferSource()
   src.buffer = buffer
-  src.playbackRate.value = rate
   const g = c.createGain()
   g.gain.value = gain
   src.connect(g).connect(output(c))
@@ -234,80 +191,52 @@ interface Ring {
   drive: number
   /** Round the clipping off (tanh) instead of cutting it flat. */
   soft?: boolean
-  /** Add a low thump underneath: [pitch Hz, time to die away s, level]. */
-  body?: [number, number, number]
 }
 
 /**
- * The snap, worked out from the recording: a tone that rings for a few
- * milliseconds and dies away fast, starting so loud it clips. Drawn sample by
- * sample, so it's the same at any sample rate.
+ * A tone that rings for a few milliseconds and dies away fast, starting so loud
+ * it clips. Drawn sample by sample, so it's the same at any sample rate.
  */
 const rings = new Map<string, AudioBuffer>()
 function ringBuffer(c: AudioContext, ring: Ring) {
   const key = `${c.sampleRate}:${JSON.stringify(ring)}`
   let buffer = rings.get(key)
   if (!buffer) {
-    const { freq, tau, drive, soft, body } = ring
-    const seconds = Math.max(tau * 12, body ? body[1] * 8 : 0)
+    const { freq, tau, drive, soft } = ring
+    const seconds = tau * 12
     const n = Math.ceil(seconds * c.sampleRate)
     buffer = c.createBuffer(1, n, c.sampleRate)
     const data = buffer.getChannelData(0)
     for (let i = 0; i < n; i++) {
       const t = i / c.sampleRate
       const v = drive * Math.exp(-t / tau) * Math.sin(2 * Math.PI * freq * t)
-      let y = soft ? Math.tanh(v) : Math.max(-1, Math.min(1, v))
-      if (body) y += body[2] * Math.exp(-t / body[1]) * Math.sin(2 * Math.PI * body[0] * t)
-      data[i] = y
+      data[i] = soft ? Math.tanh(v) : Math.max(-1, Math.min(1, v))
     }
     rings.set(key, buffer)
   }
   return buffer
 }
 
-/** The recording's numbers: 1574 Hz, dying away in 0.6 ms, starting at twice full scale. */
-const SNAP: Ring = { freq: 1574, tau: 0.000595, drive: 1.98 }
-/** Snaps are short and very loud for their length: this sits them with the rest. */
-const SNAP_LEVEL = 0.55
+/**
+ * Pop: measured from a recording of the sound wanted (like Pulse's "Snap"): 1574 Hz,
+ * dying away in 0.6 ms, starting at twice full scale.
+ */
+const POP: Ring = { freq: 1574, tau: 0.000595, drive: 1.98 }
+/** Tap: lower and rounder, more knuckle on wood than pop. */
+const TAP: Ring = { freq: 1080, tau: 0.0009, drive: 1.6, soft: true }
+/** These are short and very loud for their length: this sits them with the rest. */
+const RING_LEVEL = 0.55
 
 function play(c: AudioContext, sound: ClickSound, accent: boolean, t: number) {
   const up = accent ? 1.2 : 1
   const loud = accent ? 1.25 : 1
   switch (sound) {
-    // The recorded snap; beat 1 plays it a little higher.
-    case 'snap':
-      if (recorded) playBuffer(c, recorded, t, SNAP_LEVEL * loud, up)
+    // The default: a short, dull pop, between knuckles on a table and an electrical pop.
+    case 'pop':
+      playBuffer(c, ringBuffer(c, { ...POP, freq: POP.freq * up }), t, RING_LEVEL * loud)
       break
-    // The same sound, made in code.
-    case 'snapCode':
-      playBuffer(c, ringBuffer(c, { ...SNAP, freq: SNAP.freq * up }), t, SNAP_LEVEL * loud)
-      break
-    // Lower and rounder: more knuckle on wood than pop.
-    case 'snapWarm':
-      playBuffer(
-        c,
-        ringBuffer(c, { freq: 1080 * up, tau: 0.0009, drive: 1.6, soft: true }),
-        t,
-        SNAP_LEVEL * loud,
-      )
-      break
-    // The snap with a soft low thump under it, like the table answering back.
-    case 'snapFull':
-      playBuffer(
-        c,
-        ringBuffer(c, { ...SNAP, freq: SNAP.freq * up, body: [190 * up, 0.006, 0.45] }),
-        t,
-        SNAP_LEVEL * 0.85 * loud,
-      )
-      break
-    // Shorter and cleaner: the edge rounded off, so it's just a tight tick of a pop.
-    case 'snapTight':
-      playBuffer(
-        c,
-        ringBuffer(c, { freq: 1750 * up, tau: 0.00045, drive: 1.5, soft: true }),
-        t,
-        SNAP_LEVEL * 1.1 * loud,
-      )
+    case 'tap':
+      playBuffer(c, ringBuffer(c, { ...TAP, freq: TAP.freq * up }), t, RING_LEVEL * loud)
       break
     // Soft, short and woody-electronic: the default, easy to listen to for a while.
     case 'click': {

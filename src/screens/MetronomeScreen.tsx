@@ -1,8 +1,11 @@
 import {
+  IconAdjustmentsHorizontal,
   IconArrowLeft,
+  IconChevronDown,
   IconBolt,
   IconCat,
   IconClick,
+  IconHandFinger,
   IconMinus,
   IconPawFilled,
   IconPlayerPlayFilled,
@@ -13,7 +16,7 @@ import {
   IconWood,
   type Icon,
 } from '@tabler/icons-react'
-import { Slider, ToggleGroup } from 'radix-ui'
+import { Collapsible, Slider, ToggleGroup } from 'radix-ui'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -50,11 +53,8 @@ const BARS_PER_PATTERN = 8
 /** Taps further apart than this start a new tap tempo. */
 const TAP_RESET_MS = 2000
 const SOUND_ICONS: Record<ClickSound, Icon> = {
-  snap: IconBolt,
-  snapCode: IconBolt,
-  snapWarm: IconBolt,
-  snapFull: IconBolt,
-  snapTight: IconBolt,
+  pop: IconBolt,
+  tap: IconHandFinger,
   click: IconClick,
   wood: IconWood,
   beep: IconWaveSquare,
@@ -75,8 +75,18 @@ export function MetronomeScreen() {
   const catMode = useSettings((s) => s.catMode)
   const { bpm, beats, sound, setBpm, setBeats, setSound } = useToybox()
   const [running, setRunning] = useState(false)
-  const [hit, setHit] = useState<(Beat & { pattern: DrumPattern }) | null>(null)
+  // Beats and sound fold away under Start, so the cat gets the room; side by side
+  // (wide screens) there's space to show them all the time.
+  const [moreOpen, setMoreOpen] = useState(false)
+  const wide = useMediaQuery(
+    '(orientation: landscape) and (min-width: 700px) and (min-height: 501px)',
+  )
+  const [hit, setHit] = useState<(Beat & { pattern: DrumPattern; next: DrumPattern }) | null>(
+    null,
+  )
   const pattern = useRef<DrumPattern>('alternate')
+  /** The pattern for the next beat: picked a beat early, so the paws get there in time. */
+  const upcoming = useRef<DrumPattern>('alternate')
   const taps = useRef<number[]>([])
   const card = useRef<HTMLElement>(null)
 
@@ -86,10 +96,11 @@ export function MetronomeScreen() {
   useEffect(
     () =>
       onBeat((beat) => {
-        if (beat.count > 0 && beat.inBar === 0 && beat.count % (beats * BARS_PER_PATTERN) === 0) {
-          pattern.current = otherPattern(pattern.current)
-        }
-        setHit({ ...beat, pattern: pattern.current })
+        const period = beats * BARS_PER_PATTERN
+        if (beat.count > 0 && beat.count % period === 0) pattern.current = upcoming.current
+        upcoming.current =
+          (beat.count + 1) % period === 0 ? otherPattern(pattern.current) : pattern.current
+        setHit({ ...beat, pattern: pattern.current, next: upcoming.current })
         // The card takes the hit: a little bump (bigger on beat 1).
         card.current?.animate(
           [{ transform: `translateY(${beat.accent ? 2 : 1}px)` }, { transform: 'none' }],
@@ -124,6 +135,7 @@ export function MetronomeScreen() {
       return
     }
     pattern.current = otherPattern()
+    upcoming.current = pattern.current
     setRunning(true)
     void startMetronome()
   }
@@ -161,7 +173,13 @@ export function MetronomeScreen() {
   const tempo = tempoOf(bpm)
   const drum: DrumHit | undefined =
     running && hit
-      ? { count: hit.count, pattern: hit.pattern, accent: hit.accent, seconds: hit.seconds }
+      ? {
+          count: hit.count,
+          pattern: hit.pattern,
+          next: hit.next,
+          accent: hit.accent,
+          seconds: hit.seconds,
+        }
       : undefined
   const mood = !running ? 'idle' : bpm >= 200 ? 'curious' : 'listening'
 
@@ -279,49 +297,73 @@ export function MetronomeScreen() {
             {running ? t('metronome.stop') : t('metronome.start')}
           </Button3D>
 
-          <section className={styles.panel}>
-            <h2 id="beats-label" className={styles.label}>
-              {t('metronome.beats')}
-            </h2>
-            <ToggleGroup.Root
-              type="single"
-              aria-labelledby="beats-label"
-              className={styles.chips}
-              value={String(beats)}
-              onValueChange={(v) => v && setBeats(Number(v))}
-            >
-              {BEAT_CHOICES.map((n) => (
-                <ToggleGroup.Item key={n} value={String(n)} className={`${styles.chip} squircle`}>
-                  {n}
-                </ToggleGroup.Item>
-              ))}
-            </ToggleGroup.Root>
-
-            <h2 id="sound-label" className={styles.label}>
-              {t('metronome.sound')}
-            </h2>
-            <ToggleGroup.Root
-              type="single"
-              aria-labelledby="sound-label"
-              className={styles.sounds}
-              value={sound}
-              onValueChange={(v) => {
-                if (!v) return
-                setSound(v as ClickSound)
-                void previewClick(v as ClickSound)
+          <Collapsible.Root
+            open={wide || moreOpen}
+            onOpenChange={setMoreOpen}
+            className={styles.more}
+          >
+            <Collapsible.Trigger className={styles.moreButton}>
+              <IconAdjustmentsHorizontal size={20} aria-hidden="true" />
+              <span className={styles.moreText}>
+                {t('metronome.beatsSummary', { count: beats })} ·{' '}
+                {t(`metronome.sounds.${sound}`)}
+              </span>
+              <IconChevronDown size={20} aria-hidden="true" className={styles.chevron} />
+            </Collapsible.Trigger>
+            <Collapsible.Content
+              className={styles.moreContent}
+              onAnimationEnd={(e) => {
+                // Once it has opened (not a chip's animation), bring it into view.
+                if (e.target === e.currentTarget && e.currentTarget.dataset.state === 'open') {
+                  e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+                }
               }}
             >
-              {CLICK_SOUNDS.map((s) => {
-                const SoundIcon = SOUND_ICONS[s]
-                return (
-                  <ToggleGroup.Item key={s} value={s} className={styles.sound}>
-                    <SoundIcon size={18} aria-hidden="true" />
-                    {t(`metronome.sounds.${s}`)}
-                  </ToggleGroup.Item>
-                )
-              })}
-            </ToggleGroup.Root>
-          </section>
+              <section className={styles.panel}>
+                <h2 id="beats-label" className={styles.label}>
+                  {t('metronome.beats')}
+                </h2>
+                <ToggleGroup.Root
+                  type="single"
+                  aria-labelledby="beats-label"
+                  className={styles.chips}
+                  value={String(beats)}
+                  onValueChange={(v) => v && setBeats(Number(v))}
+                >
+                  {BEAT_CHOICES.map((n) => (
+                    <ToggleGroup.Item key={n} value={String(n)} className={`${styles.chip} squircle`}>
+                      {n}
+                    </ToggleGroup.Item>
+                  ))}
+                </ToggleGroup.Root>
+
+                <h2 id="sound-label" className={styles.label}>
+                  {t('metronome.sound')}
+                </h2>
+                <ToggleGroup.Root
+                  type="single"
+                  aria-labelledby="sound-label"
+                  className={styles.sounds}
+                  value={sound}
+                  onValueChange={(v) => {
+                    if (!v) return
+                    setSound(v as ClickSound)
+                    void previewClick(v as ClickSound)
+                  }}
+                >
+                  {CLICK_SOUNDS.map((s) => {
+                    const SoundIcon = SOUND_ICONS[s]
+                    return (
+                      <ToggleGroup.Item key={s} value={s} className={styles.sound}>
+                        <SoundIcon size={18} aria-hidden="true" />
+                        {t(`metronome.sounds.${s}`)}
+                      </ToggleGroup.Item>
+                    )
+                  })}
+                </ToggleGroup.Root>
+              </section>
+            </Collapsible.Content>
+          </Collapsible.Root>
         </main>
       </div>
     </div>
@@ -354,4 +396,15 @@ function useWakeLock(on: boolean) {
       void lock?.release()
     }
   }, [on])
+}
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches)
+  useEffect(() => {
+    const list = window.matchMedia(query)
+    const onChange = () => setMatches(list.matches)
+    list.addEventListener('change', onChange)
+    return () => list.removeEventListener('change', onChange)
+  }, [query])
+  return matches
 }

@@ -42,9 +42,11 @@ interface PeekCatProps {
 export type DrumPattern = 'alternate' | 'both' | 'clap'
 
 export interface DrumHit {
-  /** Beats so far; each new one replays the strike. */
+  /** Beats so far; each new one moves the paws. */
   count: number
   pattern: DrumPattern
+  /** The pattern for the next beat, so the paws can get there in time. */
+  next: DrumPattern
   /** Beat 1 of the bar: a bigger hit, ears up. */
   accent: boolean
   /** Seconds until the next beat, so each strike lands back down on time. */
@@ -86,6 +88,11 @@ export function PeekCat({
   const [blink, setBlink] = useState(false)
   const [twitch, setTwitch] = useState<'L' | 'R' | null>(null)
   const wake = useRef(() => {})
+  const pawL = useRef<SVGGElement>(null)
+  const pawR = useRef<SVGGElement>(null)
+  // Once it has drummed, the paws keep their place in the page (see below).
+  const [drummed, setDrummed] = useState(false)
+  const steadyPaws = drummed || drum !== undefined
 
   const face: Face = petting
     ? loved
@@ -142,6 +149,27 @@ export function PeekCat({
   }, [sleepy])
 
   useEffect(() => wake.current(), [mood, beat, peek])
+
+  // Drumming: move the paws for each beat as it sounds; when it stops, settle them.
+  const drumCount = drum?.count
+  const drumRef = useRef(drum)
+  useEffect(() => {
+    drumRef.current = drum
+  })
+  useEffect(() => {
+    const hit = drumRef.current
+    if (hit) setDrummed(true)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const paws: [SVGGElement | null, Side][] = [
+      [pawL.current, 'L'],
+      [pawR.current, 'R'],
+    ]
+    for (const [el, side] of paws) {
+      if (!el) continue
+      if (hit) drumPaw(el, side, hit)
+      else restPaw(el)
+    }
+  }, [drumCount])
 
   // Blinks and ear twitches, at random.
   useEffect(() => {
@@ -258,7 +286,6 @@ export function PeekCat({
     hearMic && styles.hearMic,
     twitch && styles[`twitch${twitch}`],
     drum && styles.drumming,
-    drum && styles[drum.pattern],
     drum?.accent && styles.accent,
     className,
   ]
@@ -296,12 +323,17 @@ export function PeekCat({
           </g>
         </g>
         {peekVariant && (
-          <g key={`paws-${face}-${beat ?? ''}-${petting}`} className={styles.paws}>
-            <g key={`L${drumKey(drum, 'L')}`} className={pawClass(drum, 'L')}>
+          <g
+            // Once it has drummed, the paws stay put (no replaying), so they can ease
+            // back down from wherever they are.
+            key={steadyPaws ? 'paws' : `paws-${face}-${beat ?? ''}-${petting}`}
+            className={styles.paws}
+          >
+            <g ref={pawL} className={styles.pawL}>
               <ellipse cx="21" cy="52.2" rx="6.2" ry="4.5" className={styles.paw} />
               <path d="M19.2 56.4v-1.9M22.8 56.4v-1.9" className={styles.toes} />
             </g>
-            <g key={`R${drumKey(drum, 'R')}`} className={pawClass(drum, 'R')}>
+            <g ref={pawR} className={styles.pawR}>
               <ellipse cx="43" cy="52.2" rx="6.2" ry="4.5" className={styles.paw} />
               <path d="M41.2 56.4v-1.9M44.8 56.4v-1.9" className={styles.toes} />
             </g>
@@ -335,21 +367,71 @@ export function PeekCat({
   )
 }
 
-/**
- * Drumming, each paw restarts its strike when it hits: both on every beat, or
- * alternating (left on even beats, right on odd). The key is the paw's last hit.
- */
-function drumKey(drum: DrumHit | undefined, side: 'L' | 'R') {
-  if (!drum) return ''
-  if (drum.pattern !== 'alternate') return drum.count
-  const left = drum.count % 2 === 0
-  return (side === 'L') === left ? drum.count : drum.count - 1
+type Side = 'L' | 'R'
+
+/* Drumming poses, in the 64-unit space; each paw turns about the middle of its
+   bottom edge. All written with the same functions, so any two blend smoothly. */
+const pose = (x: number, y: number, deg: number, sx = 1, sy = 1) =>
+  `translate(${x}px, ${y}px) rotate(${deg}deg) scale(${sx}, ${sy})`
+const DOWN = pose(0, 0, 0)
+const UP = (side: Side, lift = 6) => pose(0, -lift, side === 'L' ? -6 : 6)
+/** Clapping: each paw turned on its side, bottoms meeting in front of the chin. */
+const CLAP = (side: Side) => (side === 'L' ? pose(11, -9, -80) : pose(-11, -9, 80))
+const PAW_ORIGIN = { L: '21px 56.7px', R: '43px 56.7px' }
+
+/** Does this paw hit on this beat? Alternating: left on even beats, right on odd. */
+const hits = (pattern: DrumPattern, side: Side, count: number) =>
+  pattern !== 'alternate' || (count % 2 === 0) === (side === 'L')
+
+/** Where a paw is as a beat sounds. */
+function poseAt(pattern: DrumPattern, side: Side, count: number) {
+  if (pattern === 'clap') return CLAP(side)
+  return hits(pattern, side, count) ? DOWN : UP(side)
 }
 
-function pawClass(drum: DrumHit | undefined, side: 'L' | 'R') {
-  const paw = side === 'L' ? styles.pawL : styles.pawR
-  // A paw that hasn't hit yet (the right one, on the very first beat) stays put.
-  return drum && Number(drumKey(drum, side)) >= 0 ? `${paw} ${styles.strike}` : paw
+/** The same pose, squashed a little by the hit. */
+const squash = (p: string, accent: boolean) =>
+  p.replace('scale(1, 1)', accent ? 'scale(1.08, 0.8)' : 'scale(1.05, 0.87)')
+
+/**
+ * One beat of drumming for one paw: from wherever it is now, through the hit (if
+ * it's hitting), to where it needs to be for the next beat, which may be a new
+ * pattern. Starting from where it is means it never jumps.
+ */
+function drumPaw(el: SVGGElement, side: Side, hit: DrumHit) {
+  const from = getComputedStyle(el).transform
+  el.getAnimations().forEach((a) => a.cancel())
+  el.style.transformOrigin = PAW_ORIGIN[side]
+  const start = poseAt(hit.pattern, side, hit.count)
+  const end = poseAt(hit.next, side, hit.count + 1)
+  const frames: Keyframe[] = [{ offset: 0, transform: from === 'none' ? DOWN : from }]
+  if (hits(hit.pattern, side, hit.count)) {
+    frames.push({ offset: 0.07, transform: squash(start, hit.accent), easing: 'ease-out' })
+  }
+  if (start === end) {
+    // Back to the same pose: lift off the card, or (clapping) open out onto it.
+    const mid = start === DOWN ? pose(0, hit.accent ? -6 : -4.5, 0) : DOWN
+    frames.push({ offset: 0.5, transform: mid, easing: 'ease-in' })
+  } else {
+    frames[frames.length - 1].easing = 'ease-in-out'
+  }
+  frames.push({ offset: 1, transform: end })
+  el.animate(frames, { duration: hit.seconds * 1000, fill: 'forwards' })
+}
+
+/** Stopped: ease back down onto the card, then hand back to the moods. */
+function restPaw(el: SVGGElement) {
+  if (!el.getAnimations().length) return
+  const from = getComputedStyle(el).transform
+  el.getAnimations().forEach((a) => a.cancel())
+  const settle = el.animate([{ transform: from }, { transform: DOWN }], {
+    duration: 260,
+    easing: 'ease-out',
+  })
+  settle.onfinish = () => {
+    settle.cancel()
+    el.style.transformOrigin = ''
+  }
 }
 
 function Head({ face, blink }: { face: Face; blink: boolean }) {

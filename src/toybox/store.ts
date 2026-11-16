@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { ClickSound } from '../audio/metronome'
+import { CLICK_SOUNDS, type ClickSound } from '../audio/metronome'
 
 export const MIN_BPM = 30
 export const MAX_BPM = 240
@@ -19,11 +19,20 @@ export const useToybox = create<{
     (set) => ({
       bpm: 100,
       beats: 4,
-      sound: 'click',
+      sound: 'pop',
       setBpm: (bpm) => set({ bpm: clampBpm(bpm) }),
       setBeats: (beats) => set({ beats }),
       setSound: (sound) => set({ sound }),
     }),
-    { name: 'kiano-toybox', version: 1 },
+    {
+      name: 'kiano-toybox',
+      version: 2,
+      // Sounds come and go while they're being tried out: anything unknown is Pop.
+      migrate: (saved) => {
+        const s = saved as { sound?: ClickSound }
+        if (!s.sound || !CLICK_SOUNDS.includes(s.sound)) s.sound = 'pop'
+        return s as never
+      },
+    },
   ),
 )
