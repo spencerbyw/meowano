@@ -70,13 +70,18 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: 'kiano-settings',
-      version: 2,
+      version: 3,
       migrate: (saved, version) => {
         const s = saved as Partial<SettingsState>
         // v2 added `octaves`: take it from the saved level, or off for a custom mix.
         if (version < 2 && s.practice) {
           const preset = s.preset && s.preset !== 'custom' ? PRESETS[s.preset] : null
           s.practice = { ...s.practice, octaves: preset?.octaves ?? false }
+        }
+        // v3 reworked the levels: a saved level takes on its new settings. A custom
+        // mix stays as it is.
+        if (version < 3 && s.preset && s.preset !== 'custom') {
+          s.practice = PRESETS[s.preset]
         }
         return s as SettingsState
       },

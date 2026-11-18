@@ -13,7 +13,8 @@ export type RangeMode = 'positions' | 'staff' | 'ledger1' | 'ledger2'
 
 export type TriadSet = 'primary' | 'diatonic'
 
-export type PresetId = 'newbie' | 'beginner' | 'intermediate' | 'experienced' | 'anything'
+export type PresetId =
+  'newbie' | 'beginner' | 'elementary' | 'intermediate' | 'experienced' | 'anything'
 
 export interface PracticeSettings {
   clef: ClefSetting

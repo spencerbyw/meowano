@@ -11,6 +11,7 @@ import {
   IconPiano,
   IconPlant2,
   IconRocket,
+  IconSeedling,
   IconSun,
   IconTree,
   IconVolume,
@@ -42,7 +43,8 @@ import styles from './SettingsDrawer.module.css'
 
 const PRESET_ICONS: Record<PresetId, ReactNode> = {
   newbie: <IconEgg size={26} />,
-  beginner: <IconPlant size={26} />,
+  beginner: <IconSeedling size={26} />,
+  elementary: <IconPlant size={26} />,
   intermediate: <IconPlant2 size={26} />,
   experienced: <IconTree size={26} />,
   anything: <IconRocket size={26} />,

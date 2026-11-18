@@ -18,8 +18,23 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
   },
   beginner: {
     clef: 'both',
-    kinds: { note: true, dyad: true, triad: false },
+    kinds: { note: true, dyad: false, triad: false },
     rangeMode: 'positions',
+    positions: ['C', 'G'],
+    maxKeyAccidentals: 0,
+    sharpKeys: true,
+    flatKeys: true,
+    accidentals: false,
+    intervals: [2, 3, 4, 5],
+    triadSet: 'primary',
+    inversions: false,
+    extraChords: false,
+    octaves: false,
+  },
+  elementary: {
+    clef: 'both',
+    kinds: { note: true, dyad: true, triad: false },
+    rangeMode: 'staff',
     positions: ['C', 'G'],
     maxKeyAccidentals: 1,
     sharpKeys: true,
@@ -34,9 +49,9 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
   intermediate: {
     clef: 'both',
     kinds: { note: true, dyad: true, triad: true },
-    rangeMode: 'staff',
+    rangeMode: 'ledger1',
     positions: ['C', 'G', 'F', 'D'],
-    maxKeyAccidentals: 3,
+    maxKeyAccidentals: 2,
     sharpKeys: true,
     flatKeys: true,
     accidentals: false,
@@ -81,9 +96,10 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
 export const PRESET_ORDER: PresetId[] = [
   'newbie',
   'beginner',
+  'elementary',
   'intermediate',
   'experienced',
   'anything',
 ]
 
-export const DEFAULT_PRESET: PresetId = 'beginner'
+export const DEFAULT_PRESET: PresetId = 'newbie'
