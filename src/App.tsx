@@ -1,5 +1,6 @@
 import { SettingsDrawer } from './components/settings/SettingsDrawer'
 import { useQuiz } from './quiz/store'
+import { KeyboardScreen } from './screens/KeyboardScreen'
 import { MetronomeScreen } from './screens/MetronomeScreen'
 import { MicTestScreen } from './screens/MicTestScreen'
 import { QuizScreen } from './screens/QuizScreen'
@@ -24,6 +25,8 @@ export default function App() {
         <MicTestScreen />
       ) : screen === 'metronome' ? (
         <MetronomeScreen />
+      ) : screen === 'keyboard' ? (
+        <KeyboardScreen />
       ) : (
         <StartScreen />
       )}

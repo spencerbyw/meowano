@@ -261,8 +261,19 @@ const en = {
     back: 'Back',
     tools: {
       metronome: { name: 'Metronome', hint: 'Keep the beat' },
+      keyboard: { name: 'Keyboard', hint: 'Play with all your fingers' },
       stats: { name: 'My stats', hint: 'See how you’re doing' },
     },
+  },
+  keyboard: {
+    title: 'Keyboard',
+    keys: 'Piano keys',
+    lower: 'Down an octave',
+    higher: 'Up an octave',
+    where: 'Keys on screen',
+    whereValue: '{{from}} to {{to}}',
+    loading: 'Getting the piano ready…',
+    error: 'Couldn’t load the piano sound',
   },
   metronome: {
     title: 'Metronome',

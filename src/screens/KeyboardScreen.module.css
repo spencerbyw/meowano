@@ -1,0 +1,233 @@
+.screen {
+  --cat-w: 64px;
+  --piano-body: #3b2f4a;
+}
+
+/* Phones held upright: the whole screen turns a quarter turn, so it reads with
+   the phone on its side (top of the phone to the right). The safe areas turn too. */
+.sideways {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100dvh;
+  height: 100dvw;
+  transform-origin: top left;
+  transform: translateX(100dvw) rotate(90deg);
+  padding: var(--safe-right) var(--safe-bottom) var(--safe-left) var(--safe-top);
+  background: var(--color-bg);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  /* Room on the right for the cat's head. */
+  padding: var(--space-3) calc(var(--cat-w) + var(--space-6)) var(--space-2) var(--space-4);
+}
+
+.nav {
+  flex: 1;
+  max-width: 640px;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.octave {
+  flex-shrink: 0;
+}
+
+/* The whole keyboard, small, with a window over the part on screen. */
+.minimap {
+  position: relative;
+  flex: 1;
+  height: 40px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: 6px;
+}
+
+.minimap:focus-visible {
+  outline: 3px solid var(--color-secondary-edge);
+  outline-offset: 4px;
+}
+
+.miniSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.miniWhite {
+  fill: #fffdfb;
+  stroke: var(--color-staff-line);
+  stroke-width: 0.6;
+}
+
+.miniMiddleC {
+  fill: var(--color-secondary);
+  stroke: var(--color-secondary-edge);
+  stroke-width: 0.6;
+}
+
+.miniBlack {
+  fill: var(--piano-body);
+}
+
+.window {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  border: 3px solid var(--color-primary);
+  border-radius: 8px;
+  background: hsl(335deg 100% 74% / 0.22);
+  box-shadow: 0 2px 6px hsl(var(--color-shadow) / 0.3);
+  pointer-events: none;
+  transition:
+    left 220ms var(--ease-out),
+    width 220ms var(--ease-out);
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: calc(var(--cat-w) * 0.7586 - var(--space-6)) var(--space-4) var(--space-3);
+}
+
+.piano {
+  position: relative;
+  flex: 1;
+  max-height: 520px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-md);
+  background: var(--piano-body);
+  box-shadow: 0 10px 30px hsl(var(--color-shadow) / 0.25);
+}
+
+/* The cat peeks over the lid at the top end. */
+.cat {
+  left: auto;
+  right: 5%;
+  margin-left: 0;
+}
+
+.lid {
+  flex-shrink: 0;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  padding-inline: var(--space-4);
+}
+
+.status {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: #d8cce4;
+}
+
+.keys {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0 6px 6px;
+  overflow: hidden;
+  border-radius: 0 0 10px 10px;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.strip {
+  position: absolute;
+  inset: 0 auto 0 0;
+  transition: transform 260ms var(--ease-out);
+}
+
+.white,
+.black {
+  position: absolute;
+  top: 0;
+  cursor: pointer;
+}
+
+.white {
+  bottom: 0;
+  width: var(--key-w);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 16px;
+  border: 1px solid #dccfd9;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(#f4ecf1, #fffdfb 12%);
+  box-shadow: inset 0 -8px 0 #ebdfe7;
+}
+
+.white.down {
+  background: linear-gradient(#ff9fc5, #ffbcd6 12%);
+  box-shadow: inset 0 -3px 0 #ef8ab3;
+}
+
+.black {
+  z-index: 1;
+  height: 62%;
+  width: calc(var(--key-w) * 0.6);
+  margin-left: calc(var(--key-w) * -0.3);
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(#2a2136, #4a3d5c 85%);
+  box-shadow:
+    inset 0 -7px 0 #241c30,
+    0 3px 4px rgb(0 0 0 / 0.3);
+}
+
+.black.down {
+  background: linear-gradient(#b8406f, var(--color-primary-edge) 85%);
+  box-shadow:
+    inset 0 -3px 0 #a3315f,
+    0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+.label {
+  font-weight: 800;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+:root[data-theme='dark'] .label {
+  color: #7a6e86;
+}
+
+/* Middle C: a purple label, as on the map above. */
+.middleC .label,
+:root[data-theme='dark'] .middleC .label {
+  color: var(--color-secondary-edge);
+}
+
+/* Tablets and computers: room for a bigger cat. */
+@media (min-height: 600px) and (min-width: 600px) {
+  .screen {
+    --cat-w: 96px;
+  }
+}
+
+/* Short screens (phones on their side): tighter. */
+@media (max-height: 500px) {
+  .top {
+    padding-top: var(--space-2);
+  }
+
+  .white {
+    padding-bottom: 12px;
+  }
+}

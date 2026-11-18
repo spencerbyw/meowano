@@ -29,7 +29,7 @@ interface Options {
 const LOOKAHEAD_S = 0.12
 const TICK_MS = 25
 
-let opts: Options = { bpm: 100, beats: 4, sound: 'pop' }
+let opts: Options = { bpm: 100, beats: 1, sound: 'pop' }
 let ctx: AudioContext | null = null
 let out: GainNode | null = null
 let timer: number | undefined

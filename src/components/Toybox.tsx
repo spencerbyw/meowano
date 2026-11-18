@@ -1,4 +1,4 @@
-import { IconChartBar, IconChevronRight, IconMetronome } from '@tabler/icons-react'
+import { IconChartBar, IconChevronRight, IconMetronome, IconPiano } from '@tabler/icons-react'
 import { Popover } from 'radix-ui'
 import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,9 +9,11 @@ import styles from './Toybox.module.css'
 type Entry = Tool | 'stats'
 
 /** The tools, then (last, set apart) the player's stats. */
-const ENTRIES: { id: Entry; icon: ReactNode }[] = [
-  { id: 'metronome', icon: <IconMetronome size={26} aria-hidden="true" /> },
-  { id: 'stats', icon: <IconChartBar size={26} aria-hidden="true" /> },
+/** Each in its own candy colour. */
+const ENTRIES: { id: Entry; icon: ReactNode; tone: 'pink' | 'sunny' | 'purple' }[] = [
+  { id: 'metronome', icon: <IconMetronome size={26} aria-hidden="true" />, tone: 'pink' },
+  { id: 'keyboard', icon: <IconPiano size={26} aria-hidden="true" />, tone: 'sunny' },
+  { id: 'stats', icon: <IconChartBar size={26} aria-hidden="true" />, tone: 'purple' },
 ]
 
 /** The toybox: a button that springs open a menu of practice tools. */
@@ -44,10 +46,10 @@ export function Toybox({ className }: { className?: string }) {
         >
           <h2 className={styles.title}>{t('toybox.title')}</h2>
           <ul className={styles.tools}>
-            {ENTRIES.map(({ id, icon }, i) => (
+            {ENTRIES.map(({ id, icon, tone }, i) => (
               <li
                 key={id}
-                className={id === 'stats' ? styles.stats : undefined}
+                className={styles[tone]}
                 style={{ '--i': i } as React.CSSProperties}
               >
                 <button
