@@ -50,6 +50,16 @@ const PRESET_ICONS: Record<PresetId, ReactNode> = {
   anything: <IconRocket size={26} />,
 }
 
+/** Each level's colour, cool for the easy ones to warm for the hard ones. */
+const PRESET_TONES: Record<PresetId, string> = {
+  newbie: 'sky',
+  beginner: 'success',
+  elementary: 'secondary',
+  intermediate: 'primary',
+  experienced: 'sunny',
+  anything: 'error',
+}
+
 const KINDS: QuestionKind[] = ['note', 'dyad', 'triad']
 const POSITIONS: PositionId[] = ['C', 'D', 'F', 'G', 'A']
 const RANGES: RangeMode[] = ['positions', 'staff', 'ledger1', 'ledger2']
@@ -98,6 +108,12 @@ export function SettingsDrawer() {
                     role="radio"
                     aria-checked={settings.preset === id}
                     className={styles.preset}
+                    style={
+                      {
+                        '--tone': `var(--color-${PRESET_TONES[id]})`,
+                        '--tone-edge': `var(--color-${PRESET_TONES[id]}-edge)`,
+                      } as React.CSSProperties
+                    }
                     onClick={() => settings.applyPreset(id)}
                   >
                     <span className={styles.presetIcon} aria-hidden="true">
