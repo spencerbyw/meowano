@@ -102,4 +102,4 @@ export const PRESET_ORDER: PresetId[] = [
   'anything',
 ]
 
-export const DEFAULT_PRESET: PresetId = 'newbie'
+export const DEFAULT_PRESET: PresetId = 'beginner'
