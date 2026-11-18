@@ -64,7 +64,7 @@ export const PRESETS: Record<PresetId, PracticeSettings> = {
   experienced: {
     clef: 'both',
     kinds: { note: true, dyad: true, triad: true },
-    rangeMode: 'ledger1',
+    rangeMode: 'ledger2',
     positions: ['C', 'D', 'F', 'G', 'A'],
     maxKeyAccidentals: 5,
     sharpKeys: true,
