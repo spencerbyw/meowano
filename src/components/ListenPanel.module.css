@@ -89,3 +89,21 @@
     transform: translateX(6px);
   }
 }
+
+/* Narrow phones: tighter, to share the row with the switch to the keys. */
+@media (max-width: 420px) {
+  .panel {
+    gap: var(--space-3);
+    padding-inline: var(--space-3);
+  }
+
+  .mic {
+    width: 48px;
+    height: 48px;
+  }
+
+  .mic > svg {
+    width: 26px;
+    height: 26px;
+  }
+}

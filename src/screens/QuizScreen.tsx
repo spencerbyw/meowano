@@ -5,18 +5,20 @@ import {
   IconHelp,
   IconLoader2,
   IconMusic,
+  IconPiano,
   IconVolume,
   IconX,
 } from '@tabler/icons-react'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { playChime, playNotes, useAudioStatus } from '../audio/engine'
-import { onNotePlayed } from '../audio/mic'
+import { onNotePlayed, startMic, stopMic } from '../audio/mic'
 import { ListenPanel } from '../components/ListenPanel'
 import { NextButton } from '../components/NextButton'
 import { PeekCat, type PeekMood } from '../components/PeekCat'
 import { SettingsButton } from '../components/settings/SettingsButton'
 import { PianoKeys } from '../components/PianoKeys'
+import { PlayKeyboard } from '../components/PlayKeyboard'
 import { Staff } from '../components/Staff'
 import { Button3D, type ButtonVariant } from '../components/ui/Button3D'
 import { formatAnswer, formatPitchClass, formatStaffLabel } from '../music/format'
@@ -37,7 +39,17 @@ export function QuizScreen() {
   const currentStreak = useStats((s) => s.currentStreak)
   const allTimeBest = useStats((s) => s.bestStreak)
   const { answer, next, skip, finish, goHome } = useQuiz()
-  const { confirm, catMode, sound, autoAdvance, autoAdvanceSeconds } = useSettings()
+  const {
+    confirm,
+    catMode,
+    sound,
+    autoAdvance,
+    autoAdvanceSeconds,
+    playInput,
+    setPlayInput,
+  } = useSettings()
+  // "Play the note" without a piano: answered on a keyboard on screen.
+  const onKeys = mode === 'play' && playInput === 'keyboard'
   const practice = useSettings((s) => s.practice)
   // One staff size for the whole session: tall enough for every note these
   // settings can produce, and wide enough for the biggest key signature.
@@ -114,32 +126,46 @@ export function QuizScreen() {
   const [shake, setShake] = useState<number | null>(null)
   const promptRef = useRef<HTMLParagraphElement>(null)
 
-  // "Play the note": judge each note the mic hears.
+  // "Play the note": judge a note played, on a piano (heard by the mic) or the keys.
+  const judge = (midi: number) => {
+    const quiz = useQuiz.getState()
+    const q = quiz.question
+    if (!q) return
+    const outcome = quiz.answerNote(midi)
+    if (outcome === 'ignored') return
+    if (useSettings.getState().sound) void playChime(outcome)
+    if (outcome === 'correct') {
+      const praise = t(catMode ? 'quiz.praiseCat' : 'quiz.praise', {
+        returnObjects: true,
+      }) as string[]
+      setFeedback({ kind: 'correct', text: pick(praise) })
+    } else {
+      const played = spellMidi(midi, q.key)
+      setFeedback({
+        kind: 'wrong',
+        text: t(midi > midiOf(q.notes[0]) ? 'listen.tooHigh' : 'listen.tooLow', {
+          note: `${formatPitchClass(t, played)}${played.octave}`,
+        }),
+      })
+    }
+  }
+  const judgeRef = useRef(judge)
+  useEffect(() => {
+    judgeRef.current = judge
+  })
   useEffect(() => {
     if (mode !== 'play') return
-    return onNotePlayed((midi) => {
-      const quiz = useQuiz.getState()
-      const q = quiz.question
-      if (!q) return
-      const outcome = quiz.answerNote(midi)
-      if (outcome === 'ignored') return
-      if (useSettings.getState().sound) void playChime(outcome)
-      if (outcome === 'correct') {
-        const praise = t(catMode ? 'quiz.praiseCat' : 'quiz.praise', {
-          returnObjects: true,
-        }) as string[]
-        setFeedback({ kind: 'correct', text: pick(praise) })
-      } else {
-        const played = spellMidi(midi, q.key)
-        setFeedback({
-          kind: 'wrong',
-          text: t(midi > midiOf(q.notes[0]) ? 'listen.tooHigh' : 'listen.tooLow', {
-            note: `${formatPitchClass(t, played)}${played.octave}`,
-          }),
-        })
-      }
-    })
-  }, [mode, catMode, t])
+    return onNotePlayed((midi) => judgeRef.current(midi))
+  }, [mode])
+  // Switching between a real piano and the keys: the mic only listens for the piano.
+  const switchToKeys = () => {
+    setPlayInput('keyboard')
+    stopMic()
+  }
+  const switchToMic = () => {
+    setPlayInput('mic')
+    void startMic()
+  }
   const mood: PeekMood =
     hearing && feedback?.kind !== 'correct'
       ? 'listening'
@@ -260,7 +286,9 @@ export function QuizScreen() {
       </header>
 
       <main
-        className={[styles.main, catMode && styles.catMain].filter(Boolean).join(' ')}
+        className={[styles.main, catMode && styles.catMain, onKeys && styles.keysMain]
+          .filter(Boolean)
+          .join(' ')}
       >
         <p className="visually-hidden" aria-live="polite">
           {length > 0
@@ -288,7 +316,7 @@ export function QuizScreen() {
                 beat={`${results.length}-${wrongPicks.length}-${wrongNotes.length}-${hearing}`}
                 peek={question.id}
                 streak={currentStreak}
-                hearMic={mode === 'play' && !solved}
+                hearMic={mode === 'play' && !solved && !onKeys}
                 sleepy
                 petLabel={t('app.petCat')}
                 className={styles.cat}
@@ -380,7 +408,8 @@ export function QuizScreen() {
                 />
               </div>
             )}
-            {solved && (
+            {/* On the keys, the answer shows there instead. */}
+            {solved && !onKeys && (
               <div className={styles.keysReveal}>
                 <div>
                   <PianoKeys notes={question.notes} t={t} />
@@ -391,11 +420,33 @@ export function QuizScreen() {
         </div>
 
         <section className={styles.answers}>
-          {mode === 'play' && !solved ? (
-            <ListenPanel
-              key={`${question.id}-${wrongNotes.length}`}
-              shake={wrongNotes.length > 0}
+          {onKeys ? (
+            <PlayKeyboard
+              questionId={question.id}
+              clef={question.clef}
+              answer={question.notes[0]}
+              wrongNotes={wrongNotes}
+              solved={solved}
+              onPress={judge}
+              onUseMic={switchToMic}
             />
+          ) : mode === 'play' && !solved ? (
+            <div className={styles.listenRow}>
+              <ListenPanel
+                key={`${question.id}-${wrongNotes.length}`}
+                shake={wrongNotes.length > 0}
+              />
+              <Button3D
+                variant="secondary"
+                className={styles.toKeys}
+                frontClassName={styles.toKeysFront}
+                aria-label={t('listen.useKeysLabel')}
+                onClick={switchToKeys}
+              >
+                <IconPiano size={30} stroke={2.2} aria-hidden="true" />
+                <span aria-hidden="true">{t('listen.useKeys')}</span>
+              </Button3D>
+            </div>
           ) : (
             <ol className={styles.choices}>
               {question.choices.map((choice, i) => {

@@ -413,6 +413,37 @@
   }
 }
 
+/* "Play the note": listening, with the switch to the keys beside it. */
+.listenRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.listenRow > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.toKeys {
+  flex-shrink: 0;
+}
+
+.toKeysFront {
+  flex-direction: column;
+  gap: 2px;
+  width: 76px;
+  min-height: 104px;
+  padding: var(--space-2);
+  font-size: 0.9375rem;
+}
+
+@media (max-width: 420px) {
+  .toKeysFront {
+    width: 64px;
+  }
+}
+
 /* Feedback + next */
 .footer {
   display: flex;
@@ -479,8 +510,9 @@
   white-space: nowrap;
 }
 
-/* Landscape: staff on the left, answers on the right. */
-@media (orientation: landscape) and (min-width: 700px) {
+/* Landscape (and any phone on its side): staff on the left, answers on the right. */
+@media (orientation: landscape) and (min-width: 700px),
+  (orientation: landscape) and (max-height: 500px) {
   .screen {
     max-width: 1240px;
   }
@@ -522,12 +554,38 @@
   .catMain .answers {
     padding-top: calc(var(--cat-w) * 0.7586);
   }
+
+  /* Answering on the keys: an even split, so they get more of them. */
+  .main.keysMain {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 /* Phones on their side: very little height, so a smaller cat. */
 @media (orientation: landscape) and (max-height: 500px) {
   .main {
     --cat-w: 84px;
+  }
+
+  /* The keys need the whole column, so they don't step down to line up with the card. */
+  .catMain.keysMain .answers {
+    padding-top: 0;
+  }
+
+  .keysMain .answers,
+  .keysMain .footer {
+    gap: var(--space-2);
+  }
+
+  .keysMain .feedback {
+    min-height: 1.5rem;
+    font-size: 1.125rem;
+  }
+
+  .keysMain .footer .compactFront {
+    min-height: 50px;
+    padding-block: var(--space-2);
+    font-size: 1.125rem;
   }
 }
 

@@ -39,6 +39,7 @@ export interface PracticeSettings {
 
 export type ThemeSetting = 'system' | 'light' | 'dark'
 export type ConfirmMode = 'single' | 'double'
+export type PlayInput = 'mic' | 'keyboard'
 
 export const QUIZ_LENGTHS = [5, 10, 20, 0] as const
 export type QuizLength = (typeof QUIZ_LENGTHS)[number]

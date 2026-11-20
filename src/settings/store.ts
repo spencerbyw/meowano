@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware'
 import { DEFAULT_PRESET, PRESETS } from './presets'
 import type {
   ConfirmMode,
+  PlayInput,
   PracticeSettings,
   PresetId,
   QuizLength,
@@ -23,6 +24,8 @@ interface SettingsState {
   autoAdvance: boolean
   /** How long Next counts down before going on (0.5–5 s). */
   autoAdvanceSeconds: number
+  /** "Play the note": answer on a real piano (heard by the mic) or on the screen. */
+  playInput: PlayInput
   preset: PresetId | 'custom'
   practice: PracticeSettings
   /** Questions per round; 0 means unlimited. */
@@ -36,6 +39,7 @@ interface SettingsState {
   setSilentMode: (on: boolean) => void
   setAutoAdvance: (on: boolean) => void
   setAutoAdvanceSeconds: (seconds: number) => void
+  setPlayInput: (input: PlayInput) => void
   applyPreset: (preset: PresetId) => void
   updatePractice: (patch: Partial<PracticeSettings>) => void
 }
@@ -51,6 +55,7 @@ export const useSettings = create<SettingsState>()(
       silentMode: true,
       autoAdvance: true,
       autoAdvanceSeconds: 2,
+      playInput: 'mic',
       preset: DEFAULT_PRESET,
       practice: PRESETS[DEFAULT_PRESET],
       quizLength: 10,
@@ -64,6 +69,7 @@ export const useSettings = create<SettingsState>()(
       setSilentMode: (silentMode) => set({ silentMode }),
       setAutoAdvance: (autoAdvance) => set({ autoAdvance }),
       setAutoAdvanceSeconds: (autoAdvanceSeconds) => set({ autoAdvanceSeconds }),
+      setPlayInput: (playInput) => set({ playInput }),
       applyPreset: (preset) => set({ preset, practice: PRESETS[preset] }),
       updatePractice: (patch) =>
         set((s) => ({ preset: 'custom', practice: { ...s.practice, ...patch } })),

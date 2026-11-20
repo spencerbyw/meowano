@@ -1,0 +1,61 @@
+/* Slides up into place when chosen. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  animation: slide-up 420ms var(--ease-spring) both;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(48px);
+  }
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.nav {
+  flex: 1;
+}
+
+/* The keyboard's case: a thin lid above the keys. */
+.body {
+  padding: 10px 5px 5px;
+  border-radius: var(--radius-md);
+  background: #3b2f4a;
+  box-shadow: 0 10px 30px hsl(var(--color-shadow) / 0.2);
+}
+
+/* Tall enough to play, short enough to leave the staff its room. */
+.keys {
+  height: clamp(104px, 22dvh, 200px);
+  border-radius: 0 0 10px 10px;
+  --key-label-gap: 12px;
+}
+
+/* Short phones, and phones on their side: every pixel counts. */
+@media (orientation: portrait) and (max-height: 700px) {
+  .panel {
+    gap: var(--space-2);
+  }
+
+  .keys {
+    height: clamp(104px, 17dvh, 200px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .panel {
+    gap: var(--space-2);
+  }
+
+  .keys {
+    height: 104px;
+    --key-label-gap: 8px;
+  }
+}
