@@ -16,7 +16,7 @@ export type KeyMark = 'right' | 'wrong'
 
 /**
  * The keys themselves, a strip slid along to `view.first`. C keys are labelled
- * with their octave ("C4"); `marks` colours keys green or red, and `named` labels
+ * with their octave ("C4") unless `octaveLabels` is off; `marks` colours keys green or red, and `named` labels
  * one key (with its name as the question spells it).
  */
 export function Keys({
@@ -24,6 +24,7 @@ export function Keys({
   pressed,
   marks,
   named,
+  octaveLabels = true,
   label,
   className,
 }: {
@@ -31,6 +32,8 @@ export function Keys({
   pressed: ReadonlySet<number>
   marks?: ReadonlyMap<number, KeyMark>
   named?: { midi: number; text: string }
+  /** Label each C with its octave ("C4"). */
+  octaveLabels?: boolean
   label: string
   className?: string
 }) {
@@ -68,6 +71,7 @@ export function Keys({
             {midi === named?.midi ? (
               <span className={styles.name}>{named.text}</span>
             ) : (
+              octaveLabels &&
               midi % 12 === 0 && (
                 <span className={styles.label}>
                   {t('notes.C')}

@@ -78,7 +78,13 @@ export function useKeyView(
  */
 export function usePlaying(
   el: HTMLDivElement | null,
-  opts: { glide?: boolean; sound?: boolean; onPress?: (midi: number) => void } = {},
+  opts: {
+    glide?: boolean
+    /** One finger at a time: others are ignored while a key is down. */
+    single?: boolean
+    sound?: boolean
+    onPress?: (midi: number) => void
+  } = {},
 ) {
   const [pressed, setPressed] = useState<ReadonlySet<number>>(new Set())
   const optsRef = useRef(opts)
@@ -118,6 +124,7 @@ export function usePlaying(
     const down = (e: PointerEvent) => {
       if (e.pointerType === 'mouse' && e.button !== 0) return
       e.preventDefault()
+      if (optsRef.current.single && fingers.size > 0) return
       // Keep hearing this pointer even if it slides off the keys.
       el.setPointerCapture(e.pointerId)
       press(e.pointerId, keyAt(e.clientX, e.clientY))

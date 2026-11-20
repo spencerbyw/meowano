@@ -30,6 +30,9 @@ import { useStats } from '../stats/store'
 import { useWakeLock } from '../ui/useWakeLock'
 import styles from './QuizScreen.module.css'
 
+/** On the keys, how long the right/wrong sound waits after the key's note. */
+const KEY_CHIME_DELAY_MS = 350
+
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)]
 
 export function QuizScreen() {
@@ -127,13 +130,16 @@ export function QuizScreen() {
   const promptRef = useRef<HTMLParagraphElement>(null)
 
   // "Play the note": judge a note played, on a piano (heard by the mic) or the keys.
-  const judge = (midi: number) => {
+  // On the keys, the right/wrong sound waits a moment, so it doesn't land on top of
+  // the key's own note.
+  const judge = (midi: number, chimeDelayMs = 0) => {
     const quiz = useQuiz.getState()
     const q = quiz.question
     if (!q) return
     const outcome = quiz.answerNote(midi)
     if (outcome === 'ignored') return
-    if (useSettings.getState().sound) void playChime(outcome)
+    if (useSettings.getState().sound)
+      window.setTimeout(() => void playChime(outcome), chimeDelayMs)
     if (outcome === 'correct') {
       const praise = t(catMode ? 'quiz.praiseCat' : 'quiz.praise', {
         returnObjects: true,
@@ -427,7 +433,7 @@ export function QuizScreen() {
               answer={question.notes[0]}
               wrongNotes={wrongNotes}
               solved={solved}
-              onPress={judge}
+              onPress={(midi) => judge(midi, KEY_CHIME_DELAY_MS)}
               onUseMic={switchToMic}
             />
           ) : mode === 'play' && !solved ? (

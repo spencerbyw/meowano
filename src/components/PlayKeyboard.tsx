@@ -16,8 +16,9 @@ const KEY_W = 44
 
 /**
  * "Play the note" without a piano: a keyboard on screen. Each question starts with
- * middle C at the edge its clef reads from (treble up, bass down); wrong keys
- * turn red, and the right one green with its name.
+ * middle C at the edge its clef reads from (treble up, bass down). One finger at
+ * a time, and no octave labels: finding the note is the point. Wrong keys turn
+ * red, and the right one green with its name.
  */
 export function PlayKeyboard({
   questionId,
@@ -46,7 +47,7 @@ export function PlayKeyboard({
     homeKey: questionId,
     show: solved ? answerMidi : undefined,
   })
-  const pressed = usePlaying(view.keysEl, { glide: false, sound, onPress })
+  const pressed = usePlaying(view.keysEl, { glide: false, single: true, sound, onPress })
 
   const marks = useMemo(() => {
     const m = new Map<number, KeyMark>(wrongNotes.map((n) => [n, 'wrong']))
@@ -72,6 +73,7 @@ export function PlayKeyboard({
           view={view}
           pressed={pressed}
           marks={marks}
+          octaveLabels={false}
           named={
             solved
               ? {
