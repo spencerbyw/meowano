@@ -95,6 +95,7 @@ const en = {
   presets: {
     newbie: 'Newbie',
     beginner: 'Beginner',
+    elementary: 'Elementary',
     intermediate: 'Intermediate',
     experienced: 'Experienced',
     anything: 'Anything goes',
@@ -102,10 +103,11 @@ const en = {
   },
   presetHints: {
     newbie: 'Treble clef, single notes, C position',
-    beginner: 'Both clefs, notes and intervals, C and G positions, up to 1♯ or 1♭',
-    intermediate: 'Adds I, IV and V chords, the whole staff, up to 3♯ or 3♭',
-    experienced: 'Every chord in the key, inversions, 1 ledger line, up to 5♯ or 5♭',
-    anything: 'All keys, extra chords, 2 ledger lines',
+    beginner: 'Both clefs, single notes, C and G positions',
+    elementary: 'The whole staff, adds intervals, up to 1♯ or 1♭',
+    intermediate: 'Adds I, IV and V chords, 1 ledger line, up to 2♯ or 2♭',
+    experienced: 'Every chord in the key, inversions, 2 ledger lines, up to 5♯ or 5♭',
+    anything: 'All keys, extra chords',
     custom: 'Your own mix of settings',
   },
   settings: {

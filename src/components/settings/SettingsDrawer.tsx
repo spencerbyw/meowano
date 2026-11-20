@@ -11,6 +11,7 @@ import {
   IconPiano,
   IconPlant2,
   IconRocket,
+  IconSeedling,
   IconSun,
   IconTree,
   IconVolume,
@@ -42,10 +43,21 @@ import styles from './SettingsDrawer.module.css'
 
 const PRESET_ICONS: Record<PresetId, ReactNode> = {
   newbie: <IconEgg size={26} />,
-  beginner: <IconPlant size={26} />,
+  beginner: <IconSeedling size={26} />,
+  elementary: <IconPlant size={26} />,
   intermediate: <IconPlant2 size={26} />,
   experienced: <IconTree size={26} />,
   anything: <IconRocket size={26} />,
+}
+
+/** Each level's colour, cool for the easy ones to warm for the hard ones. */
+const PRESET_TONES: Record<PresetId, string> = {
+  newbie: 'sky',
+  beginner: 'success',
+  elementary: 'secondary',
+  intermediate: 'primary',
+  experienced: 'sunny',
+  anything: 'error',
 }
 
 const KINDS: QuestionKind[] = ['note', 'dyad', 'triad']
@@ -96,6 +108,12 @@ export function SettingsDrawer() {
                     role="radio"
                     aria-checked={settings.preset === id}
                     className={styles.preset}
+                    style={
+                      {
+                        '--tone': `var(--color-${PRESET_TONES[id]})`,
+                        '--tone-edge': `var(--color-${PRESET_TONES[id]}-edge)`,
+                      } as React.CSSProperties
+                    }
                     onClick={() => settings.applyPreset(id)}
                   >
                     <span className={styles.presetIcon} aria-hidden="true">
