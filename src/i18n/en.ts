@@ -199,6 +199,10 @@ const en = {
     stalled: 'The microphone stopped hearing anything. Tap to start it again.',
     tooHigh: 'That was {{note}} — too high!',
     tooLow: 'That was {{note}} — too low!',
+    useKeys: 'Keys',
+    useKeysLabel: 'No piano? Answer on a keyboard on screen',
+    useMic: 'Listen to my piano instead',
+    keys: 'Keyboard: tap the note',
   },
   quiz: {
     quit: 'Back to start',

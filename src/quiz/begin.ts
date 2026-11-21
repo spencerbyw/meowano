@@ -3,10 +3,14 @@ import { startMic, stopMic } from '../audio/mic'
 import { useSettings } from '../settings/store'
 import { useQuiz, type QuizMode } from './store'
 
-/** Start a round from a tap: wakes the audio (and the mic for "Play the note") first. */
+/**
+ * Start a round from a tap: wakes the audio (and, for "Play the note" on a real
+ * piano, the mic) first.
+ */
 export function beginRound(mode: QuizMode) {
-  if (useSettings.getState().sound) unlockAudio()
-  if (mode === 'play') void startMic()
+  const { sound, playInput } = useSettings.getState()
+  if (sound) unlockAudio()
+  if (mode === 'play' && playInput === 'mic') void startMic()
   useQuiz.getState().start(mode)
 }
 

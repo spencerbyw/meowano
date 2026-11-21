@@ -1,0 +1,185 @@
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.octave {
+  flex-shrink: 0;
+}
+
+/* The whole keyboard, small, with a window over the part on screen. */
+.minimap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  border-radius: 6px;
+}
+
+.minimap:focus-visible {
+  outline: 3px solid var(--color-secondary-edge);
+  outline-offset: 4px;
+}
+
+.miniSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.miniWhite {
+  fill: #fffdfb;
+  stroke: var(--color-staff-line);
+  stroke-width: 0.6;
+}
+
+.miniMiddleC {
+  fill: var(--color-secondary);
+  stroke: var(--color-secondary-edge);
+  stroke-width: 0.6;
+}
+
+.miniBlack {
+  fill: #3b2f4a;
+}
+
+.window {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  border: 3px solid var(--color-primary);
+  border-radius: 8px;
+  background: hsl(335deg 100% 74% / 0.22);
+  box-shadow: 0 2px 6px hsl(var(--color-shadow) / 0.3);
+  pointer-events: none;
+  transition:
+    left 220ms var(--ease-out),
+    width 220ms var(--ease-out);
+}
+
+/* The keys. --key-w (a white key's width) is set inline. */
+.keys {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.strip {
+  position: absolute;
+  inset: 0 auto 0 0;
+  transition: transform 260ms var(--ease-out);
+}
+
+.white,
+.black {
+  position: absolute;
+  top: 0;
+  cursor: pointer;
+}
+
+.white {
+  bottom: 0;
+  width: var(--key-w);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: var(--key-label-gap, 16px);
+  border: 1px solid #dccfd9;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(#f4ecf1, #fffdfb 12%);
+  box-shadow: inset 0 -8px 0 #ebdfe7;
+}
+
+.white.down {
+  background: linear-gradient(#ff9fc5, #ffbcd6 12%);
+  box-shadow: inset 0 -3px 0 #ef8ab3;
+}
+
+.black {
+  z-index: 1;
+  height: 62%;
+  width: calc(var(--key-w) * 0.6);
+  margin-left: calc(var(--key-w) * -0.3);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  border-radius: 0 0 6px 6px;
+  background: linear-gradient(#2a2136, #4a3d5c 85%);
+  box-shadow:
+    inset 0 -7px 0 #241c30,
+    0 3px 4px rgb(0 0 0 / 0.3);
+}
+
+.black.down {
+  background: linear-gradient(#b8406f, var(--color-primary-edge) 85%);
+  box-shadow:
+    inset 0 -3px 0 #a3315f,
+    0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+/* Marked keys: the right answer, and wrong ones tried. */
+.white.right {
+  background: linear-gradient(#8fe3c4, #b9f0db 12%);
+  box-shadow: inset 0 -3px 0 var(--color-success-edge);
+}
+
+.black.right {
+  background: linear-gradient(#1f9a72, var(--color-success) 85%);
+  box-shadow:
+    inset 0 -3px 0 #187a5a,
+    0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+.white.wrong {
+  background: linear-gradient(#ffb3b3, #ffd3d3 12%);
+  box-shadow: inset 0 -3px 0 var(--color-error-edge);
+}
+
+.black.wrong {
+  background: linear-gradient(#a83a3a, var(--color-error-edge) 85%);
+  box-shadow:
+    inset 0 -3px 0 #8f2f2f,
+    0 1px 2px rgb(0 0 0 / 0.3);
+}
+
+.label {
+  font-weight: 800;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+:root[data-theme='dark'] .label {
+  color: #7a6e86;
+}
+
+/* Middle C: a purple label, as on the map. */
+.middleC .label,
+:root[data-theme='dark'] .middleC .label {
+  color: var(--color-secondary-edge);
+}
+
+/* A key's name, shown on the answer. */
+.name {
+  font-weight: 800;
+  font-size: 0.875rem;
+  line-height: 1;
+  white-space: nowrap;
+  color: #145c45;
+  pointer-events: none;
+}
+
+.black .name {
+  font-size: 0.75rem;
+  color: #fff;
+}
